@@ -1,11 +1,53 @@
+﻿using CoworkBooking.Infrastructure;
+using CoworkBooking.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-builder.Services.AddControllers();
+var useInMemory = builder.Configuration.GetValue<bool>("DatabaseSettings:UseInMemory");
+
+
+try
+{
+    if (!useInMemory && !string.IsNullOrEmpty(connectionString))
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("🗄️ Using SQL Server Database");
+        builder.Services.AddDbContext<AppDbContext>(options =>
+            options.UseSqlServer(connectionString));
+    }
+    else
+    {
+        throw new Exception("Forcing InMemory by config");
+    }
+}
+catch (Exception ex)
+{
+    Console.ForegroundColor = ConsoleColor.Yellow;
+    Console.WriteLine("⚠️ SQL Server unavailable — switching to InMemory DB");
+    Console.ResetColor();
+
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseInMemoryDatabase("CoworkBooking_Fallback"));
+}
+
+//if (useInMemory)
+//{
+//    Console.WriteLine("💾 Using InMemory Database");
+//    builder.Services.AddDbContext<AppDbContext>(options =>
+//        options.UseInMemoryDatabase("CoworkBookingDB"));
+//}
+//else
+//{
+//    Console.WriteLine("🧱 Using SQL Server Database");
+//    builder.Services.AddDbContext<AppDbContext>(options =>
+//        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+//}
+
+// ✅ Add Services
+builder.Services.AddControllers();  
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -17,38 +59,42 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+
+using (var scope = app.Services.CreateScope())
 {
-    app.MapOpenApi();
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<AppDbContext>();
+
+    // Create DB if not exists and seed
+    context.Database.Migrate();
+    SeedData.Initialize(context);
 }
 
+
+
+
+// ✅ Middleware pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 app.UseHttpsRedirection();
+app.UseAuthorization();
 
-var summaries = new[]
+// ✅ Enable Swagger permanently
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "CoworkBooking API v1");
+    c.RoutePrefix = string.Empty; // makes Swagger the homepage
+});
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+// ✅ Map Controllers
+app.MapControllers();
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
