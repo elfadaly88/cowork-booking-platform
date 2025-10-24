@@ -1,0 +1,69 @@
+<div class="container">
+  <button class="back-button" (click)="goBack()">
+    <span class="back-icon">←</span>
+    Back to Workspaces
+  </button>
+
+  <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+
+  <app-error-message
+    *ngIf="error && !loading"
+    [title]="'Failed to load workspace'"
+    [message]="error"
+  ></app-error-message>
+
+  <div *ngIf="workspace && !loading && !error">
+    <div class="workspace-header">
+      <h1 class="workspace-title">{{ workspace.name }}</h1>
+      <p class="workspace-city" *ngIf="workspace.city">
+        <span class="location-icon">📍</span>
+        {{ workspace.city }}
+      </p>
+      <p class="workspace-description" *ngIf="workspace.description">
+        {{ workspace.description }}
+      </p>
+      <p class="workspace-address" *ngIf="workspace.address">
+        <span class="address-icon">🏢</span>
+        {{ workspace.address }}
+      </p>
+      <p class="workspace-coordinates" *ngIf="workspace.latitude && workspace.longitude">
+        <span class="coordinates-icon">🌍</span>
+        Coordinates: {{ workspace.latitude }}, {{ workspace.longitude }}
+      </p>
+    </div>
+
+    <!-- Rooms Section -->
+    <section class="section">
+      <h2 class="section-title">Available Rooms</h2>
+      <div *ngIf="workspace.rooms && workspace.rooms.length > 0" class="rooms-grid">
+        <div *ngFor="let room of workspace.rooms" class="room-card">
+          <div class="room-header">
+            <h3 class="room-name">{{ room.name }}</h3>
+            <span class="room-capacity" *ngIf="room.capacity">
+              <span class="capacity-icon">👥</span>
+              {{ room.capacity }} people
+            </span>
+          </div>
+          <div class="room-body">
+            <div *ngIf="room.devices && room.devices.length > 0">
+              <p class="devices-label">Available Devices:</p>
+              <div class="devices-list">
+                <span *ngFor="let device of room.devices" class="device-chip">
+                  {{ device.name }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="room-actions">
+            <button class="book-button" (click)="bookRoom(room)">
+              Book Room
+            </button>
+          </div>
+        </div>
+      </div>
+      <p *ngIf="!workspace.rooms || workspace.rooms.length === 0" class="empty-message">
+        No rooms available in this workspace.
+      </p>
+    </section>
+  </div>
+</div>

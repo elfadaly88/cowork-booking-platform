@@ -7,7 +7,9 @@ namespace CoworkBooking.Application.Interfaces
  Task<IEnumerable<WorkSpaceDto>> GetAllAsync();
  Task<WorkSpaceDto?> GetByIdAsync(int id);
  Task<WorkSpaceDto> CreateAsync(WorkSpaceDto dto);
+ Task<WorkSpaceDto> CreateWithRoomsAsync(CreateWorkSpaceDto dto);
  Task UpdateAsync(WorkSpaceDto dto);
+ Task<WorkSpaceDto> UpdateWithRoomsAsync(UpdateWorkSpaceDto dto);
  Task DeleteAsync(int id);
  }
 }

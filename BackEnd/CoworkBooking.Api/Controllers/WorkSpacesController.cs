@@ -34,7 +34,7 @@ namespace CoworkBooking.Api.Controllers
             return Ok(workspace);
         }
 
-        // ✅ POST: api/workspaces
+        // ✅ POST: api/workspaces (Simple - without rooms)
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] WorkSpaceDto workspace)
         {
@@ -43,7 +43,25 @@ namespace CoworkBooking.Api.Controllers
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
-        // ✅ PUT: api/workspaces/5
+        // ✅ POST: api/workspaces/with-rooms (Complete - with rooms and devices)
+        [HttpPost("with-rooms")]
+        public async Task<IActionResult> CreateWithRooms([FromBody] CreateWorkSpaceDto workspace)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
+            {
+                var created = await _service.CreateWithRoomsAsync(workspace);
+                return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // ✅ PUT: api/workspaces/5 (Simple - workspace only)
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] WorkSpaceDto workspace)
         {
@@ -55,6 +73,31 @@ namespace CoworkBooking.Api.Controllers
 
             await _service.UpdateAsync(workspace);
             return NoContent();
+        }
+
+        // ✅ PUT: api/workspaces/5/with-rooms (Complete - with rooms and devices)
+        [HttpPut("{id}/with-rooms")]
+        public async Task<IActionResult> UpdateWithRooms(int id, [FromBody] UpdateWorkSpaceDto workspace)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (id != workspace.Id)
+                return BadRequest(new { message = "ID mismatch" });
+
+            try
+            {
+                var updated = await _service.UpdateWithRoomsAsync(workspace);
+                return Ok(updated);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         // ✅ DELETE: api/workspaces/5

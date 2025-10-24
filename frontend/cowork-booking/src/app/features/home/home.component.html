@@ -1,0 +1,44 @@
+<div class="container">
+  <div class="header">
+    <h1 class="title">Discover Cowork Spaces</h1>
+    <p class="subtitle">Find the perfect workspace for your needs</p>
+  </div>
+
+  <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+
+  <app-error-message
+    *ngIf="error && !loading"
+    [title]="'Failed to load workspaces'"
+    [message]="error">
+  </app-error-message>
+
+  <div *ngIf="!loading && !error" class="workspaces-grid">
+    <div *ngFor="let workspace of workspaces" class="workspace-card">
+      <div class="card-header">
+        <h3 class="workspace-name">{{ workspace.name }}</h3>
+        <span class="workspace-city" *ngIf="workspace.city">📍 {{ workspace.city }}</span>
+      </div>
+      <div class="card-body">
+        <p class="workspace-info" *ngIf="workspace.description">
+          {{ workspace.description }}
+        </p>
+        <p class="workspace-rooms">
+          <span class="rooms-icon">🚪</span>
+          <span *ngIf="workspace.rooms">{{ workspace.rooms.length }} rooms available</span>
+          <span *ngIf="!workspace.rooms">No rooms info</span>
+        </p>
+      </div>
+      <div class="card-actions">
+        <button class="view-button" (click)="viewWorkspace(workspace.id!)">
+          View Details →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && !error && workspaces.length === 0" class="empty-state">
+    <span class="empty-icon">🏢</span>
+    <p class="empty-message">No workspaces available at the moment.</p>
+    <p class="empty-hint">Check back later or contact the administrator.</p>
+  </div>
+</div>

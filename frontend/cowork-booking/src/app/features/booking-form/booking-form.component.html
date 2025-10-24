@@ -1,0 +1,88 @@
+<div class="container mx-auto px-4 py-8 max-w-2xl">
+  <button mat-button (click)="goBack()" class="mb-4">
+    <mat-icon>arrow_back</mat-icon>
+    Back
+  </button>
+
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title class="text-2xl">Book a Room</mat-card-title>
+      <mat-card-subtitle *ngIf="room">{{ room.name }}</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content class="pt-6">
+      <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+
+      <app-error-message
+        *ngIf="error && !loading"
+        [title]="'Booking Error'"
+        [message]="error"
+      ></app-error-message>
+
+      <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()" *ngIf="!loading">
+        <!-- Date Picker -->
+        <mat-form-field appearance="outline" class="w-full mb-4">
+          <mat-label>Booking Date</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="bookingDate" required>
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+          <mat-error *ngIf="bookingForm.get('bookingDate')?.hasError('required')">
+            Date is required
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Start Time -->
+        <mat-form-field appearance="outline" class="w-full mb-4">
+          <mat-label>Start Time</mat-label>
+          <input matInput type="time" formControlName="startTime" required>
+          <mat-icon matIconPrefix>access_time</mat-icon>
+          <mat-error *ngIf="bookingForm.get('startTime')?.hasError('required')">
+            Start time is required
+          </mat-error>
+        </mat-form-field>
+
+        <!-- End Time -->
+        <mat-form-field appearance="outline" class="w-full mb-4">
+          <mat-label>End Time</mat-label>
+          <input matInput type="time" formControlName="endTime" required>
+          <mat-icon matIconPrefix>access_time</mat-icon>
+          <mat-error *ngIf="bookingForm.get('endTime')?.hasError('required')">
+            End time is required
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Devices Selection -->
+        <div *ngIf="availableDevices.length > 0" class="mb-6">
+          <h3 class="text-lg font-semibold mb-3">Select Additional Devices</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <mat-checkbox
+              *ngFor="let device of availableDevices"
+              [checked]="isDeviceSelected(device.id!)"
+              (change)="toggleDevice(device.id!)"
+              class="device-checkbox"
+            >
+              {{ device.name }}
+              <span *ngIf="device.extraCostPerHour > 0" class="text-sm text-gray-500"> (+{{ device.extraCostPerHour }} EGP/hr)</span>
+            </mat-checkbox>
+          </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="flex justify-end gap-3 mt-6">
+          <button mat-button type="button" (click)="goBack()" [disabled]="submitting">
+            Cancel
+          </button>
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="bookingForm.invalid || submitting"
+          >
+            <span *ngIf="!submitting">Create Booking</span>
+            <span *ngIf="submitting">Creating...</span>
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

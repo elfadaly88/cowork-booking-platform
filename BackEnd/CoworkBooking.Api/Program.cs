@@ -27,7 +27,7 @@ try
         throw new Exception("Forcing InMemory by config");
     }
 }
-catch (Exception ex)
+catch (Exception)
 {
     Console.ForegroundColor = ConsoleColor.Yellow;
     Console.WriteLine("⚠️ SQL Server unavailable — switching to InMemory DB");
@@ -36,6 +36,19 @@ catch (Exception ex)
     builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseInMemoryDatabase("CoworkBooking_Fallback"));
 }
+
+// Configure CORS for Angular dev server (HTTP and HTTPS)
+var angularDevOrigins = new[] { "http://localhost:4200", "https://localhost:4200" };
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularDev", policy =>
+    {
+        policy.WithOrigins(angularDevOrigins)
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
+    });
+});
 
 // ✅ Add Services
 builder.Services.AddControllers()
@@ -85,6 +98,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseHttpsRedirection();
+
+// Use CORS before other middleware that handles requests
+app.UseCors("AllowAngularDev");
+
 app.UseAuthorization();
 
 // ✅ Enable Swagger permanently
@@ -101,8 +118,8 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated(); 
-    SeedData.Initialize(db);     
+    db.Database.EnsureCreated();
+    SeedData.Initialize(db);
 }
 
 app.Run();

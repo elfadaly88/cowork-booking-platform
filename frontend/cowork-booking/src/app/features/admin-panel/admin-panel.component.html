@@ -1,0 +1,173 @@
+<div class="admin-panel-container">
+  <div class="header">
+    <h1>Admin Panel - Workspace Management</h1>
+    <p class="subtitle">Create, edit, and manage workspaces</p>
+  </div>
+
+  <!-- Alert Messages -->
+  @if (successMessage()) {
+    <div class="alert alert-success">
+      {{ successMessage() }}
+      <button class="close-btn" (click)="successMessage.set(null)">&times;</button>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="alert alert-error">
+      {{ errorMessage() }}
+      <button class="close-btn" (click)="errorMessage.set(null)">&times;</button>
+    </div>
+  }
+
+  <!-- Workspace Form -->
+  <div class="form-section">
+    <h2>{{ isEditMode() ? 'Edit Workspace' : 'Add New Workspace' }}</h2>
+
+    <form [formGroup]="workspaceForm" (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="name">Name <span class="required">*</span></label>
+          <input
+            id="name"
+            type="text"
+            formControlName="name"
+            class="form-control"
+            [class.invalid]="isFieldInvalid('name')"
+            placeholder="Enter workspace name"
+          />
+          @if (isFieldInvalid('name')) {
+            <span class="error-text">{{ getErrorMessage('name') }}</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="city">City <span class="required">*</span></label>
+          <input
+            id="city"
+            type="text"
+            formControlName="city"
+            class="form-control"
+            [class.invalid]="isFieldInvalid('city')"
+            placeholder="Enter city"
+          />
+          @if (isFieldInvalid('city')) {
+            <span class="error-text">{{ getErrorMessage('city') }}</span>
+          }
+        </div>
+
+        <div class="form-group full-width">
+          <label for="address">Address <span class="required">*</span></label>
+          <input
+            id="address"
+            type="text"
+            formControlName="address"
+            class="form-control"
+            [class.invalid]="isFieldInvalid('address')"
+            placeholder="Enter full address"
+          />
+          @if (isFieldInvalid('address')) {
+            <span class="error-text">{{ getErrorMessage('address') }}</span>
+          }
+        </div>
+
+        <div class="form-group full-width">
+          <label for="description">Description <span class="required">*</span></label>
+          <textarea
+            id="description"
+            formControlName="description"
+            class="form-control"
+            [class.invalid]="isFieldInvalid('description')"
+            rows="3"
+            placeholder="Enter workspace description"
+          ></textarea>
+          @if (isFieldInvalid('description')) {
+            <span class="error-text">{{ getErrorMessage('description') }}</span>
+          }
+        </div>
+      </div>
+
+      <!-- Map Picker Section -->
+      <div class="map-section full-width">
+        <app-map-picker
+          [initialLat]="workspaceForm.get('latitude')?.value"
+          [initialLng]="workspaceForm.get('longitude')?.value"
+          (locationSelected)="onLocationSelected($event)"
+        ></app-map-picker>
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="isLoading()"
+        >
+          {{ isLoading() ? 'Saving...' : (isEditMode() ? 'Update Workspace' : 'Create Workspace') }}
+        </button>
+
+        @if (isEditMode()) {
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="resetForm()"
+            [disabled]="isLoading()"
+          >
+            Cancel
+          </button>
+        }
+      </div>
+    </form>
+  </div>
+
+  <!-- Workspaces List -->
+  <div class="list-section">
+    <h2>Existing Workspaces</h2>
+
+    @if (isLoading() && workspaces().length === 0) {
+      <div class="loading">Loading workspaces...</div>
+    } @else if (workspaces().length === 0) {
+      <div class="empty-state">
+        <p>No workspaces found. Create your first workspace above!</p>
+      </div>
+    } @else {
+      <div class="workspace-grid">
+        @for (workspace of workspaces(); track workspace.id) {
+          <div class="workspace-card">
+            <div class="workspace-header">
+              <h3>{{ workspace.name }}</h3>
+              <span class="city-badge">{{ workspace.city }}</span>
+            </div>
+
+            <div class="workspace-body">
+              <p class="description">{{ workspace.description }}</p>
+              <p class="address"><strong>Address:</strong> {{ workspace.address }}</p>
+
+              @if (workspace.latitude && workspace.longitude) {
+                <p class="coordinates">
+                  <strong>Coordinates:</strong>
+                  {{ workspace.latitude }}, {{ workspace.longitude }}
+                </p>
+              }
+            </div>
+
+            <div class="workspace-actions">
+              <button
+                class="btn btn-edit"
+                (click)="editWorkspace(workspace)"
+                [disabled]="isLoading()"
+              >
+                Edit
+              </button>
+              <button
+                class="btn btn-delete"
+                (click)="deleteWorkspace(workspace.id!)"
+                [disabled]="isLoading()"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,278 @@
+<div class="admin-container">
+  <div class="header">
+    <h1>{{ isEditMode() ? 'Edit' : 'Add New' }} Workspace</h1>
+    <p class="subtitle">Manage workspaces, rooms, and devices</p>
+  </div>
+
+  <!-- Messages -->
+  @if (successMessage()) {
+    <div class="alert alert-success">
+      {{ successMessage() }}
+      <button type="button" class="close-btn" (click)="successMessage.set(null)">&times;</button>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="alert alert-error">
+      {{ errorMessage() }}
+      <button type="button" class="close-btn" (click)="errorMessage.set(null)">&times;</button>
+    </div>
+  }
+
+  <!-- Workspace Form -->
+  <form [formGroup]="workspaceForm" (ngSubmit)="onSubmit()" class="workspace-form">
+    <!-- Workspace Basic Info -->
+    <div class="form-section">
+      <h2 class="section-title">📍 Workspace Information</h2>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name">Workspace Name *</label>
+          <input
+            id="name"
+            type="text"
+            formControlName="name"
+            placeholder="e.g., Cairo Hub"
+            [class.invalid]="isFieldInvalid('name')"
+          />
+          @if (isFieldInvalid('name')) {
+            <span class="error-text">{{ getErrorMessage('name') }}</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="city">City *</label>
+          <input
+            id="city"
+            type="text"
+            formControlName="city"
+            placeholder="e.g., Cairo"
+            [class.invalid]="isFieldInvalid('city')"
+          />
+          @if (isFieldInvalid('city')) {
+            <span class="error-text">{{ getErrorMessage('city') }}</span>
+          }
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description *</label>
+        <textarea
+          id="description"
+          formControlName="description"
+          rows="3"
+          placeholder="Describe the workspace..."
+          [class.invalid]="isFieldInvalid('description')"
+        ></textarea>
+        @if (isFieldInvalid('description')) {
+          <span class="error-text">{{ getErrorMessage('description') }}</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="address">Address *</label>
+        <input
+          id="address"
+          type="text"
+          formControlName="address"
+          placeholder="e.g., 123 Main Street, Downtown"
+          [class.invalid]="isFieldInvalid('address')"
+        />
+        @if (isFieldInvalid('address')) {
+          <span class="error-text">{{ getErrorMessage('address') }}</span>
+        }
+      </div>
+
+      <!-- Map Picker -->
+      <div class="form-group">
+        <label>Location on Map</label>
+        <app-map-picker
+          [initialLat]="workspaceForm.get('latitude')?.value"
+          [initialLng]="workspaceForm.get('longitude')?.value"
+          (locationSelected)="onLocationSelected($event)"
+        ></app-map-picker>
+        @if (workspaceForm.get('latitude')?.value && workspaceForm.get('longitude')?.value) {
+          <p class="coordinates-info">
+            📌 Selected: {{ workspaceForm.get('latitude')?.value | number:'1.6-6' }},
+            {{ workspaceForm.get('longitude')?.value | number:'1.6-6' }}
+          </p>
+        }
+      </div>
+    </div>
+
+    <!-- Rooms Section -->
+    <div class="form-section">
+      <div class="section-header">
+        <h2 class="section-title">🏢 Rooms</h2>
+        <button type="button" class="btn btn-secondary" (click)="addRoom()">
+          ➕ Add Room
+        </button>
+      </div>
+
+      @if (rooms.length === 0) {
+        <p class="empty-message">No rooms added yet. Click "Add Room" to create one.</p>
+      }
+
+      @for (room of rooms.controls; track $index) {
+        <div class="room-card" [formGroupName]="$index">
+          <div class="card-header">
+            <h3>Room {{ $index + 1 }}</h3>
+            <button type="button" class="btn btn-danger-small" (click)="removeRoom($index)">
+              🗑️ Remove
+            </button>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Room Name *</label>
+              <input
+                type="text"
+                formControlName="name"
+                placeholder="e.g., Meeting Room A"
+                [class.invalid]="isRoomFieldInvalid($index, 'name')"
+              />
+              @if (isRoomFieldInvalid($index, 'name')) {
+                <span class="error-text">Room name is required</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label>Capacity *</label>
+              <input
+                type="number"
+                formControlName="capacity"
+                placeholder="e.g., 10"
+                min="1"
+                [class.invalid]="isRoomFieldInvalid($index, 'capacity')"
+              />
+              @if (isRoomFieldInvalid($index, 'capacity')) {
+                <span class="error-text">Capacity is required</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label>Price per Hour (EGP) *</label>
+              <input
+                type="number"
+                formControlName="pricePerHour"
+                placeholder="e.g., 100"
+                min="0"
+                step="0.01"
+                [class.invalid]="isRoomFieldInvalid($index, 'pricePerHour')"
+              />
+              @if (isRoomFieldInvalid($index, 'pricePerHour')) {
+                <span class="error-text">Price is required</span>
+              }
+            </div>
+          </div>
+
+          <!-- Devices Section -->
+          <div class="devices-section">
+            <div class="devices-header">
+              <h4>🖥️ Devices (Optional)</h4>
+              <button type="button" class="btn btn-secondary-small" (click)="addDevice($index)">
+                ➕ Add Device
+              </button>
+            </div>
+
+            @if (getDevices($index).length === 0) {
+              <p class="empty-message-small">No devices added.</p>
+            }
+
+            @for (device of getDevices($index).controls; track device; let di = $index) {
+              <div class="device-row" [formGroupName]="di">
+                <div class="form-group-inline">
+                  <input
+                    type="text"
+                    formControlName="name"
+                    placeholder="Device name (e.g., Projector)"
+                    [class.invalid]="isDeviceFieldInvalid($index, di, 'name')"
+                  />
+                </div>
+                <div class="form-group-inline">
+                  <input
+                    type="number"
+                    formControlName="extraCostPerHour"
+                    placeholder="Extra cost"
+                    min="0"
+                    step="0.01"
+                    [class.invalid]="isDeviceFieldInvalid($index, di, 'extraCostPerHour')"
+                  />
+                </div>
+                <button type="button" class="btn btn-danger-icon" (click)="removeDevice($index, di)">
+                  🗑️
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="resetForm()" [disabled]="isLoading()">
+        Cancel
+      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="isLoading()">
+        @if (isLoading()) {
+          <span class="spinner"></span> Saving...
+        } @else {
+          {{ isEditMode() ? 'Update' : 'Create' }} Workspace
+        }
+      </button>
+    </div>
+  </form>
+
+  <!-- Workspaces List -->
+  <div class="workspaces-list">
+    <h2>Existing Workspaces</h2>
+
+    @if (isLoading()) {
+      <div class="loading-container">
+        <div class="spinner"></div>
+        <p>Loading workspaces...</p>
+      </div>
+    } @else if (workspaces().length === 0) {
+      <p class="empty-message">No workspaces found. Create your first one!</p>
+    } @else {
+      <div class="workspace-cards">
+        @for (workspace of workspaces(); track workspace.id) {
+          <div class="workspace-card">
+            <div class="workspace-header">
+              <h3>{{ workspace.name }}</h3>
+              <span class="city-badge">{{ workspace.city }}</span>
+            </div>
+            <p class="description">{{ workspace.description }}</p>
+            <p class="address">📍 {{ workspace.address }}</p>
+
+            @if (workspace.rooms && workspace.rooms.length > 0) {
+              <div class="rooms-summary">
+                <strong>🏢 {{ workspace.rooms.length }} Room(s)</strong>
+                <ul>
+                  @for (room of workspace.rooms; track room.id) {
+                    <li>
+                      {{ room.name }} - {{ room.capacity }} people - {{ room.pricePerHour | number:'1.2-2' }} EGP/hr
+                      @if (room.devices && room.devices.length > 0) {
+                        <span class="devices-badge">{{ room.devices.length }} devices</span>
+                      }
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+
+            <div class="card-actions">
+              <button class="btn btn-edit" (click)="editWorkspace(workspace)">
+                ✏️ Edit
+              </button>
+              <button class="btn btn-danger" (click)="deleteWorkspace(workspace.id!)">
+                🗑️ Delete
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
