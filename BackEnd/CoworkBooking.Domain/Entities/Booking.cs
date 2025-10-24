@@ -14,6 +14,6 @@ namespace CoworkBooking.Domain.Entities
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public decimal TotalPrice { get; set; }
-        public required Room Room { get; set; }
+        public Room? Room { get; set; }
     }
 }

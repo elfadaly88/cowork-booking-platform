@@ -1,7 +1,11 @@
 ﻿using CoworkBooking.Infrastructure;
 using CoworkBooking.Infrastructure.Data;
+using CoworkBooking.Domain.Interfaces;
+using CoworkBooking.Application.Services;
+using CoworkBooking.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -33,21 +37,14 @@ catch (Exception ex)
         options.UseInMemoryDatabase("CoworkBooking_Fallback"));
 }
 
-//if (useInMemory)
-//{
-//    Console.WriteLine("💾 Using InMemory Database");
-//    builder.Services.AddDbContext<AppDbContext>(options =>
-//        options.UseInMemoryDatabase("CoworkBookingDB"));
-//}
-//else
-//{
-//    Console.WriteLine("🧱 Using SQL Server Database");
-//    builder.Services.AddDbContext<AppDbContext>(options =>
-//        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-//}
-
 // ✅ Add Services
-builder.Services.AddControllers();  
+builder.Services.AddControllers()
+    .AddJsonOptions(opts =>
+    {
+        // Prevent JSON serializer from throwing on cyclical references produced by EF navigation properties
+        opts.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        opts.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -59,6 +56,11 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// Register application services
+builder.Services.AddScoped<CoworkBooking.Domain.Interfaces.IRoomService, CoworkBooking.Application.Services.RoomService>();
+builder.Services.AddScoped<CoworkBooking.Application.Interfaces.IWorkSpaceService, CoworkBooking.Application.Services.WorkSpaceService>();
+builder.Services.AddScoped<CoworkBooking.Application.Interfaces.IDeviceService, CoworkBooking.Application.Services.DeviceService>();
+builder.Services.AddScoped<CoworkBooking.Application.Interfaces.IBookingService, CoworkBooking.Application.Services.BookingService>();
 
 var app = builder.Build();
 
@@ -99,8 +101,8 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated(); // ينشئ الداتا بيز لو مش موجودة
-    SeedData.Initialize(db);     // يملأ البيانات الأولية
+    db.Database.EnsureCreated(); 
+    SeedData.Initialize(db);     
 }
 
 app.Run();

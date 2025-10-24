@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CoworkBooking.Domain\CoworkBooking.Domain.csproj" />
+    <ProjectReference Include="..\CoworkBooking.Infrastructure\CoworkBooking.Infrastructure.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -9,5 +10,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
+  </ItemGroup>
 
 </Project>

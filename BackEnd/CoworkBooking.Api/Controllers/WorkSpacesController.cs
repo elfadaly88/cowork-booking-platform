@@ -1,7 +1,6 @@
-﻿using CoworkBooking.Domain.Entities;
-using CoworkBooking.Infrastructure.Data;
+﻿using CoworkBooking.Application.DTOs;
+using CoworkBooking.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace CoworkBooking.Api.Controllers
 {
@@ -9,33 +8,26 @@ namespace CoworkBooking.Api.Controllers
     [Route("api/[controller]")]
     public class WorkSpacesController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IWorkSpaceService _service;
 
-        public WorkSpacesController(AppDbContext context)
+        public WorkSpacesController(IWorkSpaceService service)
         {
-            _context = context;
+            _service = service;
         }
 
         // ✅ GET: api/workspaces
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<WorkSpace>>> GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var workspaces = await _context.Workspaces.Include(w => w.Rooms)
-        .ThenInclude(r => r.Devices)
-    .ToListAsync();
-
+            var workspaces = await _service.GetAllAsync();
             return Ok(workspaces);
         }
 
         // ✅ GET: api/workspaces/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<WorkSpace>> GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var workspace = await _context.Workspaces
-                .Include(w => w.Rooms)
-                .ThenInclude(r => r.Devices)
-                .FirstOrDefaultAsync(w => w.Id == id);
-
+            var workspace = await _service.GetByIdAsync(id);
             if (workspace == null)
                 return NotFound();
 
@@ -44,24 +36,24 @@ namespace CoworkBooking.Api.Controllers
 
         // ✅ POST: api/workspaces
         [HttpPost]
-        public async Task<ActionResult<WorkSpace>> Create(WorkSpace workspace)
+        public async Task<IActionResult> Create([FromBody] WorkSpaceDto workspace)
         {
-            _context.Workspaces.Add(workspace);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetById), new { id = workspace.Id }, workspace);
+            if (workspace == null) return BadRequest();
+            var created = await _service.CreateAsync(workspace);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
         // ✅ PUT: api/workspaces/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, WorkSpace workspace)
+        public async Task<IActionResult> Update(int id, [FromBody] WorkSpaceDto workspace)
         {
-            if (id != workspace.Id)
+            if (workspace == null || id != workspace.Id)
                 return BadRequest();
 
-            _context.Entry(workspace).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            var existing = await _service.GetByIdAsync(id);
+            if (existing == null) return NotFound();
 
+            await _service.UpdateAsync(workspace);
             return NoContent();
         }
 
@@ -69,13 +61,10 @@ namespace CoworkBooking.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var workspace = await _context.Workspaces.FindAsync(id);
-            if (workspace == null)
-                return NotFound();
+            var existing = await _service.GetByIdAsync(id);
+            if (existing == null) return NotFound();
 
-            _context.Workspaces.Remove(workspace);
-            await _context.SaveChangesAsync();
-
+            await _service.DeleteAsync(id);
             return NoContent();
         }
     }
