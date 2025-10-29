@@ -1,13 +1,13 @@
 import { Component, Input } from '@angular/core';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-loading-spinner',
   standalone: true,
-  imports: [MatProgressSpinnerModule],
+  imports: [CommonModule],
   template: `
     <div class="flex justify-center items-center py-8">
-      <mat-spinner [diameter]="diameter"></mat-spinner>
+      <div class="animate-spin rounded-full border-4 border-gray-300 border-t-blue-600" [style.width.px]="diameter" [style.height.px]="diameter"></div>
     </div>
   `,
   styles: []

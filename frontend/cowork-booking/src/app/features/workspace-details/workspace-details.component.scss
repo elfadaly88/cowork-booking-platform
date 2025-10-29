@@ -332,3 +332,40 @@
     font-size: 0.875rem;
   }
 }
+
+/* Additional responsive tweaks for better cross-platform layout */
+.workspace-image {
+  width: 100%;
+  height: auto;
+  max-height: 60vh;
+  object-fit: cover;
+}
+
+@media (max-width: 1024px) {
+  .workspace-header {
+    padding: 1.25rem;
+  }
+
+  .back-button {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .book-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .workspace-title {
+    font-size: 1.5rem;
+  }
+
+  .workspace-header {
+    padding: 1rem;
+  }
+
+  .room-card, .schedule-card, .devices-card {
+    padding: 1rem;
+  }
+}

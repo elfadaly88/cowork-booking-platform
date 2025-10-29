@@ -47,7 +47,9 @@ export class WorkspaceDetailsComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        this.error = err.message;
+        console.warn('Backend API not available for workspace details:', err);
+        this.error = 'Unable to connect to backend. Please ensure the API server is running.';
+        this.workspace = null;
         this.loading = false;
       }
     });
@@ -58,8 +60,9 @@ export class WorkspaceDetailsComponent implements OnInit {
       next: (data) => {
         this.schedulePeriod = data;
       },
-      error: () => {
-        // Silently ignore if no schedule exists
+      error: (err) => {
+        console.warn('Backend API not available for schedule:', err);
+        // Schedule is optional, so don't set error for this
         this.schedulePeriod = null;
       }
     });
@@ -82,3 +85,4 @@ export class WorkspaceDetailsComponent implements OnInit {
     this.router.navigate(['/']);
   }
 }
+

@@ -13,10 +13,7 @@
 .title {
   font-size: 3rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #667eea; /* Temporary solid color instead of gradient */
   margin-bottom: 0.5rem;
   padding: 0.25rem 0;
   display: inline-block;

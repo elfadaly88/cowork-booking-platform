@@ -127,7 +127,11 @@ export class BookingFormComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        this.error = err.message || 'Failed to load room details';
+        console.warn('Backend API not available for room details:', err);
+        this.error = 'Unable to connect to backend. Please ensure the API server is running.';
+        this.room = null;
+        this.workspace = null;
+        this.availableDevices = [];
         this.loading = false;
       }
     });

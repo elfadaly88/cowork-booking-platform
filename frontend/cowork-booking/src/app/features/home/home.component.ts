@@ -35,11 +35,13 @@ export class HomeComponent implements OnInit {
 
     this.workspaceService.getAvailableWorkspaces().subscribe({
       next: (data) => {
-        this.workspaces = data;
+        this.workspaces = data || [];
         this.loading = false;
       },
       error: (err) => {
-        this.error = err.message;
+        console.warn('Backend API not available for workspaces:', err);
+        this.error = 'Unable to connect to backend. Please ensure the API server is running.';
+        this.workspaces = [];
         this.loading = false;
       }
     });

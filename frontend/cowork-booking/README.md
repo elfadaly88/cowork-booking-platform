@@ -57,3 +57,36 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## Progressive Web App (PWA) & Cross-platform notes
+
+This project includes a basic Angular service worker configuration and manifest so you can build a PWA-ready bundle.
+
+Quick steps to build and test the PWA:
+
+1. Install dependencies (ensure `@angular/service-worker` was installed):
+
+```powershell
+npm install
+```
+
+2. Build a production bundle (this will include the service worker):
+
+```powershell
+ng build --configuration production
+```
+
+3. Serve the `dist/` directory from a static server (service workers require HTTPS or localhost). Example (using a simple static server):
+
+```powershell
+npx http-server ./dist/cowork-booking -p 8080
+```
+
+4. Open `http://localhost:8080` in Chrome (or other browsers) and use DevTools > Application to inspect the service worker, manifest, and test offline behavior. On mobile, open the site and add to home screen to test PWA installation flows.
+
+Responsive considerations added in CSS:
+- fluid container widths, safe-area insets for notched devices
+- grid and card layouts use auto-fill/minmax for flexibility
+- reduced paddings and full-width actions on small screens
+
+If you want further polishing (app icons, splash screens, advanced caching strategies), I can add icon assets and refine `ngsw-config.json` for API caching and versioning.

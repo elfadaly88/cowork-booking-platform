@@ -96,13 +96,15 @@ export class AdminPanelEnhancedComponent implements OnInit {
     this.http.get<Workspace[]>(`${this.baseUrl}/workspaces`)
       .pipe(
         catchError(err => {
-          this.errorMessage.set('Failed to load workspaces');
+          console.warn('Backend API not available:', err);
+          this.errorMessage.set('Unable to connect to backend. Please ensure the API server is running.');
           this.isLoading.set(false);
-          return throwError(() => err);
+          // Return empty array instead of throwing error to prevent app crash
+          return [[]];
         })
       )
       .subscribe(data => {
-        this.workspaces.set(data);
+        this.workspaces.set(data || []);
         this.isLoading.set(false);
       });
   }
@@ -139,9 +141,10 @@ export class AdminPanelEnhancedComponent implements OnInit {
     this.http.post<Workspace>(`${this.baseUrl}/workspaces/with-rooms`, workspaceData)
       .pipe(
         catchError(err => {
-          this.errorMessage.set(err.error?.message || 'Failed to create workspace');
+          console.error('Failed to create workspace:', err);
+          this.errorMessage.set(err.error?.message || 'Failed to create workspace. Please check if the API server is running.');
           this.isLoading.set(false);
-          return throwError(() => err);
+          return []; // Return empty observable instead of throwing
         })
       )
       .subscribe(() => {
@@ -171,9 +174,10 @@ export class AdminPanelEnhancedComponent implements OnInit {
     this.http.put<Workspace>(`${this.baseUrl}/workspaces/${id}/with-rooms`, workspaceData)
       .pipe(
         catchError(err => {
-          this.errorMessage.set(err.error?.message || 'Failed to update workspace');
+          console.error('Failed to update workspace:', err);
+          this.errorMessage.set(err.error?.message || 'Failed to update workspace. Please check if the API server is running.');
           this.isLoading.set(false);
-          return throwError(() => err);
+          return []; // Return empty observable instead of throwing
         })
       )
       .subscribe(() => {
@@ -253,9 +257,10 @@ export class AdminPanelEnhancedComponent implements OnInit {
     this.http.delete(`${this.baseUrl}/workspaces/${id}`)
       .pipe(
         catchError(err => {
-          this.errorMessage.set('Failed to delete workspace');
+          console.error('Failed to delete workspace:', err);
+          this.errorMessage.set('Failed to delete workspace. Please check if the API server is running.');
           this.isLoading.set(false);
-          return throwError(() => err);
+          return []; // Return empty observable instead of throwing
         })
       )
       .subscribe(() => {
