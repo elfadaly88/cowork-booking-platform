@@ -17,5 +17,6 @@ namespace CoworkBooking.Domain.Entities
         public double? Longitude { get; set; }
 
         public ICollection<Room> Rooms { get; set; } = new List<Room>();
+        public ICollection<WorkspaceSchedulePeriod> SchedulePeriods { get; set; } = new List<WorkspaceSchedulePeriod>();
     }
 }

@@ -1,20 +1,33 @@
 <div class="admin-container">
-  <div class="header">
-    <h1>{{ isEditMode() ? 'Edit' : 'Add New' }} Workspace</h1>
-    <p class="subtitle">Manage workspaces, rooms, and devices</p>
+  <div class="header" [class.edit-mode]="isEditMode()">
+    <div class="header-content">
+      <div>
+        <h1>🏢 {{ isEditMode() ? '✏️ Edit' : 'Create New' }} Workspace</h1>
+        <p class="subtitle">{{ isEditMode() ? 'Update workspace details, add or remove rooms and devices' : 'Add a new coworking space with rooms and optional equipment' }}</p>
+        @if (isEditMode()) {
+          <div class="edit-indicator">
+            <span>📝 Editing Workspace ID: {{ selectedWorkspaceId() }}</span>
+          </div>
+        }
+      </div>
+      <a routerLink="/admin/schedule" class="btn-schedule">
+        <span class="icon">🕐</span>
+        Manage Schedules
+      </a>
+    </div>
   </div>
 
   <!-- Messages -->
   @if (successMessage()) {
     <div class="alert alert-success">
-      {{ successMessage() }}
+      <span>✅ {{ successMessage() }}</span>
       <button type="button" class="close-btn" (click)="successMessage.set(null)">&times;</button>
     </div>
   }
 
   @if (errorMessage()) {
     <div class="alert alert-error">
-      {{ errorMessage() }}
+      <span>❌ {{ errorMessage() }}</span>
       <button type="button" class="close-btn" (click)="errorMessage.set(null)">&times;</button>
     </div>
   }
@@ -23,7 +36,7 @@
   <form [formGroup]="workspaceForm" (ngSubmit)="onSubmit()" class="workspace-form">
     <!-- Workspace Basic Info -->
     <div class="form-section">
-      <h2 class="section-title">📍 Workspace Information</h2>
+      <h2 class="section-title">📍 Basic Information</h2>
 
       <div class="form-row">
         <div class="form-group">
@@ -32,7 +45,7 @@
             id="name"
             type="text"
             formControlName="name"
-            placeholder="e.g., Cairo Hub"
+            placeholder="e.g., Cairo Innovation Hub, Downtown Coworking"
             [class.invalid]="isFieldInvalid('name')"
           />
           @if (isFieldInvalid('name')) {
@@ -46,7 +59,7 @@
             id="city"
             type="text"
             formControlName="city"
-            placeholder="e.g., Cairo"
+            placeholder="e.g., Cairo, Giza"
             [class.invalid]="isFieldInvalid('city')"
           />
           @if (isFieldInvalid('city')) {
@@ -60,8 +73,8 @@
         <textarea
           id="description"
           formControlName="description"
-          rows="3"
-          placeholder="Describe the workspace..."
+          rows="4"
+          placeholder="Describe your workspace... Include amenities, atmosphere, and what makes it special"
           [class.invalid]="isFieldInvalid('description')"
         ></textarea>
         @if (isFieldInvalid('description')) {
@@ -70,12 +83,12 @@
       </div>
 
       <div class="form-group">
-        <label for="address">Address *</label>
+        <label for="address">Full Address *</label>
         <input
           id="address"
           type="text"
           formControlName="address"
-          placeholder="e.g., 123 Main Street, Downtown"
+          placeholder="e.g., 123 Main Street, Zamalek, Cairo"
           [class.invalid]="isFieldInvalid('address')"
         />
         @if (isFieldInvalid('address')) {
@@ -85,7 +98,10 @@
 
       <!-- Map Picker -->
       <div class="form-group">
-        <label>Location on Map</label>
+        <label>📍 Location on Map (Cairo/Giza) *</label>
+        <p style="margin: 0.5rem 0; color: #718096; font-size: 0.9rem;">
+          Click on the map to pin your workspace location, or search for a nearby landmark
+        </p>
         <app-map-picker
           [initialLat]="workspaceForm.get('latitude')?.value"
           [initialLng]="workspaceForm.get('longitude')?.value"
@@ -93,32 +109,38 @@
         ></app-map-picker>
         @if (workspaceForm.get('latitude')?.value && workspaceForm.get('longitude')?.value) {
           <p class="coordinates-info">
-            📌 Selected: {{ workspaceForm.get('latitude')?.value | number:'1.6-6' }},
-            {{ workspaceForm.get('longitude')?.value | number:'1.6-6' }}
+            ✅ Location Set: {{ workspaceForm.get('latitude')?.value | number:'1.6-6' }}°N,
+            {{ workspaceForm.get('longitude')?.value | number:'1.6-6' }}°E
+          </p>
+        } @else {
+          <p class="coordinates-info" style="background: #fff5f5; color: #c53030;">
+            ⚠️ Please select a location on the map
           </p>
         }
       </div>
-    </div>
-
-    <!-- Rooms Section -->
+    </div>    <!-- Rooms Section -->
     <div class="form-section">
       <div class="section-header">
-        <h2 class="section-title">🏢 Rooms</h2>
+        <h2 class="section-title">🏢 Rooms & Spaces</h2>
         <button type="button" class="btn btn-secondary" (click)="addRoom()">
-          ➕ Add Room
+          ➕ Add New Room
         </button>
       </div>
 
       @if (rooms.length === 0) {
-        <p class="empty-message">No rooms added yet. Click "Add Room" to create one.</p>
+        <div class="empty-message">
+          <p style="margin: 0; font-size: 1.1rem;">📋 No rooms added yet</p>
+          <p style="margin: 0.5rem 0 0 0; color: #718096;">Click "Add New Room" to create your first meeting room, private office, or workspace</p>
+        </div>
       }
 
+      <div formArrayName="rooms">
       @for (room of rooms.controls; track $index) {
         <div class="room-card" [formGroupName]="$index">
           <div class="card-header">
-            <h3>Room {{ $index + 1 }}</h3>
+            <h3>🚪 Room {{ $index + 1 }}</h3>
             <button type="button" class="btn btn-danger-small" (click)="removeRoom($index)">
-              🗑️ Remove
+              🗑️ Remove Room
             </button>
           </div>
 
@@ -128,25 +150,26 @@
               <input
                 type="text"
                 formControlName="name"
-                placeholder="e.g., Meeting Room A"
+                placeholder="e.g., Meeting Room A, Executive Suite, Hot Desk Area"
                 [class.invalid]="isRoomFieldInvalid($index, 'name')"
               />
               @if (isRoomFieldInvalid($index, 'name')) {
-                <span class="error-text">Room name is required</span>
+                <span class="error-text">⚠️ Room name is required (minimum 2 characters)</span>
               }
             </div>
 
             <div class="form-group">
-              <label>Capacity *</label>
+              <label>Capacity (People) *</label>
               <input
                 type="number"
                 formControlName="capacity"
                 placeholder="e.g., 10"
                 min="1"
+                max="1000"
                 [class.invalid]="isRoomFieldInvalid($index, 'capacity')"
               />
               @if (isRoomFieldInvalid($index, 'capacity')) {
-                <span class="error-text">Capacity is required</span>
+                <span class="error-text">⚠️ Capacity must be between 1 and 1000</span>
               }
             </div>
 
@@ -155,51 +178,61 @@
               <input
                 type="number"
                 formControlName="pricePerHour"
-                placeholder="e.g., 100"
+                placeholder="e.g., 100.00"
                 min="0"
                 step="0.01"
                 [class.invalid]="isRoomFieldInvalid($index, 'pricePerHour')"
               />
               @if (isRoomFieldInvalid($index, 'pricePerHour')) {
-                <span class="error-text">Price is required</span>
+                <span class="error-text">⚠️ Price is required and must be positive</span>
               }
             </div>
           </div>
 
           <!-- Devices Section -->
-          <div class="devices-section">
+          <div class="devices-section" formArrayName="devices">
             <div class="devices-header">
-              <h4>🖥️ Devices (Optional)</h4>
+              <h4>🖥️ Equipment & Devices <span style="color: #a0aec0; font-weight: normal; font-size: 0.9rem;">(Optional)</span></h4>
               <button type="button" class="btn btn-secondary-small" (click)="addDevice($index)">
                 ➕ Add Device
               </button>
             </div>
 
             @if (getDevices($index).length === 0) {
-              <p class="empty-message-small">No devices added.</p>
+              <p class="empty-message-small">
+                💡 No devices added. Add equipment like projectors, whiteboards, or monitors (optional)
+              </p>
             }
 
             @for (device of getDevices($index).controls; track device; let di = $index) {
               <div class="device-row" [formGroupName]="di">
                 <div class="form-group-inline">
+                  <label style="font-size: 0.85rem; color: #718096; margin-bottom: 0.35rem;">Device Name</label>
                   <input
                     type="text"
                     formControlName="name"
-                    placeholder="Device name (e.g., Projector)"
+                    placeholder="e.g., Projector, 4K Display, Whiteboard"
                     [class.invalid]="isDeviceFieldInvalid($index, di, 'name')"
                   />
                 </div>
                 <div class="form-group-inline">
+                  <label style="font-size: 0.85rem; color: #718096; margin-bottom: 0.35rem;">Extra Cost (EGP/hr)</label>
                   <input
                     type="number"
                     formControlName="extraCostPerHour"
-                    placeholder="Extra cost"
+                    placeholder="0.00"
                     min="0"
                     step="0.01"
                     [class.invalid]="isDeviceFieldInvalid($index, di, 'extraCostPerHour')"
                   />
                 </div>
-                <button type="button" class="btn btn-danger-icon" (click)="removeDevice($index, di)">
+                <button
+                  type="button"
+                  class="btn btn-danger-icon"
+                  (click)="removeDevice($index, di)"
+                  title="Remove device"
+                  style="align-self: flex-end;"
+                >
                   🗑️
                 </button>
               </div>
@@ -207,18 +240,19 @@
           </div>
         </div>
       }
+      </div>
     </div>
 
     <!-- Form Actions -->
     <div class="form-actions">
       <button type="button" class="btn btn-secondary" (click)="resetForm()" [disabled]="isLoading()">
-        Cancel
+        ↩️ Cancel & Reset
       </button>
-      <button type="submit" class="btn btn-primary" [disabled]="isLoading()">
+      <button type="submit" class="btn btn-primary" [disabled]="isLoading() || workspaceForm.invalid">
         @if (isLoading()) {
           <span class="spinner"></span> Saving...
         } @else {
-          {{ isEditMode() ? 'Update' : 'Create' }} Workspace
+          {{ isEditMode() ? '💾 Update Workspace' : '✨ Create Workspace' }}
         }
       </button>
     </div>
@@ -226,7 +260,7 @@
 
   <!-- Workspaces List -->
   <div class="workspaces-list">
-    <h2>Existing Workspaces</h2>
+    <h2>📊 Existing Workspaces</h2>
 
     @if (isLoading()) {
       <div class="loading-container">
@@ -234,33 +268,48 @@
         <p>Loading workspaces...</p>
       </div>
     } @else if (workspaces().length === 0) {
-      <p class="empty-message">No workspaces found. Create your first one!</p>
+      <div class="empty-message">
+        <p style="margin: 0; font-size: 1.2rem;">🏗️ No workspaces yet</p>
+        <p style="margin: 0.5rem 0 0 0; color: #718096;">Create your first workspace using the form above!</p>
+      </div>
     } @else {
       <div class="workspace-cards">
         @for (workspace of workspaces(); track workspace.id) {
           <div class="workspace-card">
             <div class="workspace-header">
               <h3>{{ workspace.name }}</h3>
-              <span class="city-badge">{{ workspace.city }}</span>
+              <span class="city-badge">📍 {{ workspace.city }}</span>
             </div>
-            <p class="description">{{ workspace.description }}</p>
-            <p class="address">📍 {{ workspace.address }}</p>
+            <div style="padding: 1.5rem;">
+              <p class="description">{{ workspace.description }}</p>
+              <p class="address">
+                <span>📍</span>
+                <span>{{ workspace.address }}</span>
+              </p>
 
-            @if (workspace.rooms && workspace.rooms.length > 0) {
-              <div class="rooms-summary">
-                <strong>🏢 {{ workspace.rooms.length }} Room(s)</strong>
-                <ul>
-                  @for (room of workspace.rooms; track room.id) {
-                    <li>
-                      {{ room.name }} - {{ room.capacity }} people - {{ room.pricePerHour | number:'1.2-2' }} EGP/hr
-                      @if (room.devices && room.devices.length > 0) {
-                        <span class="devices-badge">{{ room.devices.length }} devices</span>
-                      }
-                    </li>
-                  }
-                </ul>
-              </div>
-            }
+              @if (workspace.rooms && workspace.rooms.length > 0) {
+                <div class="rooms-summary">
+                  <strong>🚪 {{ workspace.rooms.length }} Room{{ workspace.rooms.length > 1 ? 's' : '' }} Available</strong>
+                  <ul>
+                    @for (room of workspace.rooms; track room.id) {
+                      <li>
+                        <span>
+                          <strong>{{ room.name }}</strong>
+                          <span style="color: #718096;"> • {{ room.capacity }} people • {{ room.pricePerHour | number:'1.2-2' }} EGP/hr</span>
+                        </span>
+                        @if (room.devices && room.devices.length > 0) {
+                          <span class="devices-badge">🖥️ {{ room.devices.length }} device{{ room.devices.length > 1 ? 's' : '' }}</span>
+                        }
+                      </li>
+                    }
+                  </ul>
+                </div>
+              } @else {
+                <div class="rooms-summary" style="border-left-color: #fc8181;">
+                  <p style="color: #718096; margin: 0; font-style: italic;">⚠️ No rooms added yet</p>
+                </div>
+              }
+            </div>
 
             <div class="card-actions">
               <button class="btn btn-edit" (click)="editWorkspace(workspace)">

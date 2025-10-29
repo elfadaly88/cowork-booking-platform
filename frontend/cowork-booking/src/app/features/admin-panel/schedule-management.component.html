@@ -1,0 +1,191 @@
+<div class="schedule-container">
+  <!-- Header -->
+  <div class="schedule-header">
+    <button class="back-button" (click)="goBack()">
+      <span class="back-icon">←</span>
+      Back to Admin Panel
+    </button>
+    <h1 class="page-title">Workspace Schedule Management</h1>
+    <p class="page-subtitle">Define working hours for each day of the week</p>
+  </div>
+
+  <!-- Alert Messages -->
+  @if (successMessage()) {
+    <div class="alert alert-success">
+      <span class="alert-icon">✓</span>
+      {{ successMessage() }}
+      <button class="close-btn" (click)="successMessage.set(null)">&times;</button>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="alert alert-error">
+      <span class="alert-icon">⚠</span>
+      {{ errorMessage() }}
+      <button class="close-btn" (click)="errorMessage.set(null)">&times;</button>
+    </div>
+  }
+
+  <!-- Main Form Card -->
+  <div class="form-card">
+    <form [formGroup]="scheduleForm" (ngSubmit)="onSubmit()">
+
+      <!-- Workspace Selection -->
+      <div class="form-section">
+        <h2 class="section-title">Select Workspace</h2>
+        <div class="form-group">
+          <label for="workspace" class="form-label">
+            <span class="label-icon">🏢</span>
+            Workspace
+          </label>
+          <select
+            id="workspace"
+            class="form-select"
+            formControlName="workspaceId"
+            (change)="onWorkspaceChange($any($event.target).value)"
+            required
+          >
+            <option [value]="null">-- Select a Workspace --</option>
+            @for (workspace of workspaces(); track workspace.id) {
+              <option [value]="workspace.id">{{ workspace.name }} - {{ workspace.city }}</option>
+            }
+          </select>
+          @if (scheduleForm.get('workspaceId')?.invalid && scheduleForm.get('workspaceId')?.touched) {
+            <span class="form-error">Please select a workspace</span>
+          }
+        </div>
+      </div>
+
+      <!-- Date Range -->
+      <div class="form-section">
+        <h2 class="section-title">Schedule Period</h2>
+        <div class="date-range-grid">
+          <div class="form-group">
+            <label for="startDate" class="form-label">
+              <span class="label-icon">📅</span>
+              Start Date
+            </label>
+            <input
+              id="startDate"
+              type="date"
+              class="form-input"
+              formControlName="startDate"
+              required
+            />
+            @if (scheduleForm.get('startDate')?.invalid && scheduleForm.get('startDate')?.touched) {
+              <span class="form-error">Start date is required</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="endDate" class="form-label">
+              <span class="label-icon">📅</span>
+              End Date
+            </label>
+            <input
+              id="endDate"
+              type="date"
+              class="form-input"
+              formControlName="endDate"
+              required
+            />
+            @if (scheduleForm.get('endDate')?.invalid && scheduleForm.get('endDate')?.touched) {
+              <span class="form-error">End date is required</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Weekly Schedule -->
+      <div class="form-section">
+        <div class="section-header">
+          <h2 class="section-title">Weekly Working Hours</h2>
+          <button
+            type="button"
+            class="btn-secondary-small"
+            (click)="applyToAllWeekdays()"
+            [disabled]="isLoading()"
+          >
+            Apply to All Weekdays
+          </button>
+        </div>
+
+        <div class="schedule-grid" formArrayName="schedules">
+          @for (schedule of schedules.controls; track $index; let i = $index) {
+            <div class="day-card" [formGroupName]="i" [class.weekend]="schedules.at(i).get('isWeekend')?.value">
+              <div class="day-header">
+                <h3 class="day-name">{{ schedules.at(i).get('dayLabel')?.value }}</h3>
+                <label class="weekend-toggle">
+                  <input
+                    type="checkbox"
+                    [checked]="schedules.at(i).get('isWeekend')?.value"
+                    (change)="toggleWeekend(i)"
+                  />
+                  <span class="toggle-label">Weekend</span>
+                </label>
+              </div>
+
+              @if (!schedules.at(i).get('isWeekend')?.value) {
+                <div class="time-inputs">
+                  <div class="time-group">
+                    <label class="time-label">
+                      <span class="time-icon">🕐</span>
+                      Open
+                    </label>
+                    <input
+                      type="time"
+                      class="time-input"
+                      formControlName="openTime"
+                    />
+                  </div>
+
+                  <div class="time-separator">→</div>
+
+                  <div class="time-group">
+                    <label class="time-label">
+                      <span class="time-icon">🕐</span>
+                      Close
+                    </label>
+                    <input
+                      type="time"
+                      class="time-input"
+                      formControlName="closeTime"
+                    />
+                  </div>
+                </div>
+              } @else {
+                <div class="closed-message">
+                  <span class="closed-icon">🔒</span>
+                  Closed
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="goBack()"
+          [disabled]="isLoading()"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="btn-primary"
+          [disabled]="scheduleForm.invalid || isLoading()"
+        >
+          <span *ngIf="!isLoading()">Save Schedule</span>
+          <span *ngIf="isLoading()">
+            <span class="spinner"></span>
+            Saving...
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

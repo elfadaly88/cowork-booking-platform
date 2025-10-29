@@ -79,6 +79,66 @@
   margin-bottom: 1.5rem;
 }
 
+// Schedule styles
+.schedule-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.schedule-period {
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin-bottom: 1rem;
+}
+
+.schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  th {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover {
+    background-color: #f9fafb;
+  }
+}
+
+.open-hours {
+  color: #059669;
+  font-weight: 600;
+}
+
+.weekend-badge {
+  background-color: #fef3c7;
+  color: #92400e;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.no-info {
+  color: #9ca3af;
+  font-style: italic;
+}
+
 .rooms-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -124,6 +184,36 @@
 
 .room-body {
   padding: 1.5rem;
+}
+
+.availability-info {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background-color: #f3f4f6;
+  border-radius: 8px;
+}
+
+.availability-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.availability-stats {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+.booked-count {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.available-count {
+  color: #059669;
+  font-weight: 600;
 }
 
 .devices-label {
@@ -236,5 +326,9 @@
 
   .rooms-grid {
     grid-template-columns: 1fr;
+  }
+
+  .schedule-table {
+    font-size: 0.875rem;
   }
 }

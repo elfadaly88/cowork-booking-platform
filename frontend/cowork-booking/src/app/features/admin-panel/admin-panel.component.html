@@ -1,39 +1,107 @@
 <div class="admin-panel-container">
+  <!-- Workspace List (Default View) -->
+  @if (viewMode() === 'list') {
   <div class="header">
-    <h1>Admin Panel - Workspace Management</h1>
-    <p class="subtitle">Create, edit, and manage workspaces</p>
+    <h1>📊 Workspaces</h1>
+    <button type="button" class="btn btn-add-new" (click)="startNewWorkspace()" [disabled]="isLoading()">
+      ➕ Add New Workspace
+    </button>
   </div>
 
-  <!-- Alert Messages -->
-  @if (successMessage()) {
-    <div class="alert alert-success">
-      {{ successMessage() }}
-      <button class="close-btn" (click)="successMessage.set(null)">&times;</button>
-    </div>
-  }
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <input
+      class="search-input"
+      type="text"
+      [value]="searchTerm()"
+      (input)="searchTerm.set($any($event.target).value)"
+      placeholder="🔍 Search workspaces..."
+    />
+  </div>
 
+  <!-- Error Message -->
   @if (errorMessage()) {
-    <div class="alert alert-error">
-      {{ errorMessage() }}
-      <button class="close-btn" (click)="errorMessage.set(null)">&times;</button>
+  <div class="error-banner">
+    <div class="error-content">
+      <span class="error-icon">⚠️</span>
+      <span class="error-text">{{ errorMessage() }}</span>
+      <button type="button" class="btn btn-retry" (click)="loadWorkspaces()" [disabled]="isLoading()">
+        🔄 Retry
+      </button>
     </div>
+  </div>
   }
 
-  <!-- Workspace Form -->
+  <!-- Workspaces Grid -->
+  <div class="workspace-grid">
+    @if (isLoading() && workspaces().length === 0) {
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading workspaces...</p>
+      </div>
+    } @else if (filteredWorkspaces().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <h3>No workspaces found</h3>
+        <p>{{ searchTerm() ? 'Try adjusting your search terms' : 'No workspaces available' }}</p>
+      </div>
+    } @else {
+      @for (workspace of filteredWorkspaces(); track workspace.id) {
+        <div class="workspace-card">
+          <div class="workspace-header">
+            <h3>{{ workspace.name }}</h3>
+            <span class="city-badge">📍 {{ workspace.city }}</span>
+          </div>
+
+          <div class="workspace-body">
+            <p class="description">{{ workspace.description }}</p>
+            <div class="info-row">
+              <span class="icon">🏠</span>
+              <span class="text">{{ workspace.address }}</span>
+            </div>
+          </div>
+
+          <div class="workspace-actions">
+            <button
+              class="btn btn-edit"
+              (click)="editWorkspace(workspace)"
+              [disabled]="isLoading()"
+            >
+              ✏️ Edit
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+  }
+
+  <!-- Workspace Form (Edit/Add Mode) -->
+  @if (viewMode() === 'form') {
   <div class="form-section">
-    <h2>{{ isEditMode() ? 'Edit Workspace' : 'Add New Workspace' }}</h2>
+    <div class="form-header">
+      <h2>
+        @if (isEditMode()) {
+          ✏️ Edit Workspace
+        } @else {
+          ➕ Add New Workspace
+        }
+      </h2>
+    </div>
 
     <form [formGroup]="workspaceForm" (ngSubmit)="onSubmit()">
       <div class="form-grid">
         <div class="form-group">
-          <label for="name">Name <span class="required">*</span></label>
+          <label for="name">
+            Workspace Name <span class="required">*</span>
+          </label>
           <input
             id="name"
             type="text"
             formControlName="name"
             class="form-control"
             [class.invalid]="isFieldInvalid('name')"
-            placeholder="Enter workspace name"
+            placeholder="e.g., Tech Hub Cairo"
           />
           @if (isFieldInvalid('name')) {
             <span class="error-text">{{ getErrorMessage('name') }}</span>
@@ -41,14 +109,16 @@
         </div>
 
         <div class="form-group">
-          <label for="city">City <span class="required">*</span></label>
+          <label for="city">
+            City <span class="required">*</span>
+          </label>
           <input
             id="city"
             type="text"
             formControlName="city"
             class="form-control"
             [class.invalid]="isFieldInvalid('city')"
-            placeholder="Enter city"
+            placeholder="e.g., Cairo"
           />
           @if (isFieldInvalid('city')) {
             <span class="error-text">{{ getErrorMessage('city') }}</span>
@@ -56,14 +126,16 @@
         </div>
 
         <div class="form-group full-width">
-          <label for="address">Address <span class="required">*</span></label>
+          <label for="address">
+            Full Address <span class="required">*</span>
+          </label>
           <input
             id="address"
             type="text"
             formControlName="address"
             class="form-control"
             [class.invalid]="isFieldInvalid('address')"
-            placeholder="Enter full address"
+            placeholder="e.g., 123 Main Street, Downtown"
           />
           @if (isFieldInvalid('address')) {
             <span class="error-text">{{ getErrorMessage('address') }}</span>
@@ -71,14 +143,16 @@
         </div>
 
         <div class="form-group full-width">
-          <label for="description">Description <span class="required">*</span></label>
+          <label for="description">
+            Description <span class="required">*</span>
+          </label>
           <textarea
             id="description"
             formControlName="description"
             class="form-control"
             [class.invalid]="isFieldInvalid('description')"
-            rows="3"
-            placeholder="Enter workspace description"
+            rows="4"
+            placeholder="Describe the workspace, amenities, and features..."
           ></textarea>
           @if (isFieldInvalid('description')) {
             <span class="error-text">{{ getErrorMessage('description') }}</span>
@@ -87,87 +161,72 @@
       </div>
 
       <!-- Map Picker Section -->
-      <div class="map-section full-width">
+      <div class="map-section">
+        <h3>📍 Location Coordinates (Optional)</h3>
+        <div class="coordinates-hint">
+          Click on the map or enter coordinates manually
+        </div>
         <app-map-picker
           [initialLat]="workspaceForm.get('latitude')?.value"
           [initialLng]="workspaceForm.get('longitude')?.value"
           (locationSelected)="onLocationSelected($event)"
         ></app-map-picker>
+        <div class="coordinates-fields">
+          <div class="coord-group">
+            <label for="latitude">Latitude</label>
+            <input
+              id="latitude"
+              type="number"
+              formControlName="latitude"
+              class="form-control"
+              step="0.000001"
+              min="-90"
+              max="90"
+              placeholder="e.g., 30.044420"
+            />
+          </div>
+          <div class="coord-group">
+            <label for="longitude">Longitude</label>
+            <input
+              id="longitude"
+              type="number"
+              formControlName="longitude"
+              class="form-control"
+              step="0.000001"
+              min="-180"
+              max="180"
+              placeholder="e.g., 31.235712"
+            />
+          </div>
+        </div>
       </div>
 
       <div class="form-actions">
         <button
           type="submit"
           class="btn btn-primary"
+          [disabled]="isLoading() || workspaceForm.invalid"
+        >
+          @if (isLoading()) {
+            <span class="spinner-small"></span> Saving...
+          } @else {
+            @if (isEditMode()) {
+              💾 Update Workspace
+            } @else {
+              ✅ Create Workspace
+            }
+          }
+        </button>
+        <button
+          type="button"
+          class="btn btn-cancel"
+          (click)="cancelToList()"
           [disabled]="isLoading()"
         >
-          {{ isLoading() ? 'Saving...' : (isEditMode() ? 'Update Workspace' : 'Create Workspace') }}
+          ❌ Cancel
         </button>
-
-        @if (isEditMode()) {
-          <button
-            type="button"
-            class="btn btn-secondary"
-            (click)="resetForm()"
-            [disabled]="isLoading()"
-          >
-            Cancel
-          </button>
-        }
       </div>
     </form>
   </div>
-
-  <!-- Workspaces List -->
-  <div class="list-section">
-    <h2>Existing Workspaces</h2>
-
-    @if (isLoading() && workspaces().length === 0) {
-      <div class="loading">Loading workspaces...</div>
-    } @else if (workspaces().length === 0) {
-      <div class="empty-state">
-        <p>No workspaces found. Create your first workspace above!</p>
-      </div>
-    } @else {
-      <div class="workspace-grid">
-        @for (workspace of workspaces(); track workspace.id) {
-          <div class="workspace-card">
-            <div class="workspace-header">
-              <h3>{{ workspace.name }}</h3>
-              <span class="city-badge">{{ workspace.city }}</span>
-            </div>
-
-            <div class="workspace-body">
-              <p class="description">{{ workspace.description }}</p>
-              <p class="address"><strong>Address:</strong> {{ workspace.address }}</p>
-
-              @if (workspace.latitude && workspace.longitude) {
-                <p class="coordinates">
-                  <strong>Coordinates:</strong>
-                  {{ workspace.latitude }}, {{ workspace.longitude }}
-                </p>
-              }
-            </div>
-
-            <div class="workspace-actions">
-              <button
-                class="btn btn-edit"
-                (click)="editWorkspace(workspace)"
-                [disabled]="isLoading()"
-              >
-                Edit
-              </button>
-              <button
-                class="btn btn-delete"
-                (click)="deleteWorkspace(workspace.id!)"
-                [disabled]="isLoading()"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        }
-      </div>
-    }
-  </div>
+  }
 </div>

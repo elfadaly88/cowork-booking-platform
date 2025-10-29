@@ -5,6 +5,7 @@ namespace CoworkBooking.Application.Interfaces
  public interface IWorkSpaceService
  {
  Task<IEnumerable<WorkSpaceDto>> GetAllAsync();
+ Task<IEnumerable<WorkSpaceDto>> GetAvailableWorkspacesAsync(DateTime? at = null);
  Task<WorkSpaceDto?> GetByIdAsync(int id);
  Task<WorkSpaceDto> CreateAsync(WorkSpaceDto dto);
  Task<WorkSpaceDto> CreateWithRoomsAsync(CreateWorkSpaceDto dto);

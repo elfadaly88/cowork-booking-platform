@@ -32,6 +32,38 @@
       </p>
     </div>
 
+    <!-- Working Hours Schedule -->
+    <section class="section" *ngIf="schedulePeriod">
+      <h2 class="section-title">Working Hours</h2>
+      <div class="schedule-card">
+        <p class="schedule-period">
+          Valid from <strong>{{ schedulePeriod.startDate | date }}</strong> to <strong>{{ schedulePeriod.endDate | date }}</strong>
+        </p>
+        <table class="schedule-table">
+          <thead>
+            <tr>
+              <th>Day</th>
+              <th>Hours</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let day of [0, 1, 2, 3, 4, 5, 6]">
+              <td>{{ dayNames[day] }}</td>
+              <td>
+                <span *ngIf="getDaySchedule(day) as schedule">
+                  <span *ngIf="!schedule.isWeekend" class="open-hours">
+                    {{ schedule.openTime }} - {{ schedule.closeTime }}
+                  </span>
+                  <span *ngIf="schedule.isWeekend" class="weekend-badge">Closed (Weekend)</span>
+                </span>
+                <span *ngIf="!getDaySchedule(day)" class="no-info">No info</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
     <!-- Rooms Section -->
     <section class="section">
       <h2 class="section-title">Available Rooms</h2>
@@ -39,12 +71,19 @@
         <div *ngFor="let room of workspace.rooms" class="room-card">
           <div class="room-header">
             <h3 class="room-name">{{ room.name }}</h3>
-            <span class="room-capacity" *ngIf="room.capacity">
+            <span class="room-capacity">
               <span class="capacity-icon">👥</span>
-              {{ room.capacity }} people
+              Capacity: {{ room.capacity }}
             </span>
           </div>
           <div class="room-body">
+            <div class="availability-info">
+              <p class="availability-label">Availability:</p>
+              <p class="availability-stats">
+                <span class="booked-count">{{ room.bookedCount || 0 }} booked</span>
+                <span class="available-count">{{ room.availableSeats ?? room.capacity }} available</span>
+              </p>
+            </div>
             <div *ngIf="room.devices && room.devices.length > 0">
               <p class="devices-label">Available Devices:</p>
               <div class="devices-list">

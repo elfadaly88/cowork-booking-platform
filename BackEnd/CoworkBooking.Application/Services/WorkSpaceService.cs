@@ -21,6 +21,8 @@ namespace CoworkBooking.Application.Services
  var entities = await _context.Workspaces
      .Include(w => w.Rooms)
      .ThenInclude(r => r.Devices)
+     .Include(w => w.Rooms)
+     .ThenInclude(r => r.Bookings)
      .ToListAsync();
 
  return entities.Select(e => new WorkSpaceDto
@@ -32,11 +34,18 @@ namespace CoworkBooking.Application.Services
  City = e.City,
  Latitude = e.Latitude,
  Longitude = e.Longitude,
- Rooms = e.Rooms.Select(r => new RoomDto
+ Rooms = e.Rooms.Select(r =>
+ {
+     var now = DateTime.UtcNow;
+     var bookedCount = r.Bookings.Count(b => b.StartTime <= now && b.EndTime > now);
+     var available = Math.Max(0, r.Capacity - bookedCount);
+     return new RoomDto
  {
      Id = r.Id,
      Name = r.Name,
      Capacity = r.Capacity,
+     BookedCount = bookedCount,
+     AvailableSeats = available,
      PricePerHour = r.PricePerHour,
      HasDevices = r.Devices.Any(),
      WorkspaceId = r.WorkspaceId,
@@ -47,8 +56,59 @@ namespace CoworkBooking.Application.Services
          ExtraCostPerHour = d.ExtraCostPerHour,
          RoomId = d.RoomId
      }).ToList()
+     };
  }).ToList()
  });
+ }
+
+ public async Task<IEnumerable<WorkSpaceDto>> GetAvailableWorkspacesAsync(DateTime? at = null)
+ {
+     var moment = at ?? DateTime.UtcNow;
+     var workspaces = await _context.Workspaces
+         .Include(w => w.Rooms)
+             .ThenInclude(r => r.Bookings)
+         .Include(w => w.Rooms)
+             .ThenInclude(r => r.Devices)
+         .ToListAsync();
+
+     var available = workspaces
+         .Select(w => new WorkSpaceDto
+         {
+             Id = w.Id,
+             Name = w.Name,
+             Description = w.Description,
+             Address = w.Address,
+             City = w.City,
+             Latitude = w.Latitude,
+             Longitude = w.Longitude,
+             Rooms = w.Rooms.Select(r =>
+             {
+                 var booked = r.Bookings.Count(b => b.StartTime <= moment && b.EndTime > moment);
+                 var seats = Math.Max(0, r.Capacity - booked);
+                 return new RoomDto
+                 {
+                     Id = r.Id,
+                     Name = r.Name,
+                     Capacity = r.Capacity,
+                     BookedCount = booked,
+                     AvailableSeats = seats,
+                     PricePerHour = r.PricePerHour,
+                     HasDevices = r.Devices.Any(),
+                     WorkspaceId = r.WorkspaceId,
+                     Devices = r.Devices.Select(d => new DeviceDto
+                     {
+                         Id = d.Id,
+                         Name = d.Name,
+                         ExtraCostPerHour = d.ExtraCostPerHour,
+                         RoomId = d.RoomId
+                     }).ToList()
+                 };
+             }).Where(r => r.AvailableSeats > 0).ToList()
+         })
+         .Where(w => w.Rooms != null && w.Rooms.Any())
+         .ToList();
+
+     return available;
  }
 
  public async Task<WorkSpaceDto?> GetByIdAsync(int id)
@@ -56,10 +116,13 @@ namespace CoworkBooking.Application.Services
  var e = await _context.Workspaces
      .Include(w => w.Rooms)
      .ThenInclude(r => r.Devices)
+     .Include(w => w.Rooms)
+     .ThenInclude(r => r.Bookings)
      .FirstOrDefaultAsync(w => w.Id == id);
 
  if (e == null) return null;
 
+ var now = DateTime.UtcNow;
  return new WorkSpaceDto
  {
  Id = e.Id,
@@ -69,21 +132,28 @@ namespace CoworkBooking.Application.Services
  City = e.City,
  Latitude = e.Latitude,
  Longitude = e.Longitude,
- Rooms = e.Rooms.Select(r => new RoomDto
+ Rooms = e.Rooms.Select(r =>
  {
-     Id = r.Id,
-     Name = r.Name,
-     Capacity = r.Capacity,
-     PricePerHour = r.PricePerHour,
-     HasDevices = r.Devices.Any(),
-     WorkspaceId = r.WorkspaceId,
-     Devices = r.Devices.Select(d => new DeviceDto
+     var bookedCount = r.Bookings.Count(b => b.StartTime <= now && b.EndTime > now);
+     var available = Math.Max(0, r.Capacity - bookedCount);
+     return new RoomDto
      {
-         Id = d.Id,
-         Name = d.Name,
-         ExtraCostPerHour = d.ExtraCostPerHour,
-         RoomId = d.RoomId
-     }).ToList()
+         Id = r.Id,
+         Name = r.Name,
+         Capacity = r.Capacity,
+         BookedCount = bookedCount,
+         AvailableSeats = available,
+         PricePerHour = r.PricePerHour,
+         HasDevices = r.Devices.Any(),
+         WorkspaceId = r.WorkspaceId,
+         Devices = r.Devices.Select(d => new DeviceDto
+         {
+             Id = d.Id,
+             Name = d.Name,
+             ExtraCostPerHour = d.ExtraCostPerHour,
+             RoomId = d.RoomId
+         }).ToList()
+     };
  }).ToList()
  };
  }

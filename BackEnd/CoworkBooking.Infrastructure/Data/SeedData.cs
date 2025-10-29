@@ -65,11 +65,34 @@ namespace CoworkBooking.Infrastructure.Data
                 }
             };
 
-            // 💾 حفظ البيانات
+            // � إنشاء Schedule Period for current year
+            var currentYear = DateTime.Now.Year;
+            var schedulePeriod = new WorkspaceSchedulePeriod
+            {
+                Workspace = workspace,
+                StartDate = new DateTime(currentYear, 1, 1),
+                EndDate = new DateTime(currentYear, 12, 31)
+            };
+
+            // 🕒 إنشاء Working Hours (Sun-Thu: 09:00-18:00, Fri-Sat: weekend)
+            var schedules = new List<WorkspaceSchedule>
+            {
+                new WorkspaceSchedule { SchedulePeriod = schedulePeriod, DayOfWeek = DayOfWeek.Sunday, OpenTime = new TimeSpan(9, 0, 0), CloseTime = new TimeSpan(18, 0, 0), IsWeekend = false },
+                new WorkspaceSchedule { SchedulePeriod = schedulePeriod, DayOfWeek = DayOfWeek.Monday, OpenTime = new TimeSpan(9, 0, 0), CloseTime = new TimeSpan(18, 0, 0), IsWeekend = false },
+                new WorkspaceSchedule { SchedulePeriod = schedulePeriod, DayOfWeek = DayOfWeek.Tuesday, OpenTime = new TimeSpan(9, 0, 0), CloseTime = new TimeSpan(18, 0, 0), IsWeekend = false },
+                new WorkspaceSchedule { SchedulePeriod = schedulePeriod, DayOfWeek = DayOfWeek.Wednesday, OpenTime = new TimeSpan(9, 0, 0), CloseTime = new TimeSpan(18, 0, 0), IsWeekend = false },
+                new WorkspaceSchedule { SchedulePeriod = schedulePeriod, DayOfWeek = DayOfWeek.Thursday, OpenTime = new TimeSpan(9, 0, 0), CloseTime = new TimeSpan(18, 0, 0), IsWeekend = false },
+                new WorkspaceSchedule { SchedulePeriod = schedulePeriod, DayOfWeek = DayOfWeek.Friday, OpenTime = null, CloseTime = null, IsWeekend = true },
+                new WorkspaceSchedule { SchedulePeriod = schedulePeriod, DayOfWeek = DayOfWeek.Saturday, OpenTime = null, CloseTime = null, IsWeekend = true }
+            };
+
+            // �💾 حفظ البيانات
             context.Workspaces.Add(workspace);
             context.Rooms.AddRange(room1, room2);
             context.Devices.AddRange(devices);
             context.Bookings.AddRange(bookings);
+            context.WorkspaceSchedulePeriods.Add(schedulePeriod);
+            context.WorkspaceSchedules.AddRange(schedules);
 
             context.SaveChanges();
         }

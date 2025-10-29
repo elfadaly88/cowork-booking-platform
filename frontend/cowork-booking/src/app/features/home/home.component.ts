@@ -33,7 +33,7 @@ export class HomeComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
-    this.workspaceService.getWorkspaces().subscribe({
+    this.workspaceService.getAvailableWorkspaces().subscribe({
       next: (data) => {
         this.workspaces = data;
         this.loading = false;

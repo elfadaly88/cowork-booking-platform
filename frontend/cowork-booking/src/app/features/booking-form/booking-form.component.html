@@ -1,88 +1,183 @@
-<div class="container mx-auto px-4 py-8 max-w-2xl">
-  <button mat-button (click)="goBack()" class="mb-4">
-    <mat-icon>arrow_back</mat-icon>
-    Back
-  </button>
+<div class="booking-container">
+  <!-- Header with back button -->
+  <div class="booking-header">
+    <button class="back-button" (click)="goBack()">
+      <span class="back-icon">←</span>
+      Back to {{ workspace?.name || 'Workspaces' }}
+    </button>
+  </div>
 
-  <mat-card>
-    <mat-card-header>
-      <mat-card-title class="text-2xl">Book a Room</mat-card-title>
-      <mat-card-subtitle *ngIf="room">{{ room.name }}</mat-card-subtitle>
-    </mat-card-header>
+  <app-loading-spinner *ngIf="loading"></app-loading-spinner>
 
-    <mat-card-content class="pt-6">
-      <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+  <app-error-message
+    *ngIf="error && !loading"
+    [title]="'Unable to Load Room'"
+    [message]="error"
+  ></app-error-message>
 
-      <app-error-message
-        *ngIf="error && !loading"
-        [title]="'Booking Error'"
-        [message]="error"
-      ></app-error-message>
+  <div class="booking-content" *ngIf="!loading && !error && room">
+    <!-- Room Info Card -->
+    <div class="room-info-card">
+      <div class="room-info-header">
+        <div>
+          <h1 class="room-title">{{ room.name }}</h1>
+          <p class="workspace-subtitle" *ngIf="workspace">
+            <span class="location-icon">📍</span>
+            {{ workspace.name }} - {{ workspace.city }}
+          </p>
+        </div>
+        <div class="room-price">
+          <span class="price-label">Starting from</span>
+          <span class="price-amount">{{ room.pricePerHour | number:'1.0-0' }} EGP</span>
+          <span class="price-unit">per hour</span>
+        </div>
+      </div>
 
-      <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()" *ngIf="!loading">
-        <!-- Date Picker -->
-        <mat-form-field appearance="outline" class="w-full mb-4">
-          <mat-label>Booking Date</mat-label>
-          <input matInput [matDatepicker]="picker" formControlName="bookingDate" required>
-          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
-          <mat-error *ngIf="bookingForm.get('bookingDate')?.hasError('required')">
-            Date is required
-          </mat-error>
-        </mat-form-field>
-
-        <!-- Start Time -->
-        <mat-form-field appearance="outline" class="w-full mb-4">
-          <mat-label>Start Time</mat-label>
-          <input matInput type="time" formControlName="startTime" required>
-          <mat-icon matIconPrefix>access_time</mat-icon>
-          <mat-error *ngIf="bookingForm.get('startTime')?.hasError('required')">
-            Start time is required
-          </mat-error>
-        </mat-form-field>
-
-        <!-- End Time -->
-        <mat-form-field appearance="outline" class="w-full mb-4">
-          <mat-label>End Time</mat-label>
-          <input matInput type="time" formControlName="endTime" required>
-          <mat-icon matIconPrefix>access_time</mat-icon>
-          <mat-error *ngIf="bookingForm.get('endTime')?.hasError('required')">
-            End time is required
-          </mat-error>
-        </mat-form-field>
-
-        <!-- Devices Selection -->
-        <div *ngIf="availableDevices.length > 0" class="mb-6">
-          <h3 class="text-lg font-semibold mb-3">Select Additional Devices</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <mat-checkbox
-              *ngFor="let device of availableDevices"
-              [checked]="isDeviceSelected(device.id!)"
-              (change)="toggleDevice(device.id!)"
-              class="device-checkbox"
-            >
-              {{ device.name }}
-              <span *ngIf="device.extraCostPerHour > 0" class="text-sm text-gray-500"> (+{{ device.extraCostPerHour }} EGP/hr)</span>
-            </mat-checkbox>
+      <div class="room-details-grid">
+        <div class="detail-item">
+          <span class="detail-icon">👥</span>
+          <div class="detail-content">
+            <span class="detail-label">Capacity</span>
+            <span class="detail-value">{{ room.capacity }} people</span>
           </div>
         </div>
 
-        <!-- Submit Buttons -->
-        <div class="flex justify-end gap-3 mt-6">
-          <button mat-button type="button" (click)="goBack()" [disabled]="submitting">
+        <div class="detail-item" *ngIf="room.availableSeats !== undefined">
+          <span class="detail-icon">✓</span>
+          <div class="detail-content">
+            <span class="detail-label">Available Now</span>
+            <span class="detail-value available">{{ room.availableSeats }} seats</span>
+          </div>
+        </div>
+
+        <div class="detail-item" *ngIf="room.devices && room.devices.length > 0">
+          <span class="detail-icon">🔧</span>
+          <div class="detail-content">
+            <span class="detail-label">Devices</span>
+            <span class="detail-value">{{ room.devices.length }} available</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Booking Form Card -->
+    <div class="booking-form-card">
+      <h2 class="form-title">Book Your Space</h2>
+
+      <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()">
+        <!-- Date Selection -->
+        <div class="form-section">
+          <h3 class="section-title">When do you need the room?</h3>
+
+          <div class="form-group">
+            <label class="form-label">
+              <span class="label-icon">📅</span>
+              Select Date
+            </label>
+            <input
+              type="date"
+              class="form-input"
+              formControlName="bookingDate"
+              [min]="minDate.toISOString().split('T')[0]"
+              required
+            />
+            <span class="form-error" *ngIf="bookingForm.get('bookingDate')?.hasError('required') && bookingForm.get('bookingDate')?.touched">
+              Please select a date
+            </span>
+          </div>
+
+          <div class="time-inputs-grid">
+            <div class="form-group">
+              <label class="form-label">
+                <span class="label-icon">🕐</span>
+                Start Time
+              </label>
+              <input
+                type="time"
+                class="form-input"
+                formControlName="startTime"
+                required
+              />
+              <span class="form-error" *ngIf="bookingForm.get('startTime')?.hasError('required') && bookingForm.get('startTime')?.touched">
+                Start time is required
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <span class="label-icon">🕐</span>
+                End Time
+              </label>
+              <input
+                type="time"
+                class="form-input"
+                formControlName="endTime"
+                required
+              />
+              <span class="form-error" *ngIf="bookingForm.get('endTime')?.hasError('required') && bookingForm.get('endTime')?.touched">
+                End time is required
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Devices Selection -->
+        <div class="form-section" *ngIf="availableDevices.length > 0">
+          <h3 class="section-title">Additional Devices (Optional)</h3>
+
+          <div class="devices-grid">
+            <label
+              *ngFor="let device of availableDevices"
+              class="device-option"
+              [class.selected]="isDeviceSelected(device.id!)"
+            >
+              <input
+                type="checkbox"
+                class="device-checkbox-input"
+                [checked]="isDeviceSelected(device.id!)"
+                (change)="toggleDevice(device.id!)"
+              />
+              <div class="device-option-content">
+                <span class="device-name">{{ device.name }}</span>
+                <span class="device-price">+{{ device.extraCostPerHour | number:'1.0-0' }} EGP/hr</span>
+              </div>
+              <span class="checkmark">✓</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Price Summary -->
+        <div class="price-summary">
+          <div class="summary-row">
+            <span class="summary-label">Estimated Total</span>
+            <span class="summary-value total">{{ totalPrice | number:'1.2-2' }} EGP</span>
+          </div>
+          <p class="summary-note">Final price will be calculated based on actual usage</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn-secondary"
+            (click)="goBack()"
+            [disabled]="submitting"
+          >
             Cancel
           </button>
           <button
-            mat-raised-button
-            color="primary"
             type="submit"
+            class="btn-primary"
             [disabled]="bookingForm.invalid || submitting"
           >
-            <span *ngIf="!submitting">Create Booking</span>
-            <span *ngIf="submitting">Creating...</span>
+            <span *ngIf="!submitting">Confirm Booking</span>
+            <span *ngIf="submitting">
+              <span class="spinner"></span>
+              Processing...
+            </span>
           </button>
         </div>
       </form>
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </div>
 </div>

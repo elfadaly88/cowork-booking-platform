@@ -7,6 +7,8 @@ namespace CoworkBooking.Application.DTOs
  public int Id { get; set; }
  public string? Name { get; set; }
  public int Capacity { get; set; }
+ public int BookedCount { get; set; }
+ public int AvailableSeats { get; set; }
  public bool HasDevices { get; set; }
  public decimal PricePerHour { get; set; }
  public int WorkspaceId { get; set; }

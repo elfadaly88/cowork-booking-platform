@@ -9,10 +9,12 @@ namespace CoworkBooking.Api.Controllers
     public class WorkSpacesController : ControllerBase
     {
         private readonly IWorkSpaceService _service;
+        private readonly IWorkspaceScheduleService _scheduleService;
 
-        public WorkSpacesController(IWorkSpaceService service)
+        public WorkSpacesController(IWorkSpaceService service, IWorkspaceScheduleService scheduleService)
         {
             _service = service;
+            _scheduleService = scheduleService;
         }
 
         // ✅ GET: api/workspaces
@@ -21,6 +23,14 @@ namespace CoworkBooking.Api.Controllers
         {
             var workspaces = await _service.GetAllAsync();
             return Ok(workspaces);
+        }
+
+        // ✅ GET: api/workspaces/available
+        [HttpGet("available")]
+        public async Task<IActionResult> GetAvailable()
+        {
+            var available = await _service.GetAvailableWorkspacesAsync();
+            return Ok(available);
         }
 
         // ✅ GET: api/workspaces/5
@@ -98,6 +108,24 @@ namespace CoworkBooking.Api.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
+        }
+
+        // ✅ GET: api/workspaces/{id}/schedule (active period)
+        [HttpGet("{id}/schedule")]
+        public async Task<IActionResult> GetActiveSchedule(int id)
+        {
+            var period = await _scheduleService.GetActiveSchedulePeriodAsync(id, DateTime.UtcNow);
+            if (period == null) return NotFound();
+            return Ok(period);
+        }
+
+        // ✅ POST: api/workspaces/{id}/schedule (add or replace period)
+        [HttpPost("{id}/schedule")]
+        public async Task<IActionResult> AddOrReplaceSchedule(int id, [FromBody] WorkspaceSchedulePeriodDto dto)
+        {
+            if (dto == null) return BadRequest();
+            var saved = await _scheduleService.AddOrReplaceSchedulePeriodAsync(id, dto);
+            return Ok(saved);
         }
 
         // ✅ DELETE: api/workspaces/5

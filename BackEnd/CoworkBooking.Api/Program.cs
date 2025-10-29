@@ -74,6 +74,7 @@ builder.Services.AddScoped<CoworkBooking.Domain.Interfaces.IRoomService, CoworkB
 builder.Services.AddScoped<CoworkBooking.Application.Interfaces.IWorkSpaceService, CoworkBooking.Application.Services.WorkSpaceService>();
 builder.Services.AddScoped<CoworkBooking.Application.Interfaces.IDeviceService, CoworkBooking.Application.Services.DeviceService>();
 builder.Services.AddScoped<CoworkBooking.Application.Interfaces.IBookingService, CoworkBooking.Application.Services.BookingService>();
+builder.Services.AddScoped<CoworkBooking.Application.Interfaces.IWorkspaceScheduleService, CoworkBooking.Application.Services.WorkspaceScheduleService>();
 
 var app = builder.Build();
 

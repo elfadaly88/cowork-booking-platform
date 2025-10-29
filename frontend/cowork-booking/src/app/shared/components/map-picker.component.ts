@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, EventEmitter, Output, Input, signal, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, EventEmitter, Output, Input, signal, inject, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -270,7 +270,7 @@ interface SearchResult {
     }
   `]
 })
-export class MapPickerComponent implements OnInit, AfterViewInit, OnDestroy {
+export class MapPickerComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges {
   @Input() initialLat?: number;
   @Input() initialLng?: number;
   @Output() locationSelected = new EventEmitter<{ lat: number; lng: number }>();
@@ -309,6 +309,18 @@ export class MapPickerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.initMap();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    // If coordinates change after init (e.g., editing an existing workspace), update the map/marker
+    if (this.map && (changes['initialLat'] || changes['initialLng'])) {
+      const lat = typeof this.initialLat === 'number' ? this.initialLat : undefined;
+      const lng = typeof this.initialLng === 'number' ? this.initialLng : undefined;
+      if (lat !== undefined && lng !== undefined) {
+        this.map.setView([lat, lng], 15);
+        this.addMarker(lat, lng);
+      }
+    }
+  }
+
   ngOnDestroy(): void {
     if (this.map) {
       this.map.remove();
@@ -317,8 +329,8 @@ export class MapPickerComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private initMap(): void {
     // Default center (Cairo, Egypt) or use provided coordinates
-    const centerLat = this.initialLat || 30.0444;
-    const centerLng = this.initialLng || 31.2357;
+  const centerLat = typeof this.initialLat === 'number' ? this.initialLat : 30.0444;
+  const centerLng = typeof this.initialLng === 'number' ? this.initialLng : 31.2357;
 
     // Define bounds for Cairo and Giza governorates
     const southWest = L.latLng(29.8, 30.9); // Southwest corner of the area
@@ -338,7 +350,7 @@ export class MapPickerComponent implements OnInit, AfterViewInit, OnDestroy {
     }).addTo(this.map);
 
     // Add initial marker if coordinates provided
-    if (this.initialLat && this.initialLng) {
+    if (typeof this.initialLat === 'number' && typeof this.initialLng === 'number') {
       this.addMarker(this.initialLat, this.initialLng);
     }
 

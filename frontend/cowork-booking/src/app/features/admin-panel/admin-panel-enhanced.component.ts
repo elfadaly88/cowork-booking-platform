@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
@@ -10,9 +11,9 @@ import { MapPickerComponent } from '../../shared/components/map-picker.component
 @Component({
   selector: 'app-admin-panel-enhanced',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MapPickerComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, MapPickerComponent],
   templateUrl: './admin-panel-enhanced.component.html',
-  styleUrls: ['./admin-panel.component.scss']
+  styleUrls: ['./admin-panel-enhanced.component.scss']
 })
 export class AdminPanelEnhancedComponent implements OnInit {
   private readonly http = inject(HttpClient);
@@ -49,7 +50,11 @@ export class AdminPanelEnhancedComponent implements OnInit {
   }
 
   getDevices(roomIndex: number): FormArray {
-    return this.rooms.at(roomIndex).get('devices') as FormArray;
+    const room = this.rooms.at(roomIndex);
+    if (!room) {
+      return this.fb.array([]) as FormArray;
+    }
+    return room.get('devices') as FormArray;
   }
 
   addRoom(): void {
@@ -180,8 +185,11 @@ export class AdminPanelEnhancedComponent implements OnInit {
   }
 
   editWorkspace(workspace: Workspace): void {
+    console.log('Editing workspace:', workspace);
     this.isEditMode.set(true);
     this.selectedWorkspaceId.set(workspace.id!);
+    this.errorMessage.set(null);
+    this.successMessage.set(null);
 
     // Clear existing rooms
     while (this.rooms.length) {
@@ -226,7 +234,12 @@ export class AdminPanelEnhancedComponent implements OnInit {
       });
     }
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Scroll to top with a slight delay to ensure rendering is complete
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 100);
+
+    console.log('Edit mode activated. Form value:', this.workspaceForm.value);
   }
 
   deleteWorkspace(id: number): void {
@@ -280,12 +293,18 @@ export class AdminPanelEnhancedComponent implements OnInit {
   }
 
   isRoomFieldInvalid(roomIndex: number, fieldName: string): boolean {
-    const field = this.rooms.at(roomIndex).get(fieldName);
+    const room = this.rooms.at(roomIndex);
+    if (!room) return false;
+    const field = room.get(fieldName);
     return !!(field && field.invalid && field.touched);
   }
 
   isDeviceFieldInvalid(roomIndex: number, deviceIndex: number, fieldName: string): boolean {
-    const field = this.getDevices(roomIndex).at(deviceIndex).get(fieldName);
+    const devices = this.getDevices(roomIndex);
+    if (!devices || deviceIndex >= devices.length) return false;
+    const device = devices.at(deviceIndex);
+    if (!device) return false;
+    const field = device.get(fieldName);
     return !!(field && field.invalid && field.touched);
   }
 

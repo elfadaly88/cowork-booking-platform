@@ -147,6 +147,60 @@ namespace CoworkBooking.Infrastructure.Migrations
                     b.ToTable("Workspaces");
                 });
 
+            modelBuilder.Entity("CoworkBooking.Domain.Entities.WorkspaceSchedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<TimeSpan?>("CloseTime")
+                        .HasColumnType("time");
+
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsWeekend")
+                        .HasColumnType("bit");
+
+                    b.Property<TimeSpan?>("OpenTime")
+                        .HasColumnType("time");
+
+                    b.Property<int>("SchedulePeriodId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SchedulePeriodId");
+
+                    b.ToTable("WorkspaceSchedules");
+                });
+
+            modelBuilder.Entity("CoworkBooking.Domain.Entities.WorkspaceSchedulePeriod", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("WorkspaceId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WorkspaceId");
+
+                    b.ToTable("WorkspaceSchedulePeriods");
+                });
+
             modelBuilder.Entity("CoworkBooking.Domain.Entities.Booking", b =>
                 {
                     b.HasOne("CoworkBooking.Domain.Entities.Room", "Room")
@@ -180,6 +234,28 @@ namespace CoworkBooking.Infrastructure.Migrations
                     b.Navigation("WorkSpace");
                 });
 
+            modelBuilder.Entity("CoworkBooking.Domain.Entities.WorkspaceSchedule", b =>
+                {
+                    b.HasOne("CoworkBooking.Domain.Entities.WorkspaceSchedulePeriod", "SchedulePeriod")
+                        .WithMany("Schedules")
+                        .HasForeignKey("SchedulePeriodId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SchedulePeriod");
+                });
+
+            modelBuilder.Entity("CoworkBooking.Domain.Entities.WorkspaceSchedulePeriod", b =>
+                {
+                    b.HasOne("CoworkBooking.Domain.Entities.WorkSpace", "Workspace")
+                        .WithMany("SchedulePeriods")
+                        .HasForeignKey("WorkspaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Workspace");
+                });
+
             modelBuilder.Entity("CoworkBooking.Domain.Entities.Room", b =>
                 {
                     b.Navigation("Bookings");
@@ -190,6 +266,13 @@ namespace CoworkBooking.Infrastructure.Migrations
             modelBuilder.Entity("CoworkBooking.Domain.Entities.WorkSpace", b =>
                 {
                     b.Navigation("Rooms");
+
+                    b.Navigation("SchedulePeriods");
+                });
+
+            modelBuilder.Entity("CoworkBooking.Domain.Entities.WorkspaceSchedulePeriod", b =>
+                {
+                    b.Navigation("Schedules");
                 });
 #pragma warning restore 612, 618
         }

@@ -15,7 +15,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { BookingService } from '../../core/services/booking.service';
 import { WorkspaceService } from '../../core/services/workspace.service';
 import { BookingRequest } from '../../core/models/booking.model';
-import { Room, Device } from '../../core/models/workspace.model';
+import { Room, Device, Workspace } from '../../core/models/workspace.model';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 import { ErrorMessageComponent } from '../../shared/components/error-message.component';
 
@@ -51,19 +51,39 @@ export class BookingFormComponent implements OnInit {
 
   bookingForm!: FormGroup;
   roomId: number | null = null;
+  workspaceId: number | null = null;
   room: Room | null = null;
+  workspace: Workspace | null = null;
   availableDevices: Device[] = [];
   selectedDevices: number[] = [];
+  minDate = new Date();
 
   loading = false;
   submitting = false;
   error: string | null = null;
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('roomId');
-    if (id) {
-      this.roomId = +id;
-      this.loadRoomDetails();
+    // Try to get state from navigation
+    const navigation = this.router.getCurrentNavigation();
+    const state = navigation?.extras?.state || (history.state?.room ? history.state : null);
+
+    if (state?.room) {
+      // State passed from workspace-details
+      this.room = state.room;
+      this.workspace = state.workspace;
+      this.roomId = this.room?.id || null;
+      this.workspaceId = this.workspace?.id || null;
+      this.availableDevices = this.room?.devices || [];
+    } else {
+      // Fallback: get from route params and fetch data
+      const id = this.route.snapshot.paramMap.get('roomId');
+      if (id) {
+        this.roomId = +id;
+        this.loadRoomDetails();
+      } else {
+        this.error = 'No room information available';
+        this.router.navigate(['/']);
+      }
     }
 
     this.initForm();
@@ -83,23 +103,62 @@ export class BookingFormComponent implements OnInit {
   }
 
   loadRoomDetails(): void {
-    // In a real app, you'd fetch room details from an API
-    // For now, we'll set availableDevices when room data is available
+    // Fetch room details from workspace by ID
+    if (!this.roomId) return;
+
     this.loading = true;
     this.error = null;
 
-    // Simulating: you could extend WorkspaceService to have getRoomById
-    // or embed room details in the route state
-    // For this demo, we'll use a placeholder
-    this.room = {
-      id: this.roomId!,
-      name: `Room ${this.roomId}`,
-      capacity: 10,
-      pricePerHour: 100,
-      devices: []
-    };
-    this.availableDevices = this.room.devices || [];
-    this.loading = false;
+    // Find workspace that contains this room
+    this.workspaceService.getWorkspaces().subscribe({
+      next: (workspaces) => {
+        for (const ws of workspaces) {
+          const foundRoom = ws.rooms?.find(r => r.id === this.roomId);
+          if (foundRoom) {
+            this.room = foundRoom;
+            this.workspace = ws;
+            this.availableDevices = foundRoom.devices || [];
+            break;
+          }
+        }
+        if (!this.room) {
+          this.error = 'Room not found';
+        }
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = err.message || 'Failed to load room details';
+        this.loading = false;
+      }
+    });
+  }
+
+  get totalPrice(): number {
+    if (!this.room || !this.bookingForm) return 0;
+
+    const formValue = this.bookingForm.value;
+    if (!formValue.startTime || !formValue.endTime) return 0;
+
+    const [startHour, startMinute] = formValue.startTime.split(':').map(Number);
+    const [endHour, endMinute] = formValue.endTime.split(':').map(Number);
+
+    const startMinutes = startHour * 60 + startMinute;
+    const endMinutes = endHour * 60 + endMinute;
+    const durationHours = (endMinutes - startMinutes) / 60;
+
+    if (durationHours <= 0) return 0;
+
+    let total = this.room.pricePerHour * durationHours;
+
+    // Add device costs
+    this.selectedDevices.forEach(deviceId => {
+      const device = this.availableDevices.find(d => d.id === deviceId);
+      if (device) {
+        total += device.extraCostPerHour * durationHours;
+      }
+    });
+
+    return total;
   }
 
   toggleDevice(deviceId: number): void {
@@ -165,6 +224,10 @@ export class BookingFormComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/']);
+    if (this.workspaceId) {
+      this.router.navigate(['/workspace', this.workspaceId]);
+    } else {
+      this.router.navigate(['/']);
+    }
   }
 }
