@@ -140,6 +140,7 @@ export class WorkspaceManagementComponent implements OnInit {
     
     if (this.editMode()) {
       const updateDto: UpdateWorkspaceDto = {
+        id: this.selectedWorkspace()?.id ?? 0,
         name: formValue.name,
         description: formValue.description,
         address: formValue.address,
@@ -149,7 +150,7 @@ export class WorkspaceManagementComponent implements OnInit {
         rooms: formValue.rooms
       };
 
-      this.workspaceService.updateWorkspace(this.selectedWorkspace()!.id, updateDto).subscribe({
+      this.workspaceService.updateWorkspace(updateDto.id, updateDto).subscribe({
         next: () => {
           this.success.set('Workspace updated successfully!');
           this.loading.set(false);
