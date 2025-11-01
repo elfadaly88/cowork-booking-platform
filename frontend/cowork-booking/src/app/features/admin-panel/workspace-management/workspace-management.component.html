@@ -1,0 +1,156 @@
+<div class="workspace-management-container">
+  <!-- Success/Error Messages -->
+  <div *ngIf="success()" class="alert alert-success">{{ success() }}</div>
+  <div *ngIf="error()" class="alert alert-danger">{{ error() }}</div>
+
+  <!-- List View -->
+  <div *ngIf="viewMode() === 'list'" class="workspace-list-view">
+    <div class="header">
+      <h2>Workspace Management</h2>
+      <button class="btn btn-primary" (click)="addNewWorkspace()">Add New Workspace</button>
+    </div>
+
+    <div *ngIf="loading()" class="loading-container">
+      <div class="spinner"></div>
+      <p>Loading workspaces...</p>
+    </div>
+
+    <div *ngIf="!loading() && workspaces().length === 0" class="empty-state">
+      <p>No workspaces found. Click "Add New Workspace" to create one.</p>
+    </div>
+
+    <div *ngIf="!loading() && workspaces().length > 0" class="workspace-grid">
+      <div *ngFor="let workspace of workspaces()" class="workspace-card" (click)="editWorkspace(workspace)">
+        <h3>{{ workspace.name }}</h3>
+        <p class="location">{{ workspace.city }}, {{ workspace.address }}</p>
+        <p class="description">{{ workspace.description }}</p>
+        <div class="rooms-info">
+          <span class="room-count">{{ workspace.rooms?.length || 0 }} Rooms</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form View -->
+  <div *ngIf="viewMode() === 'form'" class="workspace-form-view">
+    <div class="header">
+      <h2>{{ editMode() ? 'Edit Workspace' : 'Add New Workspace' }}</h2>
+      <button class="btn btn-secondary" (click)="cancelEdit()">Back to List</button>
+    </div>
+
+    <form [formGroup]="workspaceForm" (ngSubmit)="submitForm()">
+      <div class="form-section">
+        <h3>Basic Information</h3>
+        
+        <div class="form-group">
+          <label for="name">Workspace Name*</label>
+          <input type="text" id="name" formControlName="name" class="form-control" [class.is-invalid]="workspaceForm.get('name')?.invalid && workspaceForm.get('name')?.touched">
+          <div *ngIf="workspaceForm.get('name')?.invalid && workspaceForm.get('name')?.touched" class="error-message">
+            <span *ngIf="workspaceForm.get('name')?.errors?.['required']">Name is required</span>
+            <span *ngIf="workspaceForm.get('name')?.errors?.['minlength']">Name must be at least 3 characters</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description*</label>
+          <textarea id="description" formControlName="description" class="form-control" rows="3" [class.is-invalid]="workspaceForm.get('description')?.invalid && workspaceForm.get('description')?.touched"></textarea>
+          <div *ngIf="workspaceForm.get('description')?.invalid && workspaceForm.get('description')?.touched" class="error-message">
+            Description is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="address">Address*</label>
+          <input type="text" id="address" formControlName="address" class="form-control" [class.is-invalid]="workspaceForm.get('address')?.invalid && workspaceForm.get('address')?.touched">
+          <div *ngIf="workspaceForm.get('address')?.invalid && workspaceForm.get('address')?.touched" class="error-message">
+            Address is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="city">City*</label>
+          <input type="text" id="city" formControlName="city" class="form-control" [class.is-invalid]="workspaceForm.get('city')?.invalid && workspaceForm.get('city')?.touched">
+          <div *ngIf="workspaceForm.get('city')?.invalid && workspaceForm.get('city')?.touched" class="error-message">
+            City is required
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="latitude">Latitude*</label>
+            <input type="number" id="latitude" formControlName="latitude" class="form-control" [class.is-invalid]="workspaceForm.get('latitude')?.invalid && workspaceForm.get('latitude')?.touched">
+            <div *ngIf="workspaceForm.get('latitude')?.invalid && workspaceForm.get('latitude')?.touched" class="error-message">
+              <span *ngIf="workspaceForm.get('latitude')?.errors?.['required']">Latitude is required</span>
+              <span *ngIf="workspaceForm.get('latitude')?.errors?.['min'] || workspaceForm.get('latitude')?.errors?.['max']">Latitude must be between -90 and 90</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="longitude">Longitude*</label>
+            <input type="number" id="longitude" formControlName="longitude" class="form-control" [class.is-invalid]="workspaceForm.get('longitude')?.invalid && workspaceForm.get('longitude')?.touched">
+            <div *ngIf="workspaceForm.get('longitude')?.invalid && workspaceForm.get('longitude')?.touched" class="error-message">
+              <span *ngIf="workspaceForm.get('longitude')?.errors?.['required']">Longitude is required</span>
+              <span *ngIf="workspaceForm.get('longitude')?.errors?.['min'] || workspaceForm.get('longitude')?.errors?.['max']">Longitude must be between -180 and 180</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-header">
+          <h3>Rooms</h3>
+          <button type="button" class="btn btn-sm btn-outline-primary" (click)="addRoom()">Add Room</button>
+        </div>
+
+        <div *ngIf="roomsFormArray.controls.length === 0" class="empty-rooms-message">
+          No rooms added yet. Click "Add Room" to create one.
+        </div>
+
+        <div formArrayName="rooms" class="rooms-container">
+          <div *ngFor="let room of roomsFormArray.controls; let i = index" [formGroupName]="i" class="room-card">
+            <div class="room-header">
+              <h4>Room #{{ i + 1 }}</h4>
+              <button type="button" class="btn-remove" (click)="removeRoom(i)">×</button>
+            </div>
+            
+            <div class="form-group">
+              <label [for]="'roomName' + i">Room Name*</label>
+              <input type="text" [id]="'roomName' + i" formControlName="name" class="form-control" [class.is-invalid]="room.get('name')?.invalid && room.get('name')?.touched">
+              <div *ngIf="room.get('name')?.invalid && room.get('name')?.touched" class="error-message">
+                Room name is required
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label [for]="'capacity' + i">Capacity*</label>
+                <input type="number" [id]="'capacity' + i" formControlName="capacity" class="form-control" [class.is-invalid]="room.get('capacity')?.invalid && room.get('capacity')?.touched">
+                <div *ngIf="room.get('capacity')?.invalid && room.get('capacity')?.touched" class="error-message">
+                  <span *ngIf="room.get('capacity')?.errors?.['required']">Capacity is required</span>
+                  <span *ngIf="room.get('capacity')?.errors?.['min']">Capacity must be at least 1</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label [for]="'pricePerHour' + i">Price per Hour*</label>
+                <input type="number" [id]="'pricePerHour' + i" formControlName="pricePerHour" class="form-control" [class.is-invalid]="room.get('pricePerHour')?.invalid && room.get('pricePerHour')?.touched">
+                <div *ngIf="room.get('pricePerHour')?.invalid && room.get('pricePerHour')?.touched" class="error-message">
+                  <span *ngIf="room.get('pricePerHour')?.errors?.['required']">Price is required</span>
+                  <span *ngIf="room.get('pricePerHour')?.errors?.['min']">Price must be at least 0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancelEdit()">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="loading()">
+          <span *ngIf="loading()" class="spinner-sm"></span>
+          {{ editMode() ? 'Update Workspace' : 'Create Workspace' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,264 @@
+<div class="workspace-management-container">
+  <!-- Success/Error Messages -->
+  @if (successMessage()) {
+    <div class="alert alert-success">
+      {{ successMessage() }}
+    </div>
+  }
+  
+  @if (errorMessage()) {
+    <div class="alert alert-danger">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <!-- List View -->
+  @if (viewMode() === 'list') {
+    <div class="panel-header">
+      <h1>Workspace Management</h1>
+      <button class="btn btn-primary" (click)="addNewWorkspace()">
+        <span class="icon">➕</span> Add New Workspace
+      </button>
+    </div>
+
+    @if (isLoading()) {
+      <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Loading workspaces...</p>
+      </div>
+    } @else if (workspaces().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">🏢</div>
+        <h3>No Workspaces Found</h3>
+        <p>Get started by adding your first workspace</p>
+        <button class="btn btn-primary" (click)="addNewWorkspace()">
+          Add New Workspace
+        </button>
+      </div>
+    } @else {
+      <div class="workspace-grid">
+        @for (workspace of workspaces(); track workspace.id) {
+          <div class="workspace-card">
+            <div class="workspace-header">
+              <h3>{{ workspace.name }}</h3>
+              <span class="location-badge">📍 {{ workspace.city }}</span>
+            </div>
+            
+            <div class="workspace-body">
+              <p class="description">{{ workspace.description }}</p>
+              <div class="address">
+                <span class="icon">🏠</span>
+                <span>{{ workspace.address }}</span>
+              </div>
+              
+              @if (workspace.rooms && workspace.rooms.length > 0) {
+                <div class="rooms-info">
+                  <div class="rooms-header">
+                    <span class="icon">🚪</span>
+                    <span>{{ workspace.rooms.length }} Room{{ workspace.rooms.length > 1 ? 's' : '' }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+            
+            <div class="workspace-actions">
+              <button class="btn btn-edit" (click)="editWorkspace(workspace)">
+                <span class="icon">✏️</span> Edit
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <!-- Form View (Add/Edit) -->
+  @if (viewMode() === 'form') {
+    <div class="panel-header">
+      <h1>{{ isEditMode() ? 'Edit Workspace' : 'Add New Workspace' }}</h1>
+      <button class="btn btn-secondary" (click)="cancelForm()">
+        <span class="icon">←</span> Back to List
+      </button>
+    </div>
+
+    <form [formGroup]="workspaceForm" (ngSubmit)="onSubmit()">
+      <div class="form-section">
+        <h2>Basic Information</h2>
+        
+        <div class="form-group">
+          <label for="name">Workspace Name <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="name" 
+            formControlName="name" 
+            placeholder="Enter workspace name"
+            [class.is-invalid]="workspaceForm.get('name')?.invalid && workspaceForm.get('name')?.touched"
+          >
+          @if (workspaceForm.get('name')?.invalid && workspaceForm.get('name')?.touched) {
+            <div class="error-message">
+              Workspace name is required (min 3 characters)
+            </div>
+          }
+        </div>
+        
+        <div class="form-group">
+          <label for="description">Description <span class="required">*</span></label>
+          <textarea 
+            id="description" 
+            formControlName="description" 
+            rows="3" 
+            placeholder="Enter workspace description"
+            [class.is-invalid]="workspaceForm.get('description')?.invalid && workspaceForm.get('description')?.touched"
+          ></textarea>
+          @if (workspaceForm.get('description')?.invalid && workspaceForm.get('description')?.touched) {
+            <div class="error-message">
+              Description is required
+            </div>
+          }
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="address">Address <span class="required">*</span></label>
+            <input 
+              type="text" 
+              id="address" 
+              formControlName="address" 
+              placeholder="Enter address"
+              [class.is-invalid]="workspaceForm.get('address')?.invalid && workspaceForm.get('address')?.touched"
+            >
+            @if (workspaceForm.get('address')?.invalid && workspaceForm.get('address')?.touched) {
+              <div class="error-message">
+                Address is required
+              </div>
+            }
+          </div>
+          
+          <div class="form-group">
+            <label for="city">City <span class="required">*</span></label>
+            <input 
+              type="text" 
+              id="city" 
+              formControlName="city" 
+              placeholder="Enter city"
+              [class.is-invalid]="workspaceForm.get('city')?.invalid && workspaceForm.get('city')?.touched"
+            >
+            @if (workspaceForm.get('city')?.invalid && workspaceForm.get('city')?.touched) {
+              <div class="error-message">
+                City is required
+              </div>
+            }
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="latitude">Latitude</label>
+            <input 
+              type="number" 
+              id="latitude" 
+              formControlName="latitude" 
+              placeholder="Enter latitude (optional)"
+            >
+          </div>
+          
+          <div class="form-group">
+            <label for="longitude">Longitude</label>
+            <input 
+              type="number" 
+              id="longitude" 
+              formControlName="longitude" 
+              placeholder="Enter longitude (optional)"
+            >
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <div class="section-header">
+          <h2>Rooms</h2>
+          <button type="button" class="btn btn-sm btn-primary" (click)="addRoom()">
+            <span class="icon">➕</span> Add Room
+          </button>
+        </div>
+        
+        @if (rooms.length === 0) {
+          <div class="empty-rooms">
+            <p>No rooms added yet. Click "Add Room" to create rooms for this workspace.</p>
+          </div>
+        }
+        
+        <div formArrayName="rooms">
+          @for (room of rooms.controls; track $index) {
+            <div [formGroupName]="$index" class="room-card">
+              <div class="room-header">
+                <h3>Room #{{ $index + 1 }}</h3>
+                <button type="button" class="btn btn-sm btn-danger" (click)="removeRoom($index)">
+                  <span class="icon">🗑️</span> Remove
+                </button>
+              </div>
+              
+              <div class="room-body">
+                <div class="form-group">
+                  <label>Room Name <span class="required">*</span></label>
+                  <input 
+                    type="text" 
+                    formControlName="name" 
+                    placeholder="Enter room name"
+                    [class.is-invalid]="room.get('name')?.invalid && room.get('name')?.touched"
+                  >
+                  @if (room.get('name')?.invalid && room.get('name')?.touched) {
+                    <div class="error-message">
+                      Room name is required (min 2 characters)
+                    </div>
+                  }
+                </div>
+                
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Capacity <span class="required">*</span></label>
+                    <input 
+                      type="number" 
+                      formControlName="capacity" 
+                      placeholder="Enter capacity"
+                      min="1"
+                      [class.is-invalid]="room.get('capacity')?.invalid && room.get('capacity')?.touched"
+                    >
+                    @if (room.get('capacity')?.invalid && room.get('capacity')?.touched) {
+                      <div class="error-message">
+                        Capacity must be at least 1
+                      </div>
+                    }
+                  </div>
+                  
+                  <div class="form-group">
+                    <label>Price Per Hour <span class="required">*</span></label>
+                    <input 
+                      type="number" 
+                      formControlName="pricePerHour" 
+                      placeholder="Enter price per hour"
+                      min="0"
+                      [class.is-invalid]="room.get('pricePerHour')?.invalid && room.get('pricePerHour')?.touched"
+                    >
+                    @if (room.get('pricePerHour')?.invalid && room.get('pricePerHour')?.touched) {
+                      <div class="error-message">
+                        Price must be a positive number
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+      
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancelForm()">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="workspaceForm.invalid || isLoading()">
+          {{ isEditMode() ? 'Update Workspace' : 'Create Workspace' }}
+        </button>
+      </div>
+    </form>
+  }
+</div>

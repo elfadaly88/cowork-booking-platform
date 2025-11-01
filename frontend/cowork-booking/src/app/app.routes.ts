@@ -5,6 +5,7 @@ import { BookingFormComponent } from './features/booking-form/booking-form.compo
 import { AdminPanelComponent } from './features/admin-panel/admin-panel.component';
 import { AdminPanelEnhancedComponent } from './features/admin-panel/admin-panel-enhanced.component';
 import { ScheduleManagementComponent } from './features/admin-panel/schedule-management.component';
+import { WorkspaceManagementComponent } from './features/admin-panel/workspace-management.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -13,5 +14,6 @@ export const routes: Routes = [
   { path: 'admin', component: AdminPanelEnhancedComponent },
   { path: 'admin-simple', component: AdminPanelComponent },
   { path: 'admin/schedule', component: ScheduleManagementComponent },
+  { path: 'admin/workspaces', component: WorkspaceManagementComponent },
   { path: '**', redirectTo: '' }
 ];
