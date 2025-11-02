@@ -2,7 +2,7 @@
   <div class="header" [class.edit-mode]="isEditMode()">
     <div class="header-content">
       <div>
-        <h1 style="color: white  ! important;">🏢 {{ isEditMode() ? '✏️ Edit' : 'Create' }} Workspace</h1>
+  <p class="header-title">🏢 {{ isEditMode() ? '✏️ Edit' : 'Create' }} Workspace</p>
         <p class="subtitle">{{ isEditMode() ? 'Update workspace details, add or remove rooms and devices' : 'Add a new coworking space with rooms and optional equipment' }}</p>
         @if (isEditMode()) {
           <div class="edit-indicator">
