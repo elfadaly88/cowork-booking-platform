@@ -1,14 +1,18 @@
-﻿using System;
+﻿using CoworkBooking.Domain.Entities.Auth;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CoworkBooking.Domain.Entities
 {
     public class WorkSpace
     {
         public int Id { get; set; }
+
+        // Changed to string to match ApplicationUser.Id (Identity default)
+        public string OwnerId { get; set; } = string.Empty;
+
+        // Navigation property so EF can map the relationship cleanly
+        public ApplicationUser? Owner { get; set; }
+
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;

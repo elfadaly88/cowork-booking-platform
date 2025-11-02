@@ -1,11 +1,13 @@
 ﻿using CoworkBooking.Domain.Entities;
+using CoworkBooking.Domain.Entities.Auth;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using System.Collections.Generic;
 
 namespace CoworkBooking.Infrastructure.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, string>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -43,6 +45,12 @@ namespace CoworkBooking.Infrastructure.Data
                 .WithMany(p => p.Schedules)
                 .HasForeignKey(s => s.SchedulePeriodId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<WorkSpace>()
+               .HasOne<ApplicationUser>()
+               .WithMany(u => u.OwnedWorkspaces)
+               .HasForeignKey(w => w.OwnerId)
+               .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
