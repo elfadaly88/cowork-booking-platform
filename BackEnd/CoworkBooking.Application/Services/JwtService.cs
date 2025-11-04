@@ -30,7 +30,7 @@ namespace CoworkBooking.Application.Services
 
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id ?? string.Empty),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString() ?? string.Empty),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
                 new Claim("fullName", user.FullName ?? string.Empty)
             };

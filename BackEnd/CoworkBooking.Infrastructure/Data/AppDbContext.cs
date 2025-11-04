@@ -1,5 +1,6 @@
 ﻿using CoworkBooking.Domain.Entities;
 using CoworkBooking.Domain.Entities.Auth;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -7,7 +8,12 @@ using System.Collections.Generic;
 
 namespace CoworkBooking.Infrastructure.Data
 {
-    public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, string>
+    public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid,
+         IdentityUserClaim<Guid>,
+        ApplicationUserRole,
+        IdentityUserLogin<Guid>,
+        IdentityRoleClaim<Guid>,
+        IdentityUserToken<Guid>>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -17,6 +23,7 @@ namespace CoworkBooking.Infrastructure.Data
         public DbSet<Device> Devices { get; set; }
         public DbSet<WorkspaceSchedulePeriod> WorkspaceSchedulePeriods { get; set; }
         public DbSet<WorkspaceSchedule> WorkspaceSchedules { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -51,6 +58,20 @@ namespace CoworkBooking.Infrastructure.Data
                .WithMany(u => u.OwnedWorkspaces)
                .HasForeignKey(w => w.OwnerId)
                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ApplicationUserRole>(userRole =>
+            {
+                userRole.HasKey(ur => new { ur.UserId, ur.RoleId });
+
+                userRole.HasOne(ur => ur.User)
+                    .WithMany(u => u.UserRoles)
+                    .HasForeignKey(ur => ur.UserId)
+                    .IsRequired();
+
+                userRole.HasOne(ur => ur.Role)
+                    .WithMany(r => r.UserRoles)
+                    .HasForeignKey(ur => ur.RoleId)
+                    .IsRequired();
+            });
         }
     }
 }
