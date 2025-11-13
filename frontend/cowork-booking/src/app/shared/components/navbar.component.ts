@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -15,14 +17,22 @@ import { RouterModule } from '@angular/router';
         </a>
 
         <div class="navbar-menu">
-          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link" *ngIf="!authService.isOwner()">
             <span class="nav-icon">🏠</span>
-            Home
+            <span class="nav-text">Home</span>
           </a>
-          <a routerLink="/admin" routerLinkActive="active" class="nav-link">
+          <a routerLink="/owner/dashboard" routerLinkActive="active" class="nav-link" *ngIf="authService.isOwner()">
+            <span class="nav-icon">🏢</span>
+            <span class="nav-text">My Workspaces</span>
+          </a>
+          <a routerLink="/admin" routerLinkActive="active" class="nav-link" *ngIf="authService.isAdmin()">
             <span class="nav-icon">⚙️</span>
-            Admin Panel
+            <span class="nav-text">Admin Panel</span>
           </a>
+          <button class="logout-btn" (click)="logout()" *ngIf="authService.isAuthenticated()">
+            <span class="nav-icon">🚪</span>
+            <span class="nav-text">Logout</span>
+          </button>
         </div>
       </div>
     </nav>
@@ -33,6 +43,7 @@ import { RouterModule } from '@angular/router';
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       position: sticky;
       top: 0;
+      width: 100%;
       z-index: 1000;
     }
 
@@ -43,6 +54,7 @@ import { RouterModule } from '@angular/router';
       display: flex;
       justify-content: space-between;
       align-items: center;
+      width: 100%;
     }
 
     .navbar-brand {
@@ -62,6 +74,8 @@ import { RouterModule } from '@angular/router';
 
     .brand-icon {
       font-size: 2rem;
+      display: flex;
+      align-items: center;
     }
 
     .brand-text {
@@ -75,33 +89,47 @@ import { RouterModule } from '@angular/router';
     .navbar-menu {
       display: flex;
       gap: 1rem;
+      align-items: center;
     }
 
     .nav-link {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.5rem 1rem;
+      padding: 0.625rem 1.25rem;
       border-radius: 8px;
       text-decoration: none;
       color: white;
       font-weight: 500;
-      transition: all 0.2s;
+      transition: all 0.3s ease;
       background: rgba(255, 255, 255, 0.1);
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      white-space: nowrap;
 
       &:hover {
         background: rgba(255, 255, 255, 0.2);
         transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       }
 
       &.active {
         background: rgba(255, 255, 255, 0.3);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        font-weight: 600;
       }
     }
 
     .nav-icon {
-      font-size: 1.2rem;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      line-height: 1;
+    }
+
+    .nav-text {
+      display: inline;
     }
 
     @media (max-width: 640px) {
@@ -109,10 +137,53 @@ import { RouterModule } from '@angular/router';
         padding: 1rem;
       }
 
-      .nav-link span:not(.nav-icon) {
+      .nav-link {
+        padding: 0.5rem 0.75rem;
+      }
+
+      .nav-text {
         display: none;
+      }
+    }
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1.25rem;
+      border-radius: 8px;
+      text-decoration: none;
+      color: white;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      background: rgba(231, 76, 60, 0.9);
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      white-space: nowrap;
+
+      &:hover {
+        background: rgba(192, 57, 43, 1);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .logout-btn {
+        padding: 0.5rem 0.75rem;
       }
     }
   `]
 })
-export class NavbarComponent {}
+export class NavbarComponent {
+  authService = inject(AuthService);
+
+  logout(): void {
+    this.authService.logout();
+  }
+}

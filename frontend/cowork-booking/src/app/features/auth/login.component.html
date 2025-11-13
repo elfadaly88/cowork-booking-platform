@@ -1,0 +1,71 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h1>🔐 Welcome Back</h1>
+      <p>Sign in to your Cowork Booking account</p>
+    </div>
+
+    @if (errorMessage()) {
+      <div class="alert alert-error">
+        <span>❌ {{ errorMessage() }}</span>
+        <button type="button" class="close-btn" (click)="errorMessage.set(null)">&times;</button>
+      </div>
+    }
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="Enter your email"
+          [class.invalid]="isFieldInvalid('email')"
+        />
+        @if (isFieldInvalid('email')) {
+          <span class="error-text">{{ getErrorMessage('email') }}</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="password-input-wrapper">
+          <input
+            id="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="Enter your password"
+            [class.invalid]="isFieldInvalid('password')"
+          />
+          <button
+            type="button"
+            class="toggle-password-btn"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+          >
+            <span class="eye-icon">{{ showPassword() ? '🙈' : '👁️' }}</span>
+          </button>
+        </div>
+        @if (isFieldInvalid('password')) {
+          <span class="error-text">{{ getErrorMessage('password') }}</span>
+        }
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary btn-full"
+        [disabled]="isLoading() || loginForm.invalid"
+      >
+        @if (isLoading()) {
+          <span class="spinner"></span> Signing in...
+        } @else {
+          🔓 Sign In
+        }
+      </button>
+
+      <div class="auth-footer">
+        <p>Don't have an account? <a routerLink="/register">Sign up here</a></p>
+      </div>
+    </form>
+  </div>
+</div>

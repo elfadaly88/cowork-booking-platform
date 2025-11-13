@@ -1,0 +1,334 @@
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+}
+
+.auth-card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  width: 100%;
+  padding: 2.5rem;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 2rem;
+
+  h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #1a202c;
+    margin: 0 0 0.5rem 0;
+  }
+
+  p {
+    color: #718096;
+    margin: 0;
+  }
+}
+
+.auth-form {
+  .form-group {
+    margin-bottom: 1.25rem;
+
+    label {
+      display: block;
+      font-weight: 600;
+      color: #2d3748;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      transition: all 0.2s;
+
+      &:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      &.invalid {
+        border-color: #fc8181;
+      }
+    }
+
+    .password-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+
+      input {
+        padding-right: 3rem;
+      }
+
+      .toggle-password-btn {
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        border-radius: 0.25rem;
+
+        &:hover {
+          background: rgba(102, 126, 234, 0.1);
+        }
+
+        &:focus {
+          outline: 2px solid #667eea;
+          outline-offset: 2px;
+        }
+
+        .eye-icon {
+          font-size: 1.25rem;
+          line-height: 1;
+          display: block;
+        }
+      }
+    }
+
+    .error-text {
+      display: block;
+      color: #e53e3e;
+      font-size: 0.85rem;
+      margin-top: 0.35rem;
+    }
+  }
+}
+
+.btn-full {
+  width: 100%;
+  padding: 0.875rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+
+  p {
+    margin: 0;
+    color: #718096;
+
+    a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.alert {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  &.alert-error {
+    background-color: #fff5f5;
+    border: 1px solid #fc8181;
+    color: #c53030;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: inherit;
+    padding: 0;
+    line-height: 1;
+
+    &:hover {
+      opacity: 0.7;
+    }
+  }
+}
+
+.spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// User Type Selector Styles
+.user-type-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 0.5rem;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.radio-card {
+  position: relative;
+  cursor: pointer;
+  display: block;
+
+  input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .radio-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.25rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.75rem;
+    background: white;
+    transition: all 0.3s ease;
+    text-align: center;
+
+    .radio-icon {
+      font-size: 2.5rem;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+
+    .radio-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+
+      strong {
+        color: #2d3748;
+        font-size: 0.95rem;
+        display: block;
+      }
+
+      small {
+        color: #718096;
+        font-size: 0.8rem;
+        display: block;
+      }
+    }
+  }
+
+  &:hover .radio-content {
+    border-color: #cbd5e0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+    .radio-icon {
+      transform: scale(1.1);
+    }
+  }
+
+  &.selected .radio-content {
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+
+    .radio-icon {
+      transform: scale(1.15);
+    }
+
+    strong {
+      color: #667eea;
+    }
+  }
+}
+
+// Password Strength and Requirements
+.password-strength {
+  margin-top: 0.75rem;
+  margin-bottom: 0.5rem;
+
+  .strength-bar {
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+
+    .strength-fill {
+      height: 100%;
+      transition: all 0.3s ease;
+      border-radius: 2px;
+    }
+  }
+
+  .strength-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: block;
+  }
+}
+
+.password-requirements {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: #f7fafc;
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+
+  .requirement {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #718096;
+    margin-bottom: 0.5rem;
+    transition: color 0.2s;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    &.met {
+      color: #38a169;
+      font-weight: 500;
+    }
+
+    .check-icon {
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      min-width: 1.25rem;
+    }
+  }
+}

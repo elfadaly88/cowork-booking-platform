@@ -6,14 +6,17 @@ namespace CoworkBooking.Infrastructure.Data
 {
     public static class IdentitySeed
     {
-        public static async Task SeedAsync(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
+
+        public static async Task SeedAsync(
+            UserManager<ApplicationUser> userManager,
+            RoleManager<ApplicationRole> roleManager)
         {
-            // ✅ 1. Create roles if they don't exist
             var roles = new List<ApplicationRole>
             {
                 new ApplicationRole
                 {
                     Name = "Admin",
+                    NormalizedName = "ADMIN",
                     Description = "System administrator",
                     PermissionsJson = JsonSerializer.Serialize(new {
                         canManageUsers = true,
@@ -25,17 +28,18 @@ namespace CoworkBooking.Infrastructure.Data
                 new ApplicationRole
                 {
                     Name = "Owner",
+                    NormalizedName = "OWNER",
                     Description = "Workspace owner",
                     PermissionsJson = JsonSerializer.Serialize(new {
                         canManageOwnWorkspaces = true,
                         canEditRooms = true,
-                        canViewBookings = true,
-                        canBookRooms = false
+                        canViewBookings = true
                     })
                 },
                 new ApplicationRole
                 {
                     Name = "User",
+                    NormalizedName = "USER",
                     Description = "Regular user",
                     PermissionsJson = JsonSerializer.Serialize(new {
                         canBookRooms = true,
@@ -47,59 +51,27 @@ namespace CoworkBooking.Infrastructure.Data
             foreach (var role in roles)
             {
                 if (!await roleManager.RoleExistsAsync(role.Name))
-                {
                     await roleManager.CreateAsync(role);
-                    Console.WriteLine($"✅ Role '{role.Name}' created.");
-                }
             }
 
-            // ✅ 2. Create default users
-            var defaultUsers = new List<(string Email, string Password, string Role)>
+            // Create admin user if not exists
+            var adminEmail = "admin@cowork.com";
+            if (await userManager.FindByEmailAsync(adminEmail) == null)
             {
-                ("admin@cowork.com", "Admin@123", "Admin"),
-                ("owner@cowork.com", "Owner@123", "Owner"),
-                ("user@cowork.com", "User@123", "User")
-            };
-
-            foreach (var (email, password, role) in defaultUsers)
-            {
-                var existingUser = await userManager.FindByEmailAsync(email);
-                if (existingUser == null)
+                var adminUser = new ApplicationUser
                 {
-                    var newUser = new ApplicationUser
-                    {
-                        UserName = email,
-                        Email = email,
-                        EmailConfirmed = true,
-                        FullName = role switch
-                        {
-                            "Admin" => "System Administrator",
-                            "Owner" => "Default Workspace Owner",
-                            "User" => "Test User",
-                            _ => "User"
-                        }
-                    };
+                    UserName = adminEmail,
+                    Email = adminEmail,
+                    EmailConfirmed = true,
+                    FullName = "Super Admin"
+                };
 
-                    var createResult = await userManager.CreateAsync(newUser, password);
-                    if (createResult.Succeeded)
-                    {
-                        await userManager.AddToRoleAsync(newUser, role);
-                        Console.WriteLine($"👤 User '{email}' created and assigned role '{role}'.");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"⚠️ Failed to create user '{email}': {string.Join(", ", createResult.Errors.Select(e => e.Description))}");
-                    }
-                }
-                else
+                var result = await userManager.CreateAsync(adminUser, "Admin@123");
+                if (result.Succeeded)
                 {
-                    Console.WriteLine($"ℹ️ User '{email}' already exists.");
+                    await userManager.AddToRoleAsync(adminUser, "Admin");
                 }
             }
-
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("✅ Identity seeding completed successfully.");
-            Console.ResetColor();
         }
     }
 }

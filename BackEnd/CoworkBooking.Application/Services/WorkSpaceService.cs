@@ -19,6 +19,7 @@ namespace CoworkBooking.Application.Services
  public async Task<IEnumerable<WorkSpaceDto>> GetAllAsync()
  {
  var entities = await _context.Workspaces
+     .Include(w => w.Owner)
      .Include(w => w.Rooms)
      .ThenInclude(r => r.Devices)
      .Include(w => w.Rooms)
@@ -28,12 +29,15 @@ namespace CoworkBooking.Application.Services
  return entities.Select(e => new WorkSpaceDto
  {
  Id = e.Id,
+ OwnerId = e.OwnerId,
+ OwnerName = e.Owner?.FullName,
  Name = e.Name,
  Description = e.Description,
  Address = e.Address,
  City = e.City,
  Latitude = e.Latitude,
  Longitude = e.Longitude,
+ IsApproved = e.IsApproved,
  Rooms = e.Rooms.Select(r =>
  {
      var now = DateTime.UtcNow;
@@ -61,10 +65,62 @@ namespace CoworkBooking.Application.Services
  });
  }
 
+ public async Task<IEnumerable<WorkSpaceDto>> GetWorkspacesByOwnerAsync(Guid ownerId)
+ {
+     var entities = await _context.Workspaces
+         .Where(w => w.OwnerId == ownerId)
+         .Include(w => w.Owner)
+         .Include(w => w.Rooms)
+         .ThenInclude(r => r.Devices)
+         .Include(w => w.Rooms)
+         .ThenInclude(r => r.Bookings)
+         .ToListAsync();
+
+     return entities.Select(e => new WorkSpaceDto
+     {
+         Id = e.Id,
+         OwnerId = e.OwnerId,
+         OwnerName = e.Owner?.FullName,
+         Name = e.Name,
+         Description = e.Description,
+         Address = e.Address,
+         City = e.City,
+         Latitude = e.Latitude,
+         Longitude = e.Longitude,
+         IsApproved = e.IsApproved,
+         Rooms = e.Rooms.Select(r =>
+         {
+             var now = DateTime.UtcNow;
+             var bookedCount = r.Bookings.Count(b => b.StartTime <= now && b.EndTime > now);
+             var available = Math.Max(0, r.Capacity - bookedCount);
+             return new RoomDto
+             {
+                 Id = r.Id,
+                 Name = r.Name,
+                 Capacity = r.Capacity,
+                 BookedCount = bookedCount,
+                 AvailableSeats = available,
+                 PricePerHour = r.PricePerHour,
+                 HasDevices = r.Devices.Any(),
+                 WorkspaceId = r.WorkspaceId,
+                 Devices = r.Devices.Select(d => new DeviceDto
+                 {
+                     Id = d.Id,
+                     Name = d.Name,
+                     ExtraCostPerHour = d.ExtraCostPerHour,
+                     RoomId = d.RoomId
+                 }).ToList()
+             };
+         }).ToList()
+     });
+ }
+
  public async Task<IEnumerable<WorkSpaceDto>> GetAvailableWorkspacesAsync(DateTime? at = null)
  {
      var moment = at ?? DateTime.UtcNow;
      var workspaces = await _context.Workspaces
+         .Where(w => w.IsApproved) // Only show approved workspaces to users
+         .Include(w => w.Owner)
          .Include(w => w.Rooms)
              .ThenInclude(r => r.Bookings)
          .Include(w => w.Rooms)
@@ -75,12 +131,15 @@ namespace CoworkBooking.Application.Services
          .Select(w => new WorkSpaceDto
          {
              Id = w.Id,
+             OwnerId = w.OwnerId,
+             OwnerName = w.Owner?.FullName,
              Name = w.Name,
              Description = w.Description,
              Address = w.Address,
              City = w.City,
              Latitude = w.Latitude,
              Longitude = w.Longitude,
+             IsApproved = w.IsApproved,
              Rooms = w.Rooms.Select(r =>
              {
                  var booked = r.Bookings.Count(b => b.StartTime <= moment && b.EndTime > moment);
@@ -114,6 +173,7 @@ namespace CoworkBooking.Application.Services
  public async Task<WorkSpaceDto?> GetByIdAsync(int id)
  {
  var e = await _context.Workspaces
+     .Include(w => w.Owner)
      .Include(w => w.Rooms)
      .ThenInclude(r => r.Devices)
      .Include(w => w.Rooms)
@@ -126,12 +186,15 @@ namespace CoworkBooking.Application.Services
  return new WorkSpaceDto
  {
  Id = e.Id,
+ OwnerId = e.OwnerId,
+ OwnerName = e.Owner?.FullName,
  Name = e.Name,
  Description = e.Description,
  Address = e.Address,
  City = e.City,
  Latitude = e.Latitude,
  Longitude = e.Longitude,
+ IsApproved = e.IsApproved,
  Rooms = e.Rooms.Select(r =>
  {
      var bookedCount = r.Bookings.Count(b => b.StartTime <= now && b.EndTime > now);
@@ -185,7 +248,9 @@ namespace CoworkBooking.Application.Services
  Address = dto.Address,
  City = dto.City,
  Latitude = dto.Latitude,
- Longitude = dto.Longitude
+ Longitude = dto.Longitude,
+ OwnerId = dto.OwnerId,
+ IsApproved = dto.OwnerId.HasValue ? false : true // Owner workspaces need approval, Admin workspaces auto-approved
  };
 
  // Add rooms if provided
@@ -366,6 +431,56 @@ namespace CoworkBooking.Application.Services
  _context.Workspaces.Remove(entity);
  await _context.SaveChangesAsync();
  }
+ }
+
+ public async Task<IEnumerable<WorkSpaceDto>> GetPendingWorkspacesAsync()
+ {
+     var entities = await _context.Workspaces
+         .Where(w => !w.IsApproved)
+         .Include(w => w.Owner)
+         .Include(w => w.Rooms)
+         .ThenInclude(r => r.Devices)
+         .ToListAsync();
+
+     return entities.Select(e => new WorkSpaceDto
+     {
+         Id = e.Id,
+         OwnerId = e.OwnerId,
+         OwnerName = e.Owner?.FullName,
+         Name = e.Name,
+         Description = e.Description,
+         Address = e.Address,
+         City = e.City,
+         Latitude = e.Latitude,
+         Longitude = e.Longitude,
+         IsApproved = e.IsApproved,
+         Rooms = e.Rooms.Select(r => new RoomDto
+         {
+             Id = r.Id,
+             Name = r.Name,
+             Capacity = r.Capacity,
+             PricePerHour = r.PricePerHour,
+             HasDevices = r.Devices.Any(),
+             WorkspaceId = r.WorkspaceId,
+             Devices = r.Devices.Select(d => new DeviceDto
+             {
+                 Id = d.Id,
+                 Name = d.Name,
+                 ExtraCostPerHour = d.ExtraCostPerHour,
+                 RoomId = d.RoomId
+             }).ToList()
+         }).ToList()
+     });
+ }
+
+ public async Task<bool> ApproveWorkspaceAsync(int workspaceId)
+ {
+     var workspace = await _context.Workspaces.FindAsync(workspaceId);
+     if (workspace == null) return false;
+
+     workspace.IsApproved = true;
+     await _context.SaveChangesAsync();
+     return true;
  }
  }
 }

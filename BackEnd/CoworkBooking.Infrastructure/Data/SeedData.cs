@@ -11,13 +11,22 @@ namespace CoworkBooking.Infrastructure.Data
                 return;
 
             // 🏢 Workspace
+
+            var owner = context.Users.FirstOrDefault();
+            if (owner == null)
+            {
+                throw new Exception("❌ No users found in AspNetUsers table. Please seed Identity first.");
+            }
+
             var workspace = new WorkSpace
             {
                 Name = "Downtown Cowork Space",
                 Description = "Cozy workspace in Cairo Downtown with modern amenities.",
                 Address = "123 Tahrir Street",
-                City = "Cairo"
+                City = "Cairo",
+                OwnerId = owner.Id // 👈 هنا المفتاح
             };
+
 
             // 🏠 Rooms
             var room1 = new Room

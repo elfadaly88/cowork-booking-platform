@@ -51,6 +51,7 @@ catch (Exception)
 // ==========================
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
+    
     options.Password.RequiredLength = 6;
     options.Password.RequireDigit = true;
     options.Password.RequireUppercase = false;
@@ -176,7 +177,7 @@ using (var scope = app.Services.CreateScope())
     catch
     {
         Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine("⚠️ Database migration skipped (InMemory or failed).");
+        Console.WriteLine("Database migration skipped (InMemory or failed).");
         Console.ResetColor();
     }
 

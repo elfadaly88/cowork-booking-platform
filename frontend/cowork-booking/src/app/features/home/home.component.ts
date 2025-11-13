@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { WorkspaceService } from '../../core/services/workspace.service';
+import { AuthService } from '../../core/services/auth.service';
 import { Workspace } from '../../core/models/workspace.model';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 import { ErrorMessageComponent } from '../../shared/components/error-message.component';
@@ -19,6 +20,7 @@ import { ErrorMessageComponent } from '../../shared/components/error-message.com
 })
 export class HomeComponent implements OnInit {
   private readonly workspaceService = inject(WorkspaceService);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
   workspaces: Workspace[] = [];
@@ -26,6 +28,25 @@ export class HomeComponent implements OnInit {
   error: string | null = null;
 
   ngOnInit(): void {
+    // Check if user is authenticated
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    // If user is an admin, redirect to admin panel
+    if (this.authService.isAdmin()) {
+      this.router.navigate(['/admin']);
+      return;
+    }
+
+    // If user is an owner, redirect to owner dashboard
+    if (this.authService.isOwner()) {
+      this.router.navigate(['/owner/dashboard']);
+      return;
+    }
+
+    // Regular users see available workspaces
     this.loadWorkspaces();
   }
 

@@ -36,6 +36,45 @@ export class WorkspaceService {
   }
 
   /**
+   * GET /workspaces/my-workspaces → get workspaces owned by the current user (Owner only)
+   */
+  getMyWorkspaces(): Observable<Workspace[]> {
+    const url = `${this.baseUrl}/workspaces/my-workspaces`;
+    return this.http.get<Workspace[]>(url).pipe(
+      catchError((err) => {
+        const message = err?.error?.message || 'Failed to load your workspaces';
+        return throwError(() => new Error(message));
+      })
+    );
+  }
+
+  /**
+   * GET /workspaces/pending → get workspaces waiting for admin approval (Admin only)
+   */
+  getPendingWorkspaces(): Observable<Workspace[]> {
+    const url = `${this.baseUrl}/workspaces/pending`;
+    return this.http.get<Workspace[]>(url).pipe(
+      catchError((err) => {
+        const message = err?.error?.message || 'Failed to load pending workspaces';
+        return throwError(() => new Error(message));
+      })
+    );
+  }
+
+  /**
+   * POST /workspaces/{id}/approve → approve a workspace (Admin only)
+   */
+  approveWorkspace(id: number): Observable<{ message: string }> {
+    const url = `${this.baseUrl}/workspaces/${id}/approve`;
+    return this.http.post<{ message: string }>(url, {}).pipe(
+      catchError((err) => {
+        const message = err?.error?.message || 'Failed to approve workspace';
+        return throwError(() => new Error(message));
+      })
+    );
+  }
+
+  /**
    * GET /workspaces/{id} → get workspace details including rooms/devices
    */
   getWorkspaceById(id: number): Observable<Workspace> {
@@ -69,6 +108,19 @@ export class WorkspaceService {
     return this.http.post<WorkspaceSchedulePeriod>(url, period).pipe(
       catchError((err) => {
         const message = err?.error?.message || 'Failed to save schedule';
+        return throwError(() => new Error(message));
+      })
+    );
+  }
+
+  /**
+   * POST /workspaces/with-rooms → create workspace with rooms and devices (Owner/Admin)
+   */
+  createWorkspaceWithRooms(workspace: any): Observable<Workspace> {
+    const url = `${this.baseUrl}/workspaces/with-rooms`;
+    return this.http.post<Workspace>(url, workspace).pipe(
+      catchError((err) => {
+        const message = err?.error?.message || 'Failed to create workspace';
         return throwError(() => new Error(message));
       })
     );

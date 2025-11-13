@@ -19,12 +19,15 @@ export interface Room {
 
 export interface Workspace {
   id?: number;
+  ownerId?: string;
+  ownerName?: string;
   name: string;
   description: string;
   address: string;
   city: string;
   latitude?: number;
   longitude?: number;
+  isApproved?: boolean;
   rooms?: Room[];
   currentSchedulePeriod?: WorkspaceSchedulePeriod;
 }

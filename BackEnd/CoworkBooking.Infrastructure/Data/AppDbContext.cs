@@ -54,10 +54,10 @@ namespace CoworkBooking.Infrastructure.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<WorkSpace>()
-               .HasOne<ApplicationUser>()
-               .WithMany(u => u.OwnedWorkspaces)
-               .HasForeignKey(w => w.OwnerId)
-               .OnDelete(DeleteBehavior.Restrict);
+                   .HasOne(ws => ws.Owner)
+                   .WithMany(u => u.OwnedWorkspaces)
+                   .HasForeignKey(ws => ws.OwnerId)
+                   .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<ApplicationUserRole>(userRole =>
             {
                 userRole.HasKey(ur => new { ur.UserId, ur.RoleId });

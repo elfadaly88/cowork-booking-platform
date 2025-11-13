@@ -1,0 +1,71 @@
+<div class="owner-approval-container">
+  <div class="header">
+    <h1>👥 Owner Account Approvals</h1>
+    <p>Review and approve workspace owner registrations</p>
+  </div>
+
+  @if (successMessage()) {
+    <div class="alert alert-success">
+      <span>✅ {{ successMessage() }}</span>
+      <button type="button" class="close-btn" (click)="successMessage.set(null)">&times;</button>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="alert alert-error">
+      <span>❌ {{ errorMessage() }}</span>
+      <button type="button" class="close-btn" (click)="errorMessage.set(null)">&times;</button>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Loading pending approvals...</p>
+    </div>
+  } @else {
+    @if (pendingOwners().length === 0) {
+      <div class="empty-state">
+        <span class="empty-icon">📭</span>
+        <h3>No Pending Approvals</h3>
+        <p>All owner registration requests have been processed.</p>
+      </div>
+    } @else {
+      <div class="owner-list">
+        @for (owner of pendingOwners(); track owner.id) {
+          <div class="owner-card">
+            <div class="owner-info">
+              <div class="owner-avatar">
+                @if (owner.profileImageUrl) {
+                  <img [src]="owner.profileImageUrl" [alt]="owner.fullName" />
+                } @else {
+                  <span class="avatar-placeholder">{{ owner.fullName.charAt(0).toUpperCase() }}</span>
+                }
+              </div>
+              <div class="owner-details">
+                <h3>{{ owner.fullName }}</h3>
+                <p class="email">{{ owner.email }}</p>
+                <p class="date">Registered: {{ owner.createdAt | date: 'medium' }}</p>
+                <div class="badges">
+                  @for (role of owner.roles; track role) {
+                    <span class="badge badge-role">{{ role }}</span>
+                  }
+                </div>
+              </div>
+            </div>
+            <div class="owner-actions">
+              <button class="btn btn-approve" (click)="approveOwner(owner.id)">
+                <span class="icon">✅</span>
+                Approve
+              </button>
+              <button class="btn btn-reject" (click)="rejectOwner(owner.id)">
+                <span class="icon">❌</span>
+                Reject
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

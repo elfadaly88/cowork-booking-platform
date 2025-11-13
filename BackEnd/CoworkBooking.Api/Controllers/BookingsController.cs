@@ -1,11 +1,13 @@
 ﻿using CoworkBooking.Application.DTOs;
 using CoworkBooking.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CoworkBooking.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize] // All booking operations require authentication
     public class BookingsController : ControllerBase
     {
         private readonly IBookingService _service;
@@ -15,6 +17,7 @@ namespace CoworkBooking.Api.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAll() => Ok(await _service.GetAllAsync());
 
         [HttpGet("{id}")]
@@ -26,6 +29,7 @@ namespace CoworkBooking.Api.Controllers
         }
 
         [HttpPost]
+        [Authorize] // Any authenticated user can create bookings
         public async Task<IActionResult> Create([FromBody] BookingDto dto)
         {
             if (dto == null) return BadRequest();
@@ -34,6 +38,7 @@ namespace CoworkBooking.Api.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize] // Users can update their own bookings (add ownership check in service)
         public async Task<IActionResult> Update(int id, [FromBody] BookingDto dto)
         {
             if (dto == null || id != dto.Id) return BadRequest();
@@ -44,6 +49,7 @@ namespace CoworkBooking.Api.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize] // Users can delete their own bookings (add ownership check in service)
         public async Task<IActionResult> Delete(int id)
         {
             var existing = await _service.GetByIdAsync(id);
