@@ -10,6 +10,7 @@ import { OwnerApprovalComponent } from './features/admin-panel/owner-approval.co
 import { WorkspaceApprovalComponent } from './features/admin-panel/workspace-approval.component';
 import { OwnerDashboardComponent } from './features/owner-dashboard/owner-dashboard.component';
 import { OwnerWorkspaceFormComponent } from './features/owner-dashboard/owner-workspace-form.component';
+import { AdminWorkspaceFormComponent } from './features/admin-panel/admin-workspace-form.component';
 import { LoginComponent } from './features/auth/login.component';
 import { RegisterComponent } from './features/auth/register.component';
 import { authGuard, adminGuard, ownerGuard, guestGuard } from './core/guards/auth.guard';
@@ -51,6 +52,16 @@ export const routes: Routes = [
     path: 'admin/workspaces',
     component: WorkspaceManagementComponent,
     canActivate: [adminGuard] // Admin only
+  },
+  {
+    path: 'admin/workspaces/new',
+    component: AdminWorkspaceFormComponent,
+    canActivate: [adminGuard]
+  },
+  {
+    path: 'admin/workspaces/edit/:id',
+    component: AdminWorkspaceFormComponent,
+    canActivate: [adminGuard]
   },
   {
     path: 'admin/owner-approvals',

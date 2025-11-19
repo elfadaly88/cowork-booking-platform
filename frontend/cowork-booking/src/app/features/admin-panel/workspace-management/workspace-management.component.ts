@@ -1,5 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router, RouterModule } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { WorkspaceService } from '../../../core/services/workspace.service';
 import { Workspace, Room, CreateWorkspaceDto, UpdateWorkspaceDto } from '../../../core/models/workspace.model';
@@ -8,6 +9,8 @@ import { Workspace, Room, CreateWorkspaceDto, UpdateWorkspaceDto } from '../../.
   selector: 'app-workspace-management',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
+  // Router used for navigating to the separate form page
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './workspace-management.component.html',
   styleUrls: ['./workspace-management.component.scss']
 })
@@ -19,12 +22,13 @@ export class WorkspaceManagementComponent implements OnInit {
   viewMode = signal<'list' | 'form'>('list');
   editMode = signal<boolean>(false);
   selectedWorkspace = signal<Workspace | null>(null);
-  
+
   workspaceForm: FormGroup;
 
   constructor(
     private workspaceService: WorkspaceService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private router: Router
   ) {
     this.workspaceForm = this.createWorkspaceForm();
   }
@@ -36,7 +40,7 @@ export class WorkspaceManagementComponent implements OnInit {
   loadWorkspaces(): void {
     this.loading.set(true);
     this.error.set(null);
-    
+
     this.workspaceService.getWorkspaces().subscribe({
       next: (workspaces) => {
         this.workspaces.set(workspaces);
@@ -72,7 +76,7 @@ export class WorkspaceManagementComponent implements OnInit {
       capacity: [1, [Validators.required, Validators.min(1)]],
       pricePerHour: [0, [Validators.required, Validators.min(0)]]
     });
-    
+
     this.roomsFormArray.push(roomForm);
   }
 
@@ -81,41 +85,13 @@ export class WorkspaceManagementComponent implements OnInit {
   }
 
   addNewWorkspace(): void {
-    this.editMode.set(false);
-    this.selectedWorkspace.set(null);
-    this.workspaceForm = this.createWorkspaceForm();
-    this.viewMode.set('form');
+    // Navigate to the dedicated form route for creating a new workspace
+    this.router.navigate(['/admin/workspaces/new']);
   }
 
   editWorkspace(workspace: Workspace): void {
-    this.editMode.set(true);
-    this.selectedWorkspace.set(workspace);
-    
-    this.workspaceForm = this.fb.group({
-      name: [workspace.name, [Validators.required, Validators.minLength(3)]],
-      description: [workspace.description, Validators.required],
-      address: [workspace.address, Validators.required],
-      city: [workspace.city, Validators.required],
-      latitude: [workspace.latitude, [Validators.required, Validators.min(-90), Validators.max(90)]],
-      longitude: [workspace.longitude, [Validators.required, Validators.min(-180), Validators.max(180)]],
-      rooms: this.fb.array([])
-    });
-
-    // Add existing rooms
-    if (workspace.rooms && workspace.rooms.length > 0) {
-      workspace.rooms.forEach(room => {
-        const roomForm = this.fb.group({
-          id: [room.id],
-          name: [room.name, Validators.required],
-          capacity: [room.capacity, [Validators.required, Validators.min(1)]],
-          pricePerHour: [room.pricePerHour, [Validators.required, Validators.min(0)]]
-        });
-        
-        (this.workspaceForm.get('rooms') as FormArray).push(roomForm);
-      });
-    }
-    
-    this.viewMode.set('form');
+    // Navigate to the dedicated edit form route
+    this.router.navigate(['/admin/workspaces/edit', workspace.id]);
   }
 
   cancelEdit(): void {
@@ -137,7 +113,7 @@ export class WorkspaceManagementComponent implements OnInit {
     this.success.set(null);
 
     const formValue = this.workspaceForm.value;
-    
+
     if (this.editMode()) {
       const updateDto: UpdateWorkspaceDto = {
         id: this.selectedWorkspace()?.id ?? 0,

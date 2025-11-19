@@ -125,4 +125,24 @@ export class WorkspaceService {
       })
     );
   }
+
+  /**
+   * Convenience wrapper: create workspace (alias for createWorkspaceWithRooms)
+   */
+  createWorkspace(workspace: any): Observable<Workspace> {
+    return this.createWorkspaceWithRooms(workspace);
+  }
+
+  /**
+   * PUT /workspaces/{id} → update an existing workspace
+   */
+  updateWorkspace(id: number, workspace: any): Observable<Workspace> {
+    const url = `${this.baseUrl}/workspaces/${id}`;
+    return this.http.put<Workspace>(url, workspace).pipe(
+      catchError((err) => {
+        const message = err?.error?.message || `Failed to update workspace ${id}`;
+        return throwError(() => new Error(message));
+      })
+    );
+  }
 }

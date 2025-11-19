@@ -93,6 +93,7 @@ interface SearchResult {
       margin: 0 0 0.5rem 0;
       font-size: 1.25rem;
       font-weight: 600;
+      color: #ffffff;
     }
 
     .map-instruction {
