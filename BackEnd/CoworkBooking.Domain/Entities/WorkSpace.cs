@@ -25,7 +25,12 @@ namespace CoworkBooking.Domain.Entities
         // Approval status - Workspaces created by Owner must be approved by Admin before being visible to users
         public bool IsApproved { get; set; } = false;
 
+        // Ratings
+        public double? AverageRating { get; set; }
+        public int TotalReviews { get; set; } = 0;
+
         public ICollection<Room> Rooms { get; set; } = new List<Room>();
         public ICollection<WorkspaceSchedulePeriod> SchedulePeriods { get; set; } = new List<WorkspaceSchedulePeriod>();
+        public ICollection<WorkspaceImage> Images { get; set; } = new List<WorkspaceImage>();
     }
 }

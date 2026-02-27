@@ -24,6 +24,7 @@ namespace CoworkBooking.Application.Services
      .ThenInclude(r => r.Devices)
      .Include(w => w.Rooms)
      .ThenInclude(r => r.Bookings)
+     .Include(w => w.Images)
      .ToListAsync();
 
  return entities.Select(e => new WorkSpaceDto
@@ -38,6 +39,9 @@ namespace CoworkBooking.Application.Services
  Latitude = e.Latitude,
  Longitude = e.Longitude,
  IsApproved = e.IsApproved,
+ AverageRating = e.AverageRating,
+ TotalReviews = e.TotalReviews,
+ Images = e.Images.OrderBy(i => i.Order).Select(i => new WorkspaceImageDto { Id = i.Id, Url = i.Url, Caption = i.Caption, IsMain = i.IsMain, Order = i.Order }).ToList(),
  Rooms = e.Rooms.Select(r =>
  {
      var now = DateTime.UtcNow;
@@ -119,12 +123,13 @@ namespace CoworkBooking.Application.Services
  {
      var moment = at ?? DateTime.UtcNow;
      var workspaces = await _context.Workspaces
-         .Where(w => w.IsApproved) // Only show approved workspaces to users
+         .Where(w => w.IsApproved)
          .Include(w => w.Owner)
          .Include(w => w.Rooms)
              .ThenInclude(r => r.Bookings)
          .Include(w => w.Rooms)
              .ThenInclude(r => r.Devices)
+         .Include(w => w.Images)
          .ToListAsync();
 
      var available = workspaces
@@ -140,6 +145,16 @@ namespace CoworkBooking.Application.Services
              Latitude = w.Latitude,
              Longitude = w.Longitude,
              IsApproved = w.IsApproved,
+             AverageRating = w.AverageRating,
+             TotalReviews = w.TotalReviews,
+             Images = w.Images.OrderBy(i => i.Order).Select(i => new WorkspaceImageDto
+             {
+                 Id = i.Id,
+                 Url = i.Url,
+                 Caption = i.Caption,
+                 IsMain = i.IsMain,
+                 Order = i.Order
+             }).ToList(),
              Rooms = w.Rooms.Select(r =>
              {
                  var booked = r.Bookings.Count(b => b.StartTime <= moment && b.EndTime > moment);
@@ -175,9 +190,10 @@ namespace CoworkBooking.Application.Services
  var e = await _context.Workspaces
      .Include(w => w.Owner)
      .Include(w => w.Rooms)
-     .ThenInclude(r => r.Devices)
+         .ThenInclude(r => r.Devices)
      .Include(w => w.Rooms)
-     .ThenInclude(r => r.Bookings)
+         .ThenInclude(r => r.Bookings)
+     .Include(w => w.Images)
      .FirstOrDefaultAsync(w => w.Id == id);
 
  if (e == null) return null;
@@ -185,39 +201,49 @@ namespace CoworkBooking.Application.Services
  var now = DateTime.UtcNow;
  return new WorkSpaceDto
  {
- Id = e.Id,
- OwnerId = e.OwnerId,
- OwnerName = e.Owner?.FullName,
- Name = e.Name,
- Description = e.Description,
- Address = e.Address,
- City = e.City,
- Latitude = e.Latitude,
- Longitude = e.Longitude,
- IsApproved = e.IsApproved,
- Rooms = e.Rooms.Select(r =>
- {
-     var bookedCount = r.Bookings.Count(b => b.StartTime <= now && b.EndTime > now);
-     var available = Math.Max(0, r.Capacity - bookedCount);
-     return new RoomDto
+     Id = e.Id,
+     OwnerId = e.OwnerId,
+     OwnerName = e.Owner?.FullName,
+     Name = e.Name,
+     Description = e.Description,
+     Address = e.Address,
+     City = e.City,
+     Latitude = e.Latitude,
+     Longitude = e.Longitude,
+     IsApproved = e.IsApproved,
+     AverageRating = e.AverageRating,
+     TotalReviews = e.TotalReviews,
+     Images = e.Images.OrderBy(i => i.Order).Select(i => new WorkspaceImageDto
      {
-         Id = r.Id,
-         Name = r.Name,
-         Capacity = r.Capacity,
-         BookedCount = bookedCount,
-         AvailableSeats = available,
-         PricePerHour = r.PricePerHour,
-         HasDevices = r.Devices.Any(),
-         WorkspaceId = r.WorkspaceId,
-         Devices = r.Devices.Select(d => new DeviceDto
+         Id = i.Id,
+         Url = i.Url,
+         Caption = i.Caption,
+         IsMain = i.IsMain,
+         Order = i.Order
+     }).ToList(),
+     Rooms = e.Rooms.Select(r =>
+     {
+         var bookedCount = r.Bookings.Count(b => b.StartTime <= now && b.EndTime > now);
+         var available = Math.Max(0, r.Capacity - bookedCount);
+         return new RoomDto
          {
-             Id = d.Id,
-             Name = d.Name,
-             ExtraCostPerHour = d.ExtraCostPerHour,
-             RoomId = d.RoomId
-         }).ToList()
-     };
- }).ToList()
+             Id = r.Id,
+             Name = r.Name,
+             Capacity = r.Capacity,
+             BookedCount = bookedCount,
+             AvailableSeats = available,
+             PricePerHour = r.PricePerHour,
+             HasDevices = r.Devices.Any(),
+             WorkspaceId = r.WorkspaceId,
+             Devices = r.Devices.Select(d => new DeviceDto
+             {
+                 Id = d.Id,
+                 Name = d.Name,
+                 ExtraCostPerHour = d.ExtraCostPerHour,
+                 RoomId = d.RoomId
+             }).ToList()
+         };
+     }).ToList()
  };
  }
 

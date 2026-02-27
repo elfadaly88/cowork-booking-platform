@@ -1,0 +1,156 @@
+<div class="profile-page">
+
+    <!-- ─── Top Bar ────────────────────────────────────────────────────── -->
+    <header class="top-bar">
+        <button class="back-btn" (click)="goBack()">← Back</button>
+        <span class="top-title">Account Settings</span>
+    </header>
+
+    <div class="profile-layout">
+
+        <!-- ─── Left: User Card ─────────────────────────────────────────── -->
+        <aside class="user-sidebar">
+            <div class="avatar-ring">
+                <div class="avatar-circle">{{ getUserInitials() }}</div>
+            </div>
+            <h2 class="user-name">
+                {{ currentUser()?.firstName }} {{ currentUser()?.lastName }}
+            </h2>
+            <p class="user-email">{{ currentUser()?.email }}</p>
+            <div class="role-badge">{{ getRoleLabel() }}</div>
+
+            <!-- Sidebar nav -->
+            <nav class="sidebar-nav">
+                <button class="sidebar-btn" [class.active]="activeTab() === 'profile'"
+                    (click)="activeTab.set('profile')">
+                    <span>👤</span> Profile Details
+                </button>
+                <button class="sidebar-btn" [class.active]="activeTab() === 'password'"
+                    (click)="activeTab.set('password')">
+                    <span>🔐</span> Change Password
+                </button>
+            </nav>
+        </aside>
+
+        <!-- ─── Right: Content Panel ─────────────────────────────────────── -->
+        <main class="profile-main">
+
+            <!-- Profile Tab -->
+            <section *ngIf="activeTab() === 'profile'" class="form-section">
+                <div class="section-header">
+                    <h3>Personal Information</h3>
+                    <p>Update your name, email, and contact details</p>
+                </div>
+
+                <!-- Success / Error -->
+                <div class="alert alert-success" *ngIf="profileSuccess()">✅ {{ profileSuccess() }}</div>
+                <div class="alert alert-error" *ngIf="profileError()">❌ {{ profileError() }}</div>
+
+                <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="profile-form">
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="firstName">First Name</label>
+                            <input id="firstName" type="text" formControlName="firstName" placeholder="John"
+                                [class.error]="isInvalid(profileForm, 'firstName')" />
+                            <span class="field-error" *ngIf="isInvalid(profileForm, 'firstName')">First name is
+                                required</span>
+                        </div>
+                        <div class="form-field">
+                            <label for="lastName">Last Name</label>
+                            <input id="lastName" type="text" formControlName="lastName" placeholder="Doe"
+                                [class.error]="isInvalid(profileForm, 'lastName')" />
+                            <span class="field-error" *ngIf="isInvalid(profileForm, 'lastName')">Last name is
+                                required</span>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="email">Email Address</label>
+                        <input id="email" type="email" formControlName="email" placeholder="you@example.com"
+                            [class.error]="isInvalid(profileForm, 'email')" />
+                        <span class="field-error" *ngIf="isInvalid(profileForm, 'email')">Valid email is required</span>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="phone">Phone Number <span class="optional">(optional)</span></label>
+                        <input id="phone" type="tel" formControlName="phone" placeholder="+1 (555) 000-0000" />
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-save" [disabled]="savingProfile() || profileForm.invalid">
+                            <span *ngIf="!savingProfile()">💾 Save Changes</span>
+                            <span *ngIf="savingProfile()">Saving...</span>
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Password Tab -->
+            <section *ngIf="activeTab() === 'password'" class="form-section">
+                <div class="section-header">
+                    <h3>Change Password</h3>
+                    <p>Choose a strong password with at least 8 characters, one uppercase letter and one number</p>
+                </div>
+
+                <div class="alert alert-success" *ngIf="passwordSuccess()">✅ {{ passwordSuccess() }}</div>
+                <div class="alert alert-error" *ngIf="passwordError()">❌ {{ passwordError() }}</div>
+
+                <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="profile-form">
+                    <div class="form-field">
+                        <label for="currentPassword">Current Password</label>
+                        <div class="pw-wrapper">
+                            <input id="currentPassword" [type]="showCurrentPw() ? 'text' : 'password'"
+                                formControlName="currentPassword" placeholder="Enter current password"
+                                [class.error]="isInvalid(passwordForm, 'currentPassword')" />
+                            <button type="button" class="pw-toggle" (click)="showCurrentPw.set(!showCurrentPw())">
+                                {{ showCurrentPw() ? '🙈' : '👁️' }}
+                            </button>
+                        </div>
+                        <span class="field-error" *ngIf="isInvalid(passwordForm, 'currentPassword')">Current password is
+                            required</span>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="newPassword">New Password</label>
+                        <div class="pw-wrapper">
+                            <input id="newPassword" [type]="showNewPw() ? 'text' : 'password'"
+                                formControlName="newPassword" placeholder="Min 8 chars, 1 uppercase, 1 number"
+                                [class.error]="isInvalid(passwordForm, 'newPassword')" />
+                            <button type="button" class="pw-toggle" (click)="showNewPw.set(!showNewPw())">
+                                {{ showNewPw() ? '🙈' : '👁️' }}
+                            </button>
+                        </div>
+                        <span class="field-error" *ngIf="isInvalid(passwordForm, 'newPassword')">
+                            Password must be 8+ chars with uppercase and number
+                        </span>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="confirmPassword">Confirm New Password</label>
+                        <div class="pw-wrapper">
+                            <input id="confirmPassword" [type]="showConfirmPw() ? 'text' : 'password'"
+                                formControlName="confirmPassword" placeholder="Repeat new password"
+                                [class.error]="isInvalid(passwordForm, 'confirmPassword') || passwordForm.hasError('mismatch')" />
+                            <button type="button" class="pw-toggle" (click)="showConfirmPw.set(!showConfirmPw())">
+                                {{ showConfirmPw() ? '🙈' : '👁️' }}
+                            </button>
+                        </div>
+                        <span class="field-error"
+                            *ngIf="passwordForm.hasError('mismatch') && passwordForm.get('confirmPassword')?.touched">
+                            Passwords do not match
+                        </span>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-save btn-danger"
+                            [disabled]="savingPassword() || passwordForm.invalid">
+                            <span *ngIf="!savingPassword()">🔐 Change Password</span>
+                            <span *ngIf="savingPassword()">Saving...</span>
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+        </main>
+    </div>
+</div>

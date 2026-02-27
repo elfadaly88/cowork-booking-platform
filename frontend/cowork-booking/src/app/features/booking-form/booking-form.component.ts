@@ -97,8 +97,8 @@ export class BookingFormComponent implements OnInit {
     this.bookingForm = this.fb.group({
       bookingDate: [tomorrow, Validators.required],
       startTime: ['09:00', Validators.required],
-      endTime: ['17:00', Validators.required],
-      userId: [1] // Default user ID - in a real app, this would come from auth
+      endTime: ['17:00', Validators.required]
+      // userId is extracted from JWT on the backend — never sent from client
     });
   }
 
@@ -198,9 +198,9 @@ export class BookingFormComponent implements OnInit {
 
     const booking: BookingRequest = {
       roomId: this.roomId,
-      userId: formValue.userId,
       startTime: startTime.toISOString(),
       endTime: endTime.toISOString(),
+      totalPrice: this.totalPrice,
       deviceIds: this.selectedDevices.length > 0 ? this.selectedDevices : undefined
     };
 
@@ -210,11 +210,11 @@ export class BookingFormComponent implements OnInit {
     this.bookingService.createBooking(booking).subscribe({
       next: (response) => {
         this.submitting = false;
-        this.snackBar.open('Booking created successfully!', 'Close', {
-          duration: 3000,
+        this.snackBar.open('Booking created successfully! View it in My Bookings.', 'My Bookings', {
+          duration: 5000,
           panelClass: ['success-snackbar']
-        });
-        this.router.navigate(['/']);
+        }).onAction().subscribe(() => this.router.navigate(['/my-bookings']));
+        this.router.navigate(['/workspaces']);
       },
       error: (err) => {
         this.submitting = false;
@@ -231,7 +231,7 @@ export class BookingFormComponent implements OnInit {
     if (this.workspaceId) {
       this.router.navigate(['/workspace', this.workspaceId]);
     } else {
-      this.router.navigate(['/']);
+      this.router.navigate(['/workspaces']);
     }
   }
 }

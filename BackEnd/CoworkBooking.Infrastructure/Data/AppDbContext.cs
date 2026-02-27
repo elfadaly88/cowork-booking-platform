@@ -23,6 +23,8 @@ namespace CoworkBooking.Infrastructure.Data
         public DbSet<Device> Devices { get; set; }
         public DbSet<WorkspaceSchedulePeriod> WorkspaceSchedulePeriods { get; set; }
         public DbSet<WorkspaceSchedule> WorkspaceSchedules { get; set; }
+        public DbSet<WorkspaceImage> WorkspaceImages { get; set; }
+        public DbSet<WorkspaceReview> WorkspaceReviews { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -58,6 +60,38 @@ namespace CoworkBooking.Infrastructure.Data
                    .WithMany(u => u.OwnedWorkspaces)
                    .HasForeignKey(ws => ws.OwnerId)
                    .OnDelete(DeleteBehavior.Restrict);
+
+            // Booking → ApplicationUser (use NoAction to avoid cascade conflicts)
+            modelBuilder.Entity<Booking>()
+                .HasOne(b => b.User)
+                .WithMany(u => u.Bookings)
+                .HasForeignKey(b => b.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // WorkspaceImage cascades with WorkSpace
+            modelBuilder.Entity<WorkspaceImage>()
+                .HasOne(i => i.WorkSpace)
+                .WithMany(w => w.Images)
+                .HasForeignKey(i => i.WorkspaceId)
+                .OnDelete(DeleteBehavior.Cascade);
+            // WorkspaceReview cascade + no-action for user delete
+            modelBuilder.Entity<WorkspaceReview>()
+                .HasOne(r => r.WorkSpace)
+                .WithMany()
+                .HasForeignKey(r => r.WorkspaceId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<WorkspaceReview>()
+                .HasOne(r => r.User)
+                .WithMany()
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Unique: one review per user per workspace
+            modelBuilder.Entity<WorkspaceReview>()
+                .HasIndex(r => new { r.WorkspaceId, r.UserId })
+                .IsUnique();
+
             modelBuilder.Entity<ApplicationUserRole>(userRole =>
             {
                 userRole.HasKey(ur => new { ur.UserId, ur.RoleId });
@@ -75,3 +109,4 @@ namespace CoworkBooking.Infrastructure.Data
         }
     }
 }
+

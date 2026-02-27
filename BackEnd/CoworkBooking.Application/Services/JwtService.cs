@@ -30,9 +30,14 @@ namespace CoworkBooking.Application.Services
 
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString() ?? string.Empty),
+                // ✅ FIX #12 — include BOTH Sub and ClaimTypes.NameIdentifier so all controller patterns work
+                new Claim(JwtRegisteredClaimNames.Sub,  user.Id.ToString()),
+                new Claim(ClaimTypes.NameIdentifier,    user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
-                new Claim("fullName", user.FullName ?? string.Empty)
+                new Claim(ClaimTypes.Email,              user.Email ?? string.Empty),
+                new Claim("fullName", user.FullName ?? string.Empty),
+                // Jti: unique token ID — enables future token blacklisting/revocation
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 
             foreach (var role in roles)

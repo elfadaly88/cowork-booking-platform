@@ -4,7 +4,8 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
-  fullName: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -20,10 +21,26 @@ export interface AuthResponse {
 export interface User {
   id: string;
   email: string;
+  firstName: string;
+  lastName: string;
   fullName: string;
+  phone?: string;
   profileImageUrl?: string;
   roles: string[];
   isActive: boolean;
   isApproved: boolean;
   createdAt: string;
 }
+
+export interface UpdateProfileRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+

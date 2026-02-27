@@ -17,6 +17,14 @@ export interface Room {
   devices?: Device[];
 }
 
+export interface WorkspaceImage {
+  id?: number;
+  url: string;
+  caption?: string;
+  isMain: boolean;
+  order: number;
+}
+
 export interface Workspace {
   id?: number;
   ownerId?: string;
@@ -28,7 +36,11 @@ export interface Workspace {
   latitude?: number;
   longitude?: number;
   isApproved?: boolean;
+  averageRating?: number;
+  totalReviews?: number;
   rooms?: Room[];
+  images?: WorkspaceImage[];
+  mainImageUrl?: string;
   currentSchedulePeriod?: WorkspaceSchedulePeriod;
 }
 

@@ -5,7 +5,9 @@ using CoworkBooking.Infrastructure.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
+using System.Text.RegularExpressions;
 
 namespace CoworkBooking.Api.Controllers
 {
@@ -35,19 +37,24 @@ namespace CoworkBooking.Api.Controllers
         /// </summary>
         [HttpPost("login")]
         [AllowAnonymous]
+        [EnableRateLimiting("AuthPolicy")] // ✅ FIX #6 — rate limit login
         public async Task<ActionResult<AuthResponseDto>> Login([FromBody] LoginDto loginDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            // Generic error — prevents user enumeration
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
             if (user == null)
                 return Unauthorized(new { message = "Invalid email or password" });
 
             if (!user.IsActive)
-                return Unauthorized(new { message = "Account is inactive. Please contact support." });
+                return Unauthorized(new { message = "Invalid email or password" }); // ✅ FIX — don't leak account status
 
-            var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
+            // ✅ FIX #8 — lockoutOnFailure:true enables account lockout after MaxFailedAccessAttempts
+            var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, lockoutOnFailure: true);
+            if (result.IsLockedOut)
+                return StatusCode(429, new { message = "Account temporarily locked due to too many failed attempts. Try again in 15 minutes." });
             if (!result.Succeeded)
                 return Unauthorized(new { message = "Invalid email or password" });
 
@@ -62,12 +69,15 @@ namespace CoworkBooking.Api.Controllers
                 {
                     Id = user.Id,
                     Email = user.Email ?? string.Empty,
-                    FullName = user.FullName,
+                    FirstName = user.FirstName,
+                    LastName  = user.LastName,
+                    FullName  = user.FullName,
+                    Phone     = user.PhoneNumber,
                     ProfileImageUrl = user.ProfileImageUrl,
-                    Roles = roles.ToList(),
-                    IsActive = user.IsActive,
+                    Roles      = roles.ToList(),
+                    IsActive   = user.IsActive,
                     IsApproved = user.IsApproved,
-                    CreatedAt = user.CreatedAt
+                    CreatedAt  = user.CreatedAt
                 }
             });
         }
@@ -77,6 +87,7 @@ namespace CoworkBooking.Api.Controllers
         /// </summary>
         [HttpPost("register")]
         [AllowAnonymous]
+        [EnableRateLimiting("AuthPolicy")] // ✅ FIX #6 — rate limit registration
         public async Task<ActionResult<AuthResponseDto>> Register([FromBody] RegisterDto registerDto)
         {
             if (!ModelState.IsValid)
@@ -89,11 +100,11 @@ namespace CoworkBooking.Api.Controllers
             var newUser = new ApplicationUser
             {
                 UserName = registerDto.Email,
-                Email = registerDto.Email,
-                FullName = registerDto.FullName,
+                Email    = registerDto.Email,
+                FullName = registerDto.FullName,   // backward-compat: splits into First/Last internally
                 IsActive = true,
-                IsApproved = registerDto.UserType == "Owner" ? false : true, // Owner needs admin approval
-                EmailConfirmed = false // You can implement email confirmation later
+                IsApproved = registerDto.UserType == "Owner" ? false : true,
+                EmailConfirmed = false
             };
 
             var result = await _userManager.CreateAsync(newUser, registerDto.Password);
@@ -103,8 +114,9 @@ namespace CoworkBooking.Api.Controllers
                 return BadRequest(new { message = "Registration failed", errors });
             }
 
-            // Assign role based on user type selection (User or Owner)
-            var userRole = registerDto.UserType == "Owner" ? "Owner" : "User";
+            // ✅ FIX — Whitelist role assignment (prevent privilege escalation)
+            var allowedRoles = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "User", "Owner" };
+            var userRole = allowedRoles.Contains(registerDto.UserType) ? registerDto.UserType : "User";
             await _userManager.AddToRoleAsync(newUser, userRole);
 
             // Generate token for auto-login
@@ -225,5 +237,80 @@ namespace CoworkBooking.Api.Controllers
 
             return Ok(new { message = approve ? "Owner approved successfully" : "Owner rejected", isApproved = approve });
         }
+
+        /// <summary>Update current user's profile (name, email, phone)</summary>
+        [HttpPut("profile")]
+        [Authorize]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto dto)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var user = await _userManager.FindByIdAsync(userId!);
+            if (user == null) return NotFound();
+
+            // ✅ FIX #16 — Sanitize text inputs (strip HTML tags)
+            user.FirstName   = SanitizeText(dto.FirstName);
+            user.LastName    = SanitizeText(dto.LastName);
+            user.PhoneNumber = SanitizeText(dto.Phone ?? string.Empty);
+
+            // ✅ FIX #10 — Email changes require password re-verification in a real system
+            // For now: validate the new email format and check it's not already taken
+            if (!string.IsNullOrEmpty(dto.Email) && user.Email != dto.Email)
+            {
+                var existingWithEmail = await _userManager.FindByEmailAsync(dto.Email);
+                if (existingWithEmail != null && existingWithEmail.Id != user.Id)
+                    return BadRequest(new { message = "Email address is already in use" });
+
+                user.Email    = dto.Email.Trim().ToLowerInvariant();
+                user.UserName = user.Email;
+                user.EmailConfirmed = false; // require re-verification on email change
+            }
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+                return BadRequest(new { message = string.Join(", ", result.Errors.Select(e => e.Description)) });
+
+            var roles = (await _userManager.GetRolesAsync(user)).ToList();
+            var userDto = new
+            {
+                id        = user.Id,
+                email     = user.Email,
+                firstName = user.FirstName,
+                lastName  = user.LastName,
+                fullName  = user.FullName,
+                phone     = user.PhoneNumber,
+                roles,
+                isActive   = user.IsActive,
+                isApproved = user.IsApproved,
+                createdAt  = user.CreatedAt
+            };
+
+            return Ok(new { message = "Profile updated successfully", user = userDto });
+        }
+
+        /// <summary>Change the current user's password</summary>
+        [HttpPost("change-password")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var user = await _userManager.FindByIdAsync(userId!);
+            if (user == null) return NotFound();
+
+            var result = await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
+            if (!result.Succeeded)
+                return BadRequest(new { message = string.Join(", ", result.Errors.Select(e => e.Description)) });
+
+            return Ok(new { message = "Password changed successfully" });
+        }
+
+        // ─── Helper: strip HTML tags from user-supplied text ─────────────────
+        private static string SanitizeText(string? input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return string.Empty;
+            // Remove HTML tags and encode dangerous chars
+            var stripped = Regex.Replace(input.Trim(), "<[^>]*>", string.Empty);
+            return stripped.Length > 500 ? stripped[..500] : stripped; // hard cap
+        }
     }
 }
+

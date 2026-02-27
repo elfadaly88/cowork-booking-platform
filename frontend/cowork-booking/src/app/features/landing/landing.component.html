@@ -1,0 +1,192 @@
+<div class="landing-page">
+
+    <!-- ─── Hero Section ──────────────────────────────────────────────── -->
+    <section class="hero-section">
+        <nav class="hero-nav">
+            <div class="nav-brand">
+                <span class="brand-icon">🏢</span>
+                <span class="brand-name">CoworkHub</span>
+            </div>
+            <div class="nav-actions">
+                <a routerLink="/login" class="nav-link">Sign In</a>
+                <a routerLink="/register" class="nav-btn-primary">Get Started Free</a>
+            </div>
+        </nav>
+
+        <div class="hero-content">
+            <div class="hero-badge">✨ The Future of Work is Flexible</div>
+            <h1 class="hero-title">
+                Find Your Perfect<br>
+                <span class="hero-highlight">Workspace</span> Today
+            </h1>
+            <p class="hero-description">
+                Discover professional coworking spaces, private offices, and meeting rooms
+                wherever you need them. Book by the hour, day, or month.
+            </p>
+            <div class="hero-cta">
+                <button class="cta-primary" (click)="onGetStarted()">
+                    🚀 Get Started Free
+                </button>
+                <button class="cta-secondary" (click)="onExplore()">
+                    🗺️ Browse Workspaces
+                </button>
+            </div>
+            <div class="hero-trust">
+                <span>✅ No credit card required</span>
+                <span>✅ Free to browse</span>
+                <span>✅ Cancel anytime</span>
+            </div>
+        </div>
+
+        <!-- Floating workspace cards decoration -->
+        <div class="hero-floating-cards">
+            <div class="float-card fc1">
+                <span>🏙️</span>
+                <div>
+                    <strong>Downtown Hub</strong>
+                    <small>12 seats available</small>
+                </div>
+                <span class="fc-price">$8/hr</span>
+            </div>
+            <div class="float-card fc2">
+                <span>⭐</span>
+                <div>
+                    <strong>Creative Loft</strong>
+                    <small>Just booked!</small>
+                </div>
+                <span class="fc-price">$12/hr</span>
+            </div>
+            <div class="float-card fc3">
+                <span>🎯</span>
+                <div>
+                    <strong>Tech Campus</strong>
+                    <small>3 rooms open</small>
+                </div>
+                <span class="fc-price">$15/hr</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── Stats Bar ─────────────────────────────────────────────────── -->
+    <section class="stats-section">
+        <div class="stats-container">
+            <div class="stat-item" *ngFor="let stat of stats">
+                <div class="stat-value">{{ stat.value }}</div>
+                <div class="stat-label">{{ stat.label }}</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── Features ──────────────────────────────────────────────────── -->
+    <section class="features-section">
+        <div class="section-header">
+            <h2>Why Choose CoworkHub?</h2>
+            <p>Everything you need to work smarter, not harder</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card" *ngFor="let feature of features">
+                <div class="feature-icon">{{ feature.icon }}</div>
+                <h3>{{ feature.title }}</h3>
+                <p>{{ feature.desc }}</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── How It Works ──────────────────────────────────────────────── -->
+    <section class="how-it-works">
+        <div class="section-header">
+            <h2>Book in 3 Simple Steps</h2>
+            <p>From search to workspace in under a minute</p>
+        </div>
+        <div class="steps-container">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Find a Space</h3>
+                    <p>Browse available workspaces by city, capacity, or price. Filter by amenities that matter to you.
+                    </p>
+                </div>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Pick Your Slot</h3>
+                    <p>Choose your date and time. Add extra equipment like monitors or whiteboards if needed.</p>
+                </div>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Show Up & Work</h3>
+                    <p>Receive instant confirmation. Walk in and get straight to work — it's that simple.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── For Workspace Owners ──────────────────────────────────────── -->
+    <section class="owner-section">
+        <div class="owner-content">
+            <div class="owner-text">
+                <div class="owner-badge">For Space Owners</div>
+                <h2>Turn Your Space Into Revenue</h2>
+                <p>List your workspace, set your own pricing, and start earning. Our platform handles bookings,
+                    payments, and scheduling automatically.</p>
+                <ul class="owner-benefits">
+                    <li>✅ Free to list your workspace</li>
+                    <li>✅ Set your own hours and pricing</li>
+                    <li>✅ Real-time booking management</li>
+                    <li>✅ Analytics & revenue dashboard</li>
+                    <li>✅ Direct approval control</li>
+                </ul>
+                <button class="owner-cta" routerLink="/register">
+                    List My Workspace →
+                </button>
+            </div>
+            <div class="owner-visual">
+                <div class="dashboard-mockup">
+                    <div class="mockup-header">
+                        <span>📊 Owner Dashboard</span>
+                    </div>
+                    <div class="mockup-stat">
+                        <span class="m-label">Monthly Revenue</span>
+                        <span class="m-value">$3,240</span>
+                        <span class="m-growth">↑ 24%</span>
+                    </div>
+                    <div class="mockup-stat">
+                        <span class="m-label">Occupancy Rate</span>
+                        <span class="m-value">87%</span>
+                        <span class="m-growth">↑ 12%</span>
+                    </div>
+                    <div class="mockup-stat">
+                        <span class="m-label">Total Bookings</span>
+                        <span class="m-value">148</span>
+                        <span class="m-growth">↑ 8%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── Final CTA ─────────────────────────────────────────────────── -->
+    <section class="final-cta">
+        <h2>Ready to Find Your Space?</h2>
+        <p>Join thousands of professionals who book smarter with CoworkHub</p>
+        <div class="final-cta-buttons">
+            <button class="cta-primary" (click)="onGetStarted()">Create Free Account</button>
+            <button class="cta-ghost" (click)="onExplore()">Browse Spaces</button>
+        </div>
+    </section>
+
+    <!-- ─── Footer ────────────────────────────────────────────────────── -->
+    <footer class="landing-footer">
+        <div class="footer-brand">
+            <span class="brand-icon">🏢</span>
+            <span class="brand-name">CoworkHub</span>
+        </div>
+        <p>© 2026 CoworkHub. The smarter way to work.</p>
+    </footer>
+
+</div>

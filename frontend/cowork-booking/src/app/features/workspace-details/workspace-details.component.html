@@ -6,38 +6,66 @@
 
   <app-loading-spinner *ngIf="loading"></app-loading-spinner>
 
-  <app-error-message
-    *ngIf="error && !loading"
-    [title]="'Failed to load workspace'"
-    [message]="error"
-  ></app-error-message>
+  <app-error-message *ngIf="error && !loading" [title]="'Failed to load workspace'"
+    [message]="error"></app-error-message>
 
   <div *ngIf="workspace && !loading && !error">
+
+    <!-- ─── Image Gallery ─────────────────────────────────────────────────── -->
+    <section class="gallery-section" *ngIf="images().length > 0">
+      <div class="gallery-main">
+        <img [src]="images()[activeImageIndex()].url" [alt]="workspace.name" class="gallery-main-img" />
+        <button class="gallery-nav gallery-prev" (click)="prevImage()" *ngIf="images().length > 1">‹</button>
+        <button class="gallery-nav gallery-next" (click)="nextImage()" *ngIf="images().length > 1">›</button>
+        <div class="gallery-counter" *ngIf="images().length > 1">
+          {{ activeImageIndex() + 1 }} / {{ images().length }}
+        </div>
+      </div>
+      <div class="gallery-thumbnails" *ngIf="images().length > 1">
+        <div class="gallery-thumb" *ngFor="let img of images(); let i = index" [class.active]="i === activeImageIndex()"
+          (click)="setActiveImage(i)">
+          <img [src]="img.url" [alt]="'Photo ' + (i+1)" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Workspace Header ────────────────────────────────────────────── -->
     <div class="workspace-header">
-      <h1 class="workspace-title">{{ workspace.name }}</h1>
-      <p class="workspace-city" *ngIf="workspace.city">
-        <span class="location-icon">📍</span>
-        {{ workspace.city }}
-      </p>
-      <p class="workspace-description" *ngIf="workspace.description">
-        {{ workspace.description }}
-      </p>
-      <p class="workspace-address" *ngIf="workspace.address">
-        <span class="address-icon">🏢</span>
-        {{ workspace.address }}
-      </p>
-      <p class="workspace-coordinates" *ngIf="workspace.latitude && workspace.longitude">
-        <span class="coordinates-icon">🌍</span>
-        Coordinates: {{ workspace.latitude }}, {{ workspace.longitude }}
-      </p>
+      <!-- Placeholder banner if no photos -->
+      <div class="header-image-placeholder" *ngIf="images().length === 0">
+        <span>🏢</span>
+      </div>
+
+      <div class="header-info">
+        <div class="header-top">
+          <h1 class="workspace-title">{{ workspace.name }}</h1>
+          <div class="rating-pill" *ngIf="workspace.averageRating">
+            ⭐ {{ workspace.averageRating | number:'1.1-1' }}
+            <span class="rating-count" *ngIf="workspace.totalReviews">({{ workspace.totalReviews }})</span>
+          </div>
+        </div>
+
+        <p class="workspace-city" *ngIf="workspace.city">
+          <span class="location-icon">📍</span>
+          {{ workspace.city }}
+        </p>
+        <p class="workspace-address" *ngIf="workspace.address">
+          <span class="address-icon">🏢</span>
+          {{ workspace.address }}
+        </p>
+        <p class="workspace-description" *ngIf="workspace.description">
+          {{ workspace.description }}
+        </p>
+      </div>
     </div>
 
-    <!-- Working Hours Schedule -->
+    <!-- ─── Working Hours Schedule ──────────────────────────────────────── -->
     <section class="section" *ngIf="schedulePeriod">
       <h2 class="section-title">Working Hours</h2>
       <div class="schedule-card">
         <p class="schedule-period">
-          Valid from <strong>{{ schedulePeriod.startDate | date }}</strong> to <strong>{{ schedulePeriod.endDate | date }}</strong>
+          Valid from <strong>{{ schedulePeriod.startDate | date }}</strong> to <strong>{{ schedulePeriod.endDate | date
+            }}</strong>
         </p>
         <table class="schedule-table">
           <thead>
@@ -64,17 +92,22 @@
       </div>
     </section>
 
-    <!-- Rooms Section -->
+    <!-- ─── Rooms Section ───────────────────────────────────────────────── -->
     <section class="section">
       <h2 class="section-title">Available Rooms</h2>
       <div *ngIf="workspace.rooms && workspace.rooms.length > 0" class="rooms-grid">
         <div *ngFor="let room of workspace.rooms" class="room-card">
           <div class="room-header">
             <h3 class="room-name">{{ room.name }}</h3>
-            <span class="room-capacity">
-              <span class="capacity-icon">👥</span>
-              Capacity: {{ room.capacity }}
-            </span>
+            <div class="room-meta">
+              <span class="room-capacity">
+                <span class="capacity-icon">👥</span>
+                {{ room.capacity }} seats
+              </span>
+              <span class="room-price" *ngIf="room.pricePerHour">
+                💵 ${{ room.pricePerHour }}/hr
+              </span>
+            </div>
           </div>
           <div class="room-body">
             <div class="availability-info">
@@ -89,13 +122,15 @@
               <div class="devices-list">
                 <span *ngFor="let device of room.devices" class="device-chip">
                   {{ device.name }}
+                  <span *ngIf="device.extraCostPerHour > 0" class="device-cost">+${{ device.extraCostPerHour
+                    }}/hr</span>
                 </span>
               </div>
             </div>
           </div>
           <div class="room-actions">
             <button class="book-button" (click)="bookRoom(room)">
-              Book Room
+              Book This Room →
             </button>
           </div>
         </div>
@@ -104,5 +139,116 @@
         No rooms available in this workspace.
       </p>
     </section>
+
+    <!-- ─── Reviews Section ─────────────────────────────────────────────── -->
+    <section class="section reviews-section">
+      <div class="reviews-header">
+        <div>
+          <h2 class="section-title">
+            Reviews
+            <span class="reviews-count" *ngIf="reviews().length">({{ reviews().length }})</span>
+          </h2>
+          <div class="avg-rating" *ngIf="reviews().length">
+            <span class="star-row">
+              <span *ngFor="let f of getStarArray(getAverageRating())" class="star" [class.filled]="f">★</span>
+            </span>
+            <span class="avg-num">{{ getAverageRating() | number:'1.1-1' }} average</span>
+          </div>
+        </div>
+        <div class="review-actions-top">
+          <!-- Only logged-in users can write a review -->
+          <ng-container *ngIf="isAuthenticated()">
+            <button class="write-review-btn" *ngIf="!showReviewForm() && !myReview()" (click)="openReviewForm()">
+              ✏️ Write a Review
+            </button>
+            <button class="write-review-btn edit-btn" *ngIf="!showReviewForm() && myReview()"
+              (click)="openReviewForm()">
+              ✏️ Edit My Review
+            </button>
+            <button class="delete-review-btn" *ngIf="!showReviewForm() && myReview()" (click)="deleteMyReview()">
+              🗑️ Delete
+            </button>
+          </ng-container>
+        </div>
+      </div>
+
+      <!-- ─── Review Success Message ──────────────────────────────────────── -->
+      <div class="review-alert review-success" *ngIf="reviewSuccess()">✅ {{ reviewSuccess() }}</div>
+
+      <!-- ─── Review Form ─────────────────────────────────────────────────── -->
+      <div class="review-form-card" *ngIf="showReviewForm()">
+        <div class="review-form-header">
+          <h3>{{ myReview() ? 'Update Your Review' : 'Share Your Experience' }}</h3>
+        </div>
+
+        <div class="rating-picker">
+          <label>Your Rating</label>
+          <div class="star-picker">
+            <button *ngFor="let i of [1,2,3,4,5]" type="button" class="star-pick-btn" [class.selected]="i <= myRating"
+              (click)="myRating = i" [attr.aria-label]="'Rate ' + i + ' stars'">★</button>
+          </div>
+          <span class="rating-label">{{ myRating }}/5</span>
+        </div>
+
+        <div class="review-comment-field">
+          <label for="review-comment">Comment <span class="optional">(optional)</span></label>
+          <textarea id="review-comment" [(ngModel)]="myComment"
+            placeholder="Share what you loved or what could be improved..." rows="4"></textarea>
+        </div>
+
+        <div class="review-alert review-error" *ngIf="reviewError()">❌ {{ reviewError() }}</div>
+
+        <div class="review-form-actions">
+          <button type="button" class="btn-cancel-review" (click)="cancelReviewForm()">Cancel</button>
+          <button type="button" class="btn-submit-review" (click)="submitReview()" [disabled]="submittingReview()">
+            <span *ngIf="!submittingReview()">{{ myReview() ? 'Update Review' : 'Submit Review' }}</span>
+            <span *ngIf="submittingReview()">Saving…</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ─── My Review Card ─────────────────────────────────────────────────── -->
+      <div class="my-review-card" *ngIf="myReview() && !showReviewForm()">
+        <div class="review-meta">
+          <div class="reviewer-avatar my-avatar">Me</div>
+          <div>
+            <div class="reviewer-name">Your Review</div>
+            <div class="review-date">{{ myReview()!.updatedAt || myReview()!.createdAt | date:'MMM d, y' }}</div>
+          </div>
+          <div class="star-row inline-stars">
+            <span *ngFor="let f of getStarArray(myReview()!.rating)" class="star" [class.filled]="f">★</span>
+          </div>
+        </div>
+        <p class="review-comment" *ngIf="myReview()!.comment">{{ myReview()!.comment }}</p>
+      </div>
+
+      <!-- ─── All Reviews ───────────────────────────────────────────────── -->
+      <div class="reviews-list">
+        <div class="review-loading" *ngIf="reviewsLoading()">
+          <div class="review-spinner"></div>
+          Loading reviews...
+        </div>
+
+        <div class="no-reviews" *ngIf="!reviewsLoading() && reviews().length === 0">
+          <span class="no-review-icon">💬</span>
+          <p>No reviews yet. Be the first to share your experience!</p>
+        </div>
+
+        <div class="review-card" *ngFor="let review of reviews()">
+          <div class="review-meta">
+            <div class="reviewer-avatar">{{ review.userInitials || '?' }}</div>
+            <div>
+              <div class="reviewer-name">{{ review.userName || 'Anonymous' }}</div>
+              <div class="review-date">{{ review.createdAt | date:'MMM d, y' }}</div>
+            </div>
+            <div class="star-row inline-stars">
+              <span *ngFor="let f of getStarArray(review.rating)" class="star" [class.filled]="f">★</span>
+            </div>
+          </div>
+          <p class="review-comment" *ngIf="review.comment">{{ review.comment }}</p>
+        </div>
+      </div>
+    </section>
+
   </div>
 </div>

@@ -1,0 +1,202 @@
+<div class="my-bookings-page">
+
+    <!-- ─── Page Header ──────────────────────────────────────────────── -->
+    <div class="page-header">
+        <div class="header-content">
+            <button class="back-btn" routerLink="/workspaces">
+                ← Back to Workspaces
+            </button>
+            <div class="header-title">
+                <h1>My Bookings</h1>
+                <p class="header-subtitle">Manage your workspace reservations</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Success Message ───────────────────────────────────────────── -->
+    <div class="success-banner" *ngIf="successMessage()">
+        <span class="success-icon">✅</span>
+        <span>{{ successMessage() }}</span>
+    </div>
+
+    <!-- ─── Stats Cards ───────────────────────────────────────────────── -->
+    <div class="stats-grid" *ngIf="!loading() && !error()">
+        <div class="stat-card stat-total">
+            <div class="stat-icon">📅</div>
+            <div class="stat-info">
+                <div class="stat-value">{{ totalBookings() }}</div>
+                <div class="stat-label">Total Bookings</div>
+            </div>
+        </div>
+        <div class="stat-card stat-confirmed">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+                <div class="stat-value">{{ confirmedCount() }}</div>
+                <div class="stat-label">Confirmed</div>
+            </div>
+        </div>
+        <div class="stat-card stat-completed">
+            <div class="stat-icon">🏁</div>
+            <div class="stat-info">
+                <div class="stat-value">{{ completedCount() }}</div>
+                <div class="stat-label">Completed</div>
+            </div>
+        </div>
+        <div class="stat-card stat-spent">
+            <div class="stat-icon">💳</div>
+            <div class="stat-info">
+                <div class="stat-value">{{ totalSpent() | currency:'USD':'symbol':'1.0-0' }}</div>
+                <div class="stat-label">Total Spent</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Loading ──────────────────────────────────────────────────── -->
+    <div class="loading-state" *ngIf="loading()">
+        <div class="loading-spinner"></div>
+        <p>Loading your bookings...</p>
+    </div>
+
+    <!-- ─── Error ────────────────────────────────────────────────────── -->
+    <div class="error-state" *ngIf="error() && !loading()">
+        <div class="error-icon">⚠️</div>
+        <p>{{ error() }}</p>
+        <button class="retry-btn" (click)="loadBookings()">Try Again</button>
+    </div>
+
+    <!-- ─── Filter Tabs ───────────────────────────────────────────────── -->
+    <div class="filter-tabs" *ngIf="!loading() && !error()">
+        <button class="tab-btn" [class.active]="filterStatus() === 'all'" (click)="filterStatus.set('all')">
+            All <span class="tab-count">{{ totalBookings() }}</span>
+        </button>
+        <button class="tab-btn" [class.active]="filterStatus() === 'confirmed'" (click)="filterStatus.set('confirmed')">
+            Confirmed <span class="tab-count tab-confirmed">{{ confirmedCount() }}</span>
+        </button>
+        <button class="tab-btn" [class.active]="filterStatus() === 'completed'" (click)="filterStatus.set('completed')">
+            Completed <span class="tab-count tab-completed">{{ completedCount() }}</span>
+        </button>
+        <button class="tab-btn" [class.active]="filterStatus() === 'cancelled'" (click)="filterStatus.set('cancelled')">
+            Cancelled <span class="tab-count tab-cancelled">{{ cancelledCount() }}</span>
+        </button>
+    </div>
+
+    <!-- ─── Bookings List ─────────────────────────────────────────────── -->
+    <div class="bookings-list" *ngIf="!loading() && !error()">
+
+        <!-- Empty state -->
+        <div class="empty-state" *ngIf="filteredBookings().length === 0">
+            <div class="empty-illustration">📭</div>
+            <h3>No bookings found</h3>
+            <p *ngIf="filterStatus() === 'all'">You haven't made any bookings yet.</p>
+            <p *ngIf="filterStatus() !== 'all'">No {{ filterStatus() }} bookings to show.</p>
+            <button class="find-space-btn" routerLink="/">Find a Workspace →</button>
+        </div>
+
+        <!-- Booking cards -->
+        <div class="booking-card" *ngFor="let booking of filteredBookings()" [class.upcoming]="isUpcoming(booking)"
+            [class.past]="isPast(booking)" [class.cancelled]="booking.status === 'Cancelled'">
+
+            <!-- Upcoming badge -->
+            <div class="upcoming-badge" *ngIf="isUpcoming(booking)">🔔 Upcoming</div>
+
+            <!-- Card Header -->
+            <div class="booking-card-header">
+                <div class="workspace-info">
+                    <h3 class="workspace-name">{{ booking.workspaceName || 'Workspace' }}</h3>
+                    <span class="workspace-city" *ngIf="booking.workspaceCity">
+                        📍 {{ booking.workspaceCity }}
+                    </span>
+                </div>
+                <span class="status-badge" [class]="getStatusClass(booking.status)">
+                    {{ getStatusIcon(booking.status) }} {{ booking.status }}
+                </span>
+            </div>
+
+            <!-- Room Info -->
+            <div class="room-info" *ngIf="booking.roomName">
+                <span class="room-icon">🚪</span>
+                <span>{{ booking.roomName }}</span>
+            </div>
+
+            <!-- Date & Time -->
+            <div class="booking-datetime">
+                <div class="datetime-row">
+                    <span class="datetime-icon">📅</span>
+                    <div class="datetime-details">
+                        <span class="date-text">{{ booking.startTime | date:'EEEE, MMMM d, y' }}</span>
+                        <span class="time-text">
+                            {{ booking.startTime | date:'h:mm a' }} – {{ booking.endTime | date:'h:mm a' }}
+                            <span class="duration-tag">{{ getDurationHours(booking.startTime, booking.endTime)
+                                }}h</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Price -->
+            <div class="booking-price">
+                <span class="price-label">Total Paid</span>
+                <span class="price-value">{{ booking.totalPrice | currency }}</span>
+            </div>
+
+            <!-- Cancellation info -->
+            <div class="cancellation-info" *ngIf="booking.status === 'Cancelled'">
+                <span class="cancel-icon">ℹ️</span>
+                <div>
+                    <span class="cancel-label">Cancelled on {{ booking.cancelledAt | date:'MMM d, y' }}</span>
+                    <span class="cancel-reason" *ngIf="booking.cancellationReason">
+                        Reason: "{{ booking.cancellationReason }}"
+                    </span>
+                </div>
+            </div>
+
+            <!-- Booking reference -->
+            <div class="booking-ref">
+                Booking #{{ booking.id }} · Booked {{ booking.createdAt | date:'MMM d' }}
+            </div>
+
+            <!-- Actions -->
+            <div class="booking-actions">
+                <button class="action-btn view-btn" *ngIf="booking.workspaceId"
+                    (click)="viewWorkspace(booking.workspaceId!)">
+                    View Workspace
+                </button>
+                <button class="action-btn rebook-btn"
+                    *ngIf="booking.status === 'Completed' || booking.status === 'Cancelled'"
+                    (click)="rebookRoom(booking)">
+                    Book Again
+                </button>
+                <button class="action-btn cancel-btn" *ngIf="canCancel(booking)"
+                    [disabled]="cancellingId() === booking.id" (click)="openCancelDialog(booking.id)">
+                    <span *ngIf="cancellingId() !== booking.id">Cancel Booking</span>
+                    <span *ngIf="cancellingId() === booking.id">Cancelling...</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ─── Cancel Confirmation Dialog ──────────────────────────────────── -->
+    <div class="dialog-overlay" *ngIf="showCancelDialog()" (click)="closeCancelDialog()">
+        <div class="dialog-box" (click)="$event.stopPropagation()">
+            <div class="dialog-header">
+                <span class="dialog-icon">⚠️</span>
+                <h3>Cancel Booking?</h3>
+            </div>
+            <p class="dialog-text">Are you sure you want to cancel this booking? This action cannot be undone.</p>
+
+            <div class="dialog-field">
+                <label for="cancel-reason">Reason (optional)</label>
+                <textarea id="cancel-reason" [(ngModel)]="cancelReason" placeholder="Tell us why you're cancelling..."
+                    rows="3">
+        </textarea>
+            </div>
+
+            <div class="dialog-actions">
+                <button class="dialog-btn dialog-keep" (click)="closeCancelDialog()">Keep Booking</button>
+                <button class="dialog-btn dialog-cancel" (click)="confirmCancel()">Yes, Cancel</button>
+            </div>
+        </div>
+    </div>
+
+</div>

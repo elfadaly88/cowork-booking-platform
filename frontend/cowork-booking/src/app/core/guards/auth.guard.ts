@@ -2,17 +2,42 @@ import { inject } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
+// ─── Helper: validate JWT expiry without a library ──────────────────────────
+function isTokenExpired(token: string): boolean {
+  try {
+    // JWT format: header.payload.signature
+    const parts = token.split('.');
+    if (parts.length !== 3) return true;
+
+    // Base64URL decode the payload
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+
+    // 'exp' is seconds since Unix epoch
+    if (!payload.exp) return false; // no expiry claim = treat as valid
+    const nowSec = Math.floor(Date.now() / 1000);
+    return payload.exp < nowSec; // true = expired
+  } catch {
+    return true; // malformed token → treat as expired
+  }
+}
+
 /**
  * Auth Guard - Protects routes that require authentication
+ * ✅ FIX #2 — validates token is present AND not expired
  */
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
   const token = authService.getToken();
 
-  // If token is missing, null, or empty string, redirect to login
-  if (token && token.trim() !== '') {
+  // Check token exists and is not expired
+  if (token && token.trim() !== '' && !isTokenExpired(token)) {
     return true;
+  }
+
+  // Token missing or expired → clean up and redirect
+  if (token) {
+    authService.logout(); // clear stale/expired token
   }
 
   router.navigate(['/login'], {
@@ -23,32 +48,34 @@ export const authGuard: CanActivateFn = (route, state) => {
 
 /**
  * Admin Guard - Protects routes that require Admin role
+ * ✅ FIX #2 — also checks token validity
  */
 export const adminGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
+  const token = authService.getToken();
 
-  if (authService.isAuthenticated() && authService.isAdmin()) {
+  if (token && !isTokenExpired(token) && authService.isAuthenticated() && authService.isAdmin()) {
     return true;
   }
 
-  // Redirect to home or unauthorized page
   router.navigate(['/']);
   return false;
 };
 
 /**
  * Owner Guard - Protects routes that require Owner role
+ * ✅ FIX #2 — also checks token validity
  */
 export const ownerGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
+  const token = authService.getToken();
 
-  if (authService.isAuthenticated() && authService.isOwner()) {
+  if (token && !isTokenExpired(token) && authService.isAuthenticated() && authService.isOwner()) {
     return true;
   }
 
-  // Redirect to home or unauthorized page
   router.navigate(['/']);
   return false;
 };
@@ -59,8 +86,14 @@ export const ownerGuard: CanActivateFn = (route, state) => {
 export const guestGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
+  const token = authService.getToken();
 
-  if (!authService.isAuthenticated()) {
+  // If user has a valid (non-expired) token, they're authenticated
+  if (!authService.isAuthenticated() || !token || isTokenExpired(token)) {
+    // Clean up expired token silently
+    if (token && isTokenExpired(token)) {
+      authService.logout();
+    }
     return true;
   }
 

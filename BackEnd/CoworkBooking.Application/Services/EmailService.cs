@@ -1,0 +1,142 @@
+using CoworkBooking.Application.Interfaces;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System.Net;
+using System.Net.Mail;
+
+namespace CoworkBooking.Application.Services
+{
+    public class EmailSettings
+    {
+        public string Host      { get; set; } = "smtp.gmail.com";
+        public int    Port      { get; set; } = 587;
+        public bool   EnableSsl { get; set; } = true;
+        public string Username  { get; set; } = string.Empty;
+        public string Password  { get; set; } = string.Empty;
+        public string FromName  { get; set; } = "CoworkHub";
+        public string FromEmail { get; set; } = "noreply@coworkhub.app";
+        public bool   IsEnabled { get; set; } = false; // false → log only, no real send
+    }
+
+    public class EmailService : IEmailService
+    {
+        private readonly EmailSettings _settings;
+        private readonly ILogger<EmailService> _logger;
+
+        public EmailService(IOptions<EmailSettings> settings, ILogger<EmailService> logger)
+        {
+            _settings = settings.Value;
+            _logger   = logger;
+        }
+
+        public async Task SendBookingConfirmationAsync(string toEmail, string userName, BookingEmailData data)
+        {
+            var subject = $"✅ Booking Confirmed — {data.WorkspaceName}";
+            var body = BuildBookingHtml(userName, data, confirmed: true);
+            await SendAsync(toEmail, subject, body);
+        }
+
+        public async Task SendBookingCancellationAsync(string toEmail, string userName, BookingEmailData data)
+        {
+            var subject = $"❌ Booking Cancelled — {data.WorkspaceName}";
+            var body = BuildBookingHtml(userName, data, confirmed: false);
+            await SendAsync(toEmail, subject, body);
+        }
+
+        public async Task SendWelcomeEmailAsync(string toEmail, string userName)
+        {
+            var subject = "🎉 Welcome to CoworkHub!";
+            var body = $@"
+            <div style='font-family:Inter,sans-serif;max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;'>
+              <div style='background:linear-gradient(135deg,#2563EB,#7C3AED);padding:2rem;text-align:center;'>
+                <h1 style='color:white;margin:0;'>🏢 CoworkHub</h1>
+              </div>
+              <div style='padding:2rem;'>
+                <h2>Welcome aboard, {userName}!</h2>
+                <p>You're now part of CoworkHub. Discover and book amazing workspaces near you.</p>
+                <a href='http://localhost:4200/workspaces'
+                   style='display:inline-block;background:linear-gradient(135deg,#2563EB,#7C3AED);color:white;padding:0.75rem 2rem;border-radius:8px;text-decoration:none;font-weight:600;margin-top:1rem;'>
+                  Browse Workspaces →
+                </a>
+              </div>
+            </div>";
+            await SendAsync(toEmail, subject, body);
+        }
+
+        private string BuildBookingHtml(string userName, BookingEmailData data, bool confirmed)
+        {
+            var accent     = confirmed ? "#059669" : "#DC2626";
+            var statusText = confirmed ? "Confirmed" : "Cancelled";
+            var icon       = confirmed ? "✅" : "❌";
+            var duration   = (data.EndTime - data.StartTime).TotalHours;
+
+            return $@"
+            <div style='font-family:Inter,sans-serif;max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #E2E8F0;'>
+              <div style='background:linear-gradient(135deg,#2563EB,#7C3AED);padding:2rem;text-align:center;'>
+                <h1 style='color:white;margin:0;font-size:1.5rem;'>🏢 CoworkHub</h1>
+              </div>
+              <div style='padding:2rem;'>
+                <div style='text-align:center;margin-bottom:1.5rem;'>
+                  <span style='font-size:3rem;'>{icon}</span>
+                  <h2 style='color:{accent};margin:0.5rem 0;'>Booking {statusText}</h2>
+                  <p style='color:#64748B;'>Hi {userName}, your booking has been {statusText.ToLower()}.</p>
+                </div>
+                <div style='background:#F8FAFC;border-radius:10px;padding:1.5rem;margin-bottom:1.5rem;'>
+                  <table style='width:100%;border-collapse:collapse;'>
+                    <tr><td style='padding:0.5rem 0;color:#64748B;'>Booking #</td><td style='font-weight:700;'>#{data.BookingId}</td></tr>
+                    <tr><td style='padding:0.5rem 0;color:#64748B;'>Workspace</td><td style='font-weight:700;'>{data.WorkspaceName}</td></tr>
+                    <tr><td style='padding:0.5rem 0;color:#64748B;'>Room</td><td style='font-weight:700;'>{data.RoomName}</td></tr>
+                    <tr><td style='padding:0.5rem 0;color:#64748B;'>City</td><td style='font-weight:700;'>{data.City}</td></tr>
+                    <tr><td style='padding:0.5rem 0;color:#64748B;'>Start</td><td style='font-weight:700;'>{data.StartTime:ddd, MMM d yyyy h:mm tt}</td></tr>
+                    <tr><td style='padding:0.5rem 0;color:#64748B;'>End</td><td style='font-weight:700;'>{data.EndTime:ddd, MMM d yyyy h:mm tt}</td></tr>
+                    <tr><td style='padding:0.5rem 0;color:#64748B;'>Duration</td><td style='font-weight:700;'>{duration:0.#} hours</td></tr>
+                    <tr><td style='padding:0.5rem 0;color:#64748B;'>Total</td><td style='font-weight:700;color:{accent};'>${data.TotalPrice:0.00}</td></tr>
+                    {(data.CancellationReason != null ? $"<tr><td style='padding:0.5rem 0;color:#64748B;'>Reason</td><td style='color:#DC2626;'>{data.CancellationReason}</td></tr>" : "")}
+                  </table>
+                </div>
+                <a href='http://localhost:4200/my-bookings'
+                   style='display:inline-block;background:linear-gradient(135deg,#2563EB,#7C3AED);color:white;padding:0.75rem 2rem;border-radius:8px;text-decoration:none;font-weight:600;'>
+                  View My Bookings →
+                </a>
+                <p style='margin-top:2rem;color:#94A3B8;font-size:0.8rem;'>CoworkHub · Flexible Workspaces</p>
+              </div>
+            </div>";
+        }
+
+        private async Task SendAsync(string toEmail, string subject, string htmlBody)
+        {
+            if (!_settings.IsEnabled)
+            {
+                _logger.LogInformation("[EMAIL SIMULATED] To: {To} | Subject: {Subject}", toEmail, subject);
+                await Task.CompletedTask;
+                return;
+            }
+
+            try
+            {
+                using var client = new SmtpClient(_settings.Host, _settings.Port)
+                {
+                    EnableSsl   = _settings.EnableSsl,
+                    Credentials = new NetworkCredential(_settings.Username, _settings.Password)
+                };
+
+                var from    = new MailAddress(_settings.FromEmail, _settings.FromName);
+                var to      = new MailAddress(toEmail);
+                var message = new MailMessage(from, to)
+                {
+                    Subject    = subject,
+                    Body       = htmlBody,
+                    IsBodyHtml = true
+                };
+
+                await client.SendMailAsync(message);
+                _logger.LogInformation("Email sent to {Email}: {Subject}", toEmail, subject);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send email to {Email}", toEmail);
+                // Don't throw — email failure should never break the main flow
+            }
+        }
+    }
+}

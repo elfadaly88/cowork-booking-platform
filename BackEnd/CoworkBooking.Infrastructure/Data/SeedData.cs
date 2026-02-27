@@ -74,24 +74,17 @@ namespace CoworkBooking.Infrastructure.Data
                 new WorkspaceSchedule { SchedulePeriod = schedulePeriod, DayOfWeek = DayOfWeek.Saturday, IsWeekend = true }
             };
 
-            // 📅 Example Bookings (temporary user IDs)
+            // 📅 Example Bookings — use the actual first user's Guid
             var bookings = new List<Booking>
             {
                 new Booking
                 {
-                    UserId = "test-user-1", // TODO: Replace with actual user from IdentitySeed
+                    UserId = owner.Id, // actual Guid from Identity
                     Room = room1,
                     StartTime = DateTime.Now.AddHours(1),
                     EndTime = DateTime.Now.AddHours(3),
-                    TotalPrice = 150m
-                },
-                new Booking
-                {
-                    UserId = "test-user-2", // TODO: Replace with actual user from IdentitySeed
-                    Room = room2,
-                    StartTime = DateTime.Now.AddDays(1).AddHours(9),
-                    EndTime = DateTime.Now.AddDays(1).AddHours(12),
-                    TotalPrice = 360m
+                    TotalPrice = 150m,
+                    Status = BookingStatus.Confirmed
                 }
             };
 
