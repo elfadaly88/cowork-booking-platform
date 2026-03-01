@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } fr
 import { Router, ActivatedRoute } from '@angular/router';
 import { WorkspaceService } from '../../core/services/workspace.service';
 import { CreateWorkspaceDto, CreateRoomDto, CreateDeviceDto } from '../../core/models/workspace.model';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-owner-workspace-form',
@@ -75,7 +76,11 @@ export class OwnerWorkspaceFormComponent implements OnInit {
     if (this.rooms.length > 1) {
       this.rooms.removeAt(index);
     } else {
-      alert('At least one room is required');
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'At least one room is required'
+      });
     }
   }
 

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import Swal from 'sweetalert2';
 
 // Custom validator for password match
 function passwordMatchValidator(g: FormGroup) {
@@ -67,8 +68,13 @@ export class RegisterComponent {
 
         // If owner account, show approval pending message and redirect to login
         if (response.user.roles.includes('Owner') && !response.user.isApproved) {
-          alert('✅ Registration successful! Your owner account is pending admin approval. You will be notified once approved.');
-          this.router.navigate(['/login']);
+          Swal.fire({
+            icon: 'success',
+            title: 'Registration successful!',
+            text: 'Your owner account is pending admin approval. You will be notified once approved.'
+          }).then(() => {
+            this.router.navigate(['/login']);
+          });
         } else {
           this.router.navigate(['/']);
         }
