@@ -21,10 +21,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((error) => {
       // Handle 401 Unauthorized - token expired or invalid
-      if (error.status === 401) {
+      // ⚠️ Skip if this IS the logout request — avoids triggering logout() recursively
+      const isLogoutRequest = req.url.includes('/auth/logout');
+      if (error.status === 401 && !isLogoutRequest) {
         console.error('Unauthorized request - logging out');
-        authService.logout();
-        router.navigate(['/login']);
+        authService.logout(); // AuthService.isLoggingOut guard also protects here
       }
       return throwError(() => error);
     })

@@ -13,6 +13,9 @@ export class AuthService {
   private readonly TOKEN_KEY = 'auth_token';
   private readonly USER_KEY = 'auth_user';
 
+  // Re-entrancy guard — prevents logout() from being called while already logging out
+  private isLoggingOut = false;
+
   // Signals for reactive state
   private currentUserSignal = signal<User | null>(this.getUserFromStorage());
   private tokenSignal = signal<string | null>(this.getTokenFromStorage());
@@ -26,7 +29,7 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private router: Router
-  ) {}
+  ) { }
 
   /**
    * Login user and store token
@@ -65,7 +68,8 @@ export class AuthService {
       }),
       catchError(error => {
         console.error('Get current user error:', error);
-        this.logout();
+        // ⚠️ Do NOT call logout() here — it would trigger the interceptor
+        // which would call logout() again (infinite loop). Let the interceptor handle 401.
         return throwError(() => error);
       })
     );
@@ -75,14 +79,21 @@ export class AuthService {
    * Logout user
    */
   logout(): void {
-    // Optional: Call backend logout endpoint
+    // Re-entrancy guard — prevent infinite loop if logout HTTP call itself triggers a 401
+    if (this.isLoggingOut) return;
+    this.isLoggingOut = true;
+
+    // ✅ Clear local state FIRST — before the HTTP call —
+    // so the interceptor won't attach a stale token to the logout request
+    this.clearAuth();
+
+    // Notify backend (fire-and-forget, don't trigger another logout on error)
     this.http.post(`${this.API_URL}/logout`, {}).subscribe({
       next: () => console.log('Logged out from server'),
-      error: (err) => console.error('Logout error:', err)
+      error: (err) => console.warn('Backend logout notification failed (ignored):', err)
     });
 
-    // Clear local storage and state
-    this.clearAuth();
+    this.isLoggingOut = false;
     this.router.navigate(['/login']);
   }
 
