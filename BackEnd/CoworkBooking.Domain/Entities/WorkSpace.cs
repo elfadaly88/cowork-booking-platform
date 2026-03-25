@@ -1,4 +1,4 @@
-﻿using CoworkBooking.Domain.Entities.Auth;
+using CoworkBooking.Domain.Entities.Auth;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -19,8 +19,8 @@ namespace CoworkBooking.Domain.Entities
         public string Description { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;
-        public double? Latitude { get; set; }
-        public double? Longitude { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
 
         // Approval status - Workspaces created by Owner must be approved by Admin before being visible to users
         public bool IsApproved { get; set; } = false;

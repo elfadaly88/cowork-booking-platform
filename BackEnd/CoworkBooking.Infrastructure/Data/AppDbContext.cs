@@ -1,4 +1,4 @@
-﻿using CoworkBooking.Domain.Entities;
+using CoworkBooking.Domain.Entities;
 using CoworkBooking.Domain.Entities.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -25,6 +25,7 @@ namespace CoworkBooking.Infrastructure.Data
         public DbSet<WorkspaceSchedule> WorkspaceSchedules { get; set; }
         public DbSet<WorkspaceImage> WorkspaceImages { get; set; }
         public DbSet<WorkspaceReview> WorkspaceReviews { get; set; }
+        public DbSet<PaymentMethod> PaymentMethods { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -41,6 +42,23 @@ namespace CoworkBooking.Infrastructure.Data
             modelBuilder.Entity<Booking>()
                 .Property(b => b.TotalPrice)
                 .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Booking>()
+                .Property(b => b.TotalPrice)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Booking>()
+                .HasOne(b => b.PaymentMethod)
+                .WithMany()
+                .HasForeignKey(b => b.PaymentMethodId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Default Payment Methods Seeding
+            modelBuilder.Entity<PaymentMethod>().HasData(
+                new PaymentMethod { Id = 1, Name = "Cash", Description = "Pay with cash on arrival", IsActive = true },
+                new PaymentMethod { Id = 2, Name = "Credit Card", Description = "Pay securely using your credit or debit card", IsActive = true },
+                new PaymentMethod { Id = 3, Name = "Vodafone Cash", Description = "Pay with your Vodafone Cash wallet", IsActive = true }
+            );
 
             // Relationships for schedules
             modelBuilder.Entity<WorkspaceSchedulePeriod>()

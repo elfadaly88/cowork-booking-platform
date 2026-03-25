@@ -45,7 +45,7 @@
         <div class="stat-card stat-spent">
             <div class="stat-icon">💳</div>
             <div class="stat-info">
-                <div class="stat-value">{{ totalSpent() | currency:'USD':'symbol':'1.0-0' }}</div>
+                <div class="stat-value">{{ totalSpent() | currency:'EGP':'symbol':'1.0-0' }}</div>
                 <div class="stat-label">Total Spent</div>
             </div>
         </div>
@@ -136,7 +136,7 @@
             <!-- Price -->
             <div class="booking-price">
                 <span class="price-label">Total Paid</span>
-                <span class="price-value">{{ booking.totalPrice | currency }}</span>
+                <span class="price-value">{{ booking.totalPrice | currency:'EGP':'symbol' }}</span>
             </div>
 
             <!-- Cancellation info -->

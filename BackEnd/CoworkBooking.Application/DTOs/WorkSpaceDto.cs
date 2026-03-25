@@ -12,11 +12,12 @@ namespace CoworkBooking.Application.DTOs
         public string? Description { get; set; }
         public string? Address { get; set; }
         public string? City { get; set; }
-        public double? Latitude { get; set; }
-        public double? Longitude { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
         public bool IsApproved { get; set; }
         public double? AverageRating { get; set; }
         public int TotalReviews { get; set; }
+        public double? Distance { get; set; }
         public List<RoomDto>? Rooms { get; set; }
         public List<WorkspaceImageDto>? Images { get; set; }
 

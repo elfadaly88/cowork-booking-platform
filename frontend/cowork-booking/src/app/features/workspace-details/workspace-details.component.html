@@ -103,9 +103,14 @@
           <div class="room-header">
             <h3 class="room-name">{{ room.name }}</h3>
             <div class="room-meta">
-              <span class="room-capacity">
+              <span class="capacity-chip" [class.full-capacity]="room.availableSeats === 0">
                 <span class="capacity-icon">👥</span>
-                {{ room.capacity }} seats
+                <ng-container *ngIf="room.availableSeats !== undefined && room.availableSeats !== room.capacity">
+                  <span style="font-weight: 700; color: #dc2626;">{{ room.availableSeats }}</span> / {{ room.capacity }} seats available
+                </ng-container>
+                <ng-container *ngIf="room.availableSeats === undefined || room.availableSeats === room.capacity">
+                  {{ room.capacity }} seats
+                </ng-container>
               </span>
               <div class="room-price" *ngIf="room.pricePerHour">
                 <span class="price-icon">💰</span>
@@ -133,8 +138,10 @@
             </div>
           </div>
           <div class="room-actions">
-            <button class="book-button" (click)="bookRoom(room)">
-              Book This Room →
+            <button class="book-button" 
+                    [disabled]="room.availableSeats === 0" 
+                    (click)="bookRoom(room)">
+              {{ room.availableSeats === 0 ? 'Currently Full' : 'Book Now' }}
             </button>
           </div>
         </div>

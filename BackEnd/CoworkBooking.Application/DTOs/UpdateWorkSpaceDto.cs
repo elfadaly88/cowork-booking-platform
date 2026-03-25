@@ -21,11 +21,13 @@ namespace CoworkBooking.Application.DTOs
         [Required]
         public string City { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Latitude is required. Please select the location on the map.")]
         [Range(-90, 90, ErrorMessage = "Latitude must be between -90 and 90")]
-        public double? Latitude { get; set; }
+        public double Latitude { get; set; }
 
+        [Required(ErrorMessage = "Longitude is required. Please select the location on the map.")]
         [Range(-180, 180, ErrorMessage = "Longitude must be between -180 and 180")]
-        public double? Longitude { get; set; }
+        public double Longitude { get; set; }
 
         public List<UpdateRoomDto>? Rooms { get; set; }
     }

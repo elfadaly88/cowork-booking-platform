@@ -38,12 +38,16 @@ namespace CoworkBooking.Application.Services
             Status = e.Status,
             CancellationReason = e.CancellationReason,
             CancelledAt = e.CancelledAt,
-            CreatedAt = e.CreatedAt
+            CreatedAt = e.CreatedAt,
+            PaymentMethodId = e.PaymentMethodId,
+            PaymentMethodName = e.PaymentMethod?.Name,
+            PaymentStatus = e.PaymentStatus
         };
 
         private IQueryable<Booking> BookingsWithDetails() =>
             _context.Bookings
                 .Include(b => b.User)
+                .Include(b => b.PaymentMethod)
                 .Include(b => b.Room)
                     .ThenInclude(r => r!.WorkSpace);
 
@@ -97,6 +101,12 @@ namespace CoworkBooking.Application.Services
         // ─── Create ──────────────────────────────────────────────────────
         public async Task<BookingDto> CreateAsync(BookingDto dto)
         {
+            if (dto.EndTime <= dto.StartTime)
+                throw new ArgumentException("End time must be after start time.");
+
+            if (dto.StartTime < DateTime.UtcNow.AddMinutes(-5))
+                throw new ArgumentException("Start time cannot be in the past.");
+
             // Conflict check before creating
             bool hasConflict = await HasConflictAsync(dto.RoomId, dto.StartTime, dto.EndTime);
             if (hasConflict)
@@ -109,7 +119,8 @@ namespace CoworkBooking.Application.Services
                 StartTime = dto.StartTime,
                 EndTime = dto.EndTime,
                 TotalPrice = dto.TotalPrice,
-                Status = BookingStatus.Confirmed,
+                Status = BookingStatus.Pending,
+                PaymentStatus = PaymentStatus.Pending,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -150,6 +161,9 @@ namespace CoworkBooking.Application.Services
         // ─── Update ──────────────────────────────────────────────────────
         public async Task UpdateAsync(BookingDto dto)
         {
+            if (dto.EndTime <= dto.StartTime)
+                throw new ArgumentException("End time must be after start time.");
+
             var entity = await _context.Bookings.FindAsync(dto.Id);
             if (entity == null) return;
 
@@ -157,8 +171,37 @@ namespace CoworkBooking.Application.Services
             entity.EndTime = dto.EndTime;
             entity.TotalPrice = dto.TotalPrice;
             entity.Status = dto.Status;
+            entity.PaymentStatus = dto.PaymentStatus;
+            entity.PaymentMethodId = dto.PaymentMethodId;
 
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<bool> ProcessPaymentAsync(int bookingId, int paymentMethodId)
+        {
+            var entity = await _context.Bookings.FindAsync(bookingId);
+            if (entity == null) return false;
+
+            var paymentMethod = await _context.PaymentMethods.FindAsync(paymentMethodId);
+            if (paymentMethod == null) return false;
+
+            entity.PaymentMethodId = paymentMethodId;
+            
+            // "if user check cash payment the request send to database and be pending"
+            if (paymentMethod.Name == "Cash")
+            {
+                entity.PaymentStatus = PaymentStatus.Pending;
+                entity.Status = BookingStatus.Confirmed;
+            }
+            else
+            {
+                // handle other payment methods by simulating success
+                entity.PaymentStatus = PaymentStatus.Paid;
+                entity.Status = BookingStatus.Confirmed;
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         // ─── Cancel ──────────────────────────────────────────────────────

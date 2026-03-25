@@ -45,7 +45,7 @@ namespace CoworkBooking.Application.Services
  Rooms = e.Rooms.Select(r =>
  {
      var now = DateTime.UtcNow;
-     var bookedCount = r.Bookings.Count(b => b.StartTime <= now && b.EndTime > now);
+     var bookedCount = r.Bookings.Count(b => b.Status != Domain.Enums.BookingStatus.Cancelled && b.StartTime <= now && b.EndTime > now);
      var available = Math.Max(0, r.Capacity - bookedCount);
      return new RoomDto
  {
@@ -95,7 +95,7 @@ namespace CoworkBooking.Application.Services
          Rooms = e.Rooms.Select(r =>
          {
              var now = DateTime.UtcNow;
-             var bookedCount = r.Bookings.Count(b => b.StartTime <= now && b.EndTime > now);
+             var bookedCount = r.Bookings.Count(b => b.Status != Domain.Enums.BookingStatus.Cancelled && b.StartTime <= now && b.EndTime > now);
              var available = Math.Max(0, r.Capacity - bookedCount);
              return new RoomDto
              {
@@ -119,7 +119,7 @@ namespace CoworkBooking.Application.Services
      });
  }
 
- public async Task<IEnumerable<WorkSpaceDto>> GetAvailableWorkspacesAsync(DateTime? at = null)
+ public async Task<IEnumerable<WorkSpaceDto>> GetAvailableWorkspacesAsync(DateTime? at = null, double? latitude = null, double? longitude = null)
  {
      var moment = at ?? DateTime.UtcNow;
      var workspaces = await _context.Workspaces
@@ -147,6 +147,7 @@ namespace CoworkBooking.Application.Services
              IsApproved = w.IsApproved,
              AverageRating = w.AverageRating,
              TotalReviews = w.TotalReviews,
+             Distance = (latitude.HasValue && longitude.HasValue) ? CalculateDistance(latitude.Value, longitude.Value, w.Latitude, w.Longitude) : (double?)null,
              Images = w.Images.OrderBy(i => i.Order).Select(i => new WorkspaceImageDto
              {
                  Id = i.Id,
@@ -157,7 +158,7 @@ namespace CoworkBooking.Application.Services
              }).ToList(),
              Rooms = w.Rooms.Select(r =>
              {
-                 var booked = r.Bookings.Count(b => b.StartTime <= moment && b.EndTime > moment);
+                 var booked = r.Bookings.Count(b => b.Status != Domain.Enums.BookingStatus.Cancelled && b.StartTime <= moment && b.EndTime > moment);
                  var seats = Math.Max(0, r.Capacity - booked);
                  return new RoomDto
                  {
@@ -182,7 +183,24 @@ namespace CoworkBooking.Application.Services
          .Where(w => w.Rooms != null && w.Rooms.Any())
          .ToList();
 
+     if (latitude.HasValue && longitude.HasValue)
+     {
+         available = available.OrderBy(w => w.Distance ?? double.MaxValue).ToList();
+     }
+
      return available;
+ }
+
+ private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
+ {
+     var r = 6371; // km
+     var dLat = (lat2 - lat1) * Math.PI / 180.0;
+     var dLon = (lon2 - lon1) * Math.PI / 180.0;
+     var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+             Math.Cos(lat1 * Math.PI / 180.0) * Math.Cos(lat2 * Math.PI / 180.0) *
+             Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+     var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+     return r * c;
  }
 
  public async Task<WorkSpaceDto?> GetByIdAsync(int id)
@@ -223,7 +241,7 @@ namespace CoworkBooking.Application.Services
      }).ToList(),
      Rooms = e.Rooms.Select(r =>
      {
-         var bookedCount = r.Bookings.Count(b => b.StartTime <= now && b.EndTime > now);
+         var bookedCount = r.Bookings.Count(b => b.Status != Domain.Enums.BookingStatus.Cancelled && b.StartTime <= now && b.EndTime > now);
          var available = Math.Max(0, r.Capacity - bookedCount);
          return new RoomDto
          {

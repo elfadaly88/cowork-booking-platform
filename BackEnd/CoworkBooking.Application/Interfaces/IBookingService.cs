@@ -11,6 +11,7 @@ namespace CoworkBooking.Application.Interfaces
         Task UpdateAsync(BookingDto dto);
         Task DeleteAsync(int id);
         Task<bool> CancelAsync(int bookingId, string userId, string? reason = null);
+        Task<bool> ProcessPaymentAsync(int bookingId, int paymentMethodId);
         Task<bool> HasConflictAsync(int roomId, DateTime startTime, DateTime endTime, int? excludeBookingId = null);
     }
 }

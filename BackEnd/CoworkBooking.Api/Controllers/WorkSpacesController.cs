@@ -1,4 +1,4 @@
-﻿using CoworkBooking.Application.DTOs;
+using CoworkBooking.Application.DTOs;
 using CoworkBooking.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,9 +30,9 @@ namespace CoworkBooking.Api.Controllers
         // ✅ GET: api/workspaces/available (for regular users - only approved workspaces)
         [HttpGet("available")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetAvailable()
+        public async Task<IActionResult> GetAvailable([FromQuery] double? latitude = null, [FromQuery] double? longitude = null)
         {
-            var available = await _service.GetAvailableWorkspacesAsync();
+            var available = await _service.GetAvailableWorkspacesAsync(null, latitude, longitude);
             return Ok(available);
         }
 

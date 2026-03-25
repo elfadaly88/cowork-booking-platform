@@ -19,10 +19,14 @@ namespace CoworkBooking.Application.DTOs
         public DateTime EndTime { get; set; }
         public decimal TotalPrice { get; set; }
 
-        public BookingStatus Status { get; set; } = BookingStatus.Confirmed;
+        public BookingStatus Status { get; set; } = BookingStatus.Pending;
         public string? CancellationReason { get; set; }
         public DateTime? CancelledAt { get; set; }
         public DateTime CreatedAt { get; set; }
+
+        public int? PaymentMethodId { get; set; }
+        public string? PaymentMethodName { get; set; }
+        public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
     }
 
     public class CancelBookingDto

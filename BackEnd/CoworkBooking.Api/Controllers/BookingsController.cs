@@ -1,4 +1,4 @@
-﻿using CoworkBooking.Application.DTOs;
+using CoworkBooking.Application.DTOs;
 using CoworkBooking.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -95,6 +95,24 @@ namespace CoworkBooking.Api.Controllers
             return Ok(new { message = "Booking cancelled successfully" });
         }
 
+        // ─── POST: api/bookings/{id}/pay ────────────────────────────────
+        [HttpPost("{id}/pay")]
+        [Authorize]
+        public async Task<IActionResult> ProcessPayment(int id, [FromBody] PaymentRequest request)
+        {
+            var existing = await _service.GetByIdAsync(id);
+            if (existing == null) return NotFound();
+
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (existing.UserId?.ToString() != userId && !User.IsInRole("Admin"))
+                return Forbid();
+
+            var success = await _service.ProcessPaymentAsync(id, request.PaymentMethodId);
+            if (!success) return BadRequest(new { message = "Invalid payment method or booking not found" });
+
+            return Ok(new { message = "Payment updated successfully" });
+        }
+
         // ─── PUT: api/bookings/{id} (Admin or booking owner) ────────────
         [HttpPut("{id}")]
         [Authorize]
@@ -124,5 +142,10 @@ namespace CoworkBooking.Api.Controllers
             await _service.DeleteAsync(id);
             return NoContent();
         }
+    }
+
+    public class PaymentRequest
+    {
+        public int PaymentMethodId { get; set; }
     }
 }
