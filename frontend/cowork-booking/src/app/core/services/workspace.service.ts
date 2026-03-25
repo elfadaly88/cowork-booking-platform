@@ -35,9 +35,13 @@ export class WorkspaceService {
 
   /**
    * GET /workspaces/available → get available workspaces with rooms that have seats
+   * Optionally sorted by distance if latitude and longitude are provided.
    */
-  getAvailableWorkspaces(): Observable<Workspace[]> {
-    const url = `${this.baseUrl}/workspaces/available`;
+  getAvailableWorkspaces(latitude?: number, longitude?: number): Observable<Workspace[]> {
+    let url = `${this.baseUrl}/workspaces/available`;
+    if (latitude !== undefined && longitude !== undefined) {
+      url += `?latitude=${latitude}&longitude=${longitude}`;
+    }
     return this.http.get<Workspace[]>(url).pipe(
       catchError((err) => {
         const message = err?.error?.message || 'Failed to load available workspaces';

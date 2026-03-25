@@ -1,6 +1,6 @@
 .booking-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #2563EB 0%, #DC2626 100%);
+  background-color: #e11d48;
   padding: 1.25rem 1rem;
 }
 
@@ -215,7 +215,7 @@
 
   &:focus {
     outline: none;
-    border-color: #2563EB;
+    border-color: #0f172a;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
   }
 
@@ -257,13 +257,13 @@
   transition: all 0.3s ease;
 
   &:hover {
-    border-color: #2563EB;
+    border-color: #0f172a;
     background: #f0f3ff;
   }
 
   &.selected {
-    background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
-    border-color: #2563EB;
+    background-color: #0f172a;
+    border-color: #0f172a;
     color: white;
 
     .device-name,
@@ -310,7 +310,7 @@
 
 /* Price Summary */
 .price-summary {
-  background: linear-gradient(135deg, #2563EB 0%, #DC2626 100%);
+  background-color: #e11d48;
   padding: 1rem;
   border-radius: 10px;
   margin-bottom: 1.5rem;
@@ -381,7 +381,7 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+  background-color: #0f172a;
   color: white;
   box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
 

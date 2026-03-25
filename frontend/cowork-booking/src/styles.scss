@@ -13,21 +13,21 @@
    COLOR PALETTE - Professional Red & Blue Theme
    ======================================== */
 :root {
-  /* Primary Blue Colors */
-  --primary-blue: #2563EB;
-  --primary-blue-dark: #1E40AF;
-  --primary-blue-light: #3B82F6;
-  --primary-blue-lighter: #DBEAFE;
+  /* Primary Base Colors (Premium Slate/Black) */
+  --primary-blue: #0f172a;       /* Slate 900 */
+  --primary-blue-dark: #000000;  /* Pure Black */
+  --primary-blue-light: #334155; /* Slate 700 */
+  --primary-blue-lighter: #f8fafc; /* Slate 50 */
 
-  /* Secondary Red Colors */
-  --secondary-red: #DC2626;
-  --secondary-red-dark: #B91C1C;
-  --secondary-red-light: #EF4444;
-  --secondary-red-lighter: #FEE2E2;
+  /* Secondary Accent Colors (Crisp White & Gray) */
+  --secondary-red: #ffffff;
+  --secondary-red-dark: #f1f5f9;
+  --secondary-red-light: #ffffff;
+  --secondary-red-lighter: #ffffff;
 
   /* Accent Colors */
-  --accent-navy: #1E3A8A;
-  --accent-crimson: #991B1B;
+  --accent-navy: #020617;
+  --accent-crimson: #4f46e5; /* Electric Indigo for focus/accents */
 
   /* Neutral Colors */
   --white: #FFFFFF;
@@ -45,8 +45,8 @@
   /* Semantic Colors */
   --success: #10B981;
   --warning: #F59E0B;
-  --error: #EF4444;
-  --info: #3B82F6;
+  --error: #E11D48; /* Crimson */
+  --info: #4F46E5; /* Indigo */
 
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -79,12 +79,12 @@ html, body {
   width: 100%;
   margin: 0;
   padding: 0;
-  font-family: 'Roboto', 'Segoe UI', 'Helvetica Neue', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
-  background: linear-gradient(135deg, var(--gray-50) 0%, var(--primary-blue-lighter) 100%);
-  color: var(--gray-800);
+  background-color: var(--gray-50);
+  color: var(--gray-900);
 }
 
 body {
@@ -93,33 +93,31 @@ body {
 
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 600;
-  line-height: 1.2;
+  font-weight: 700;
+  line-height: 1.25;
   color: var(--gray-900);
   margin: 0 0 var(--spacing-sm) 0;
+  letter-spacing: -0.025em;
 }
 
 h1 {
   font-size: 2.5rem;
-  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-red) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--gray-900);
 }
 
 h2 {
   font-size: 2rem;
-  color: var(--primary-blue-dark);
+  color: var(--gray-900);
 }
 
 h3 {
   font-size: 1.5rem;
-  color: #ffffff;
+  color: var(--gray-800);
 }
 
 p {
   line-height: 1.6;
-  color: var(--gray-700);
+  color: var(--gray-600);
   margin: 0 0 var(--spacing-sm) 0;
 }
 
@@ -141,25 +139,28 @@ button, .btn {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
+  background-color: var(--gray-900);
   color: var(--white);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1);
 }
 
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.15);
+  background-color: var(--gray-800);
 }
 
 .btn-secondary {
-  background: linear-gradient(135deg, var(--secondary-red) 0%, var(--secondary-red-dark) 100%);
-  color: var(--white);
-  box-shadow: var(--shadow-md);
+  background-color: var(--white);
+  color: var(--gray-800);
+  border: 1px solid var(--gray-200);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .btn-secondary:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+  background-color: var(--gray-50);
+  border-color: var(--gray-300);
 }
 
 .btn-outline {
@@ -176,17 +177,17 @@ button, .btn {
 /* Cards */
 .card {
   background: var(--white);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   padding: var(--spacing-md);
-  box-shadow: var(--shadow-md);
-  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid var(--gray-200);
 }
 
 .card:hover {
-  box-shadow: var(--shadow-xl);
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
   transform: translateY(-4px);
-  border-color: var(--primary-blue-light);
+  border-color: var(--gray-300);
 }
 
 .card-header {
@@ -271,19 +272,26 @@ label {
 
 /* Navigation Bar */
 .navbar {
-  background: linear-gradient(90deg, var(--primary-blue) 0%, var(--secondary-red) 100%);
-  box-shadow: var(--shadow-md);
-  padding: calc(var(--spacing-sm) * 0.6) 0;
-  position: relative; /* make non-fixed by default; component-level styles may override */
+  background-color: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  padding: calc(var(--spacing-sm) * 0.8) 0;
+  position: relative;
   z-index: 1000;
 }
 
 .navbar a {
-  color: var(--white);
+  color: var(--gray-600);
   text-decoration: none;
+  font-weight: 500;
   padding: 0.5rem 1rem;
   border-radius: var(--radius-md);
-  transition: all 0.3s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.navbar a:hover {
+  background-color: var(--gray-100);
+  color: var(--gray-900);
 }
 
 /* Layout when using a left sidebar */
@@ -430,16 +438,16 @@ img {
 }
 
 .workspace-card:hover {
-  box-shadow: var(--shadow-xl);
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
   transform: translateY(-4px);
-  border-color: var(--primary-blue);
+  border-color: var(--gray-300);
 }
 
 .workspace-image {
   width: 100%;
   height: 200px;
   object-fit: cover;
-  background: linear-gradient(135deg, var(--primary-blue-lighter) 0%, var(--secondary-green-lighter) 100%);
+  background-color: var(--gray-100);
 }
 
 .workspace-content {
@@ -518,23 +526,26 @@ img {
 
 /* Hero Section */
 .hero {
-  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-red) 100%);
+  background: #0f172a;
   padding: var(--spacing-xl) var(--spacing-md);
   text-align: center;
   color: var(--white);
   border-radius: var(--radius-xl);
   margin-bottom: var(--spacing-lg);
+  box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.2);
 }
 
 .hero h1 {
   color: var(--white);
   -webkit-text-fill-color: var(--white);
   font-size: 3rem;
+  font-weight: 800;
   margin-bottom: var(--spacing-md);
+  letter-spacing: -0.025em;
 }
 
 .hero p {
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--gray-400);
   font-size: 1.25rem;
   max-width: 600px;
   margin: 0 auto;

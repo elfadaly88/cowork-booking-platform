@@ -3,6 +3,7 @@ import { LandingComponent } from './features/landing/landing.component';
 import { HomeComponent } from './features/home/home.component';
 import { WorkspaceDetailsComponent } from './features/workspace-details/workspace-details.component';
 import { BookingFormComponent } from './features/booking-form/booking-form.component';
+import { PaymentComponent } from './features/payment/payment.component';
 import { MyBookingsComponent } from './features/my-bookings/my-bookings.component';
 import { ProfileComponent } from './features/profile/profile.component';
 import { AdminPanelEnhancedComponent } from './features/admin-panel/admin-panel-enhanced.component';
@@ -49,6 +50,11 @@ export const routes: Routes = [
     path: 'booking/:roomId',
     component: BookingFormComponent,
     canActivate: [authGuard]        // Require authentication for booking
+  },
+  {
+    path: 'booking/:bookingId/payment',
+    component: PaymentComponent,
+    canActivate: [authGuard]
   },
   {
     path: 'my-bookings',

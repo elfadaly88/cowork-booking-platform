@@ -1,4 +1,11 @@
 export type BookingStatus = 'Pending' | 'Confirmed' | 'Cancelled' | 'Completed';
+export type PaymentStatus = 'Pending' | 'Paid' | 'Failed';
+
+export interface PaymentMethod {
+  id: number;
+  name: string;
+  description: string;
+}
 
 export interface BookingRequest {
   roomId: number;
@@ -25,6 +32,10 @@ export interface BookingResponse {
   totalPrice: number;
 
   status: BookingStatus;
+  paymentMethodId?: number;
+  paymentMethodName?: string;
+  paymentStatus?: PaymentStatus;
+
   cancellationReason?: string;
   cancelledAt?: string;
   createdAt: string;

@@ -4,12 +4,13 @@ import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } fr
 import { Router, ActivatedRoute } from '@angular/router';
 import { WorkspaceService } from '../../core/services/workspace.service';
 import { CreateWorkspaceDto, CreateRoomDto, CreateDeviceDto } from '../../core/models/workspace.model';
+import { MapLocationPickerComponent } from '../../shared/components/map-location-picker.component';
 import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-owner-workspace-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, MapLocationPickerComponent],
   templateUrl: './owner-workspace-form.component.html',
   styleUrls: ['./owner-workspace-form.component.scss']
 })
@@ -45,8 +46,8 @@ export class OwnerWorkspaceFormComponent implements OnInit {
       description: ['', Validators.required],
       address: ['', Validators.required],
       city: ['', Validators.required],
-      latitude: [null],
-      longitude: [null],
+      latitude: [null, Validators.required],
+      longitude: [null, Validators.required],
       rooms: this.fb.array([])
     });
 
@@ -94,6 +95,13 @@ export class OwnerWorkspaceFormComponent implements OnInit {
 
   removeDevice(roomIndex: number, deviceIndex: number): void {
     this.getDevices(roomIndex).removeAt(deviceIndex);
+  }
+
+  onLocationSelected(location: {lat: number, lng: number}): void {
+    this.workspaceForm.patchValue({
+      latitude: location.lat,
+      longitude: location.lng
+    });
   }
 
   onSubmit(): void {

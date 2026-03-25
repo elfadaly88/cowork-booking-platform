@@ -81,28 +81,16 @@
         }
       </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="latitude">Latitude (Optional)</label>
-          <input
-            id="latitude"
-            type="number"
-            step="0.000001"
-            formControlName="latitude"
-            placeholder="e.g., 30.0444"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="longitude">Longitude (Optional)</label>
-          <input
-            id="longitude"
-            type="number"
-            step="0.000001"
-            formControlName="longitude"
-            placeholder="e.g., 31.2357"
-          />
-        </div>
+      <div class="form-group map-group">
+        <label>Location on Map *</label>
+        <app-map-location-picker
+          [initialLatitude]="workspaceForm.get('latitude')?.value"
+          [initialLongitude]="workspaceForm.get('longitude')?.value"
+          (locationSelected)="onLocationSelected($event)">
+        </app-map-location-picker>
+        @if (isFieldInvalid('latitude') || isFieldInvalid('longitude')) {
+          <span class="error-text" style="display: block; margin-top: 5px;">Please pick the location on the map.</span>
+        }
       </div>
     </div>
 
@@ -148,7 +136,7 @@
               </div>
 
               <div class="form-group">
-                <label>Price/Hour ($) *</label>
+                <label>Price/Hour (EGP) *</label>
                 <input
                   type="number"
                   formControlName="pricePerHour"

@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { BookingRequest, BookingResponse, CancelBookingRequest } from '../models/booking.model';
+import { BookingRequest, BookingResponse, CancelBookingRequest, PaymentMethod } from '../models/booking.model';
 
 @Injectable({ providedIn: 'root' })
 export class BookingService {
@@ -51,6 +51,20 @@ export class BookingService {
   getAllBookings(): Observable<BookingResponse[]> {
     return this.http.get<BookingResponse[]>(this.baseUrl).pipe(
       catchError(err => throwError(() => new Error(err?.error?.message || 'Failed to load bookings')))
+    );
+  }
+
+  /** GET /paymentmethods */
+  getPaymentMethods(): Observable<PaymentMethod[]> {
+    return this.http.get<PaymentMethod[]>(`${environment.apiBaseUrl}/paymentmethods`).pipe(
+      catchError(err => throwError(() => new Error('Failed to load payment methods')))
+    );
+  }
+
+  /** POST /bookings/:id/pay */
+  processPayment(bookingId: number, paymentMethodId: number): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.baseUrl}/${bookingId}/pay`, { paymentMethodId }).pipe(
+      catchError(err => throwError(() => new Error(err?.error?.message || 'Payment processing failed')))
     );
   }
 }

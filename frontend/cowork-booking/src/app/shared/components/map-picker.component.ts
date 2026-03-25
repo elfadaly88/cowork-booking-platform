@@ -84,7 +84,7 @@ interface SearchResult {
     }
 
     .map-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-color: #0f172a;
       color: white;
       padding: 1rem 1.5rem;
     }
@@ -130,7 +130,7 @@ interface SearchResult {
 
     .search-button {
       padding: 0.75rem 1.5rem;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-color: #0f172a;
       color: white;
       border: none;
       border-radius: 8px;

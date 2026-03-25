@@ -66,7 +66,7 @@ import { AuthService } from '../../core/services/auth.service';
       top: 0;
       height: 100vh;
       width: 260px;
-      background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+      background: #ffffff;
       border-left: 1px solid rgba(30,41,59,0.06);
       padding: 0.5rem;
       display: flex;
@@ -119,11 +119,11 @@ import { AuthService } from '../../core/services/auth.service';
 
     .rs-item:hover { background: rgba(37,99,235,0.06); transform: translateY(-1px); }
 
-    .rs-item.active { background: linear-gradient(135deg, #2563EB 0%, #DC2626 100%); color: #fff; }
+    .rs-item.active { background-color: #e11d48; color: #fff; }
 
     .rs-footer { padding: 0.5rem; border-top: 1px solid rgba(30,41,59,0.04); }
 
-    .rs-logout { width: 100%; padding: 0.5rem; border-radius: 8px; border: none; background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%); color: #fff; font-weight: 700; cursor: pointer; }
+    .rs-logout { width: 100%; padding: 0.5rem; border-radius: 8px; border: none; background-color: #e11d48; color: #fff; font-weight: 700; cursor: pointer; }
 
     @media (max-width: 900px) {
       .right-sidebar { transform: translateX(0); position: fixed; }

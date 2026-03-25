@@ -4,11 +4,12 @@ import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } fr
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { WorkspaceService } from '../../core/services/workspace.service';
 import { Workspace, CreateWorkspaceDto, UpdateWorkspaceDto } from '../../core/models/workspace.model';
+import { MapLocationPickerComponent } from '../../shared/components/map-location-picker.component';
 
 @Component({
   selector: 'app-admin-workspace-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, MapLocationPickerComponent],
   template: `
     <div class="admin-workspace-form">
       <div class="panel-header">
@@ -44,15 +45,16 @@ import { Workspace, CreateWorkspaceDto, UpdateWorkspaceDto } from '../../core/mo
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="latitude">Latitude</label>
-              <input id="latitude" type="number" formControlName="latitude" />
-            </div>
-            <div class="form-group">
-              <label for="longitude">Longitude</label>
-              <input id="longitude" type="number" formControlName="longitude" />
-            </div>
+          <div class="form-group map-group">
+            <label>Location on Map <span class="required">*</span></label>
+            <app-map-location-picker
+              [initialLatitude]="workspaceForm.get('latitude')?.value"
+              [initialLongitude]="workspaceForm.get('longitude')?.value"
+              (locationSelected)="onLocationSelected($event)">
+            </app-map-location-picker>
+            <span *ngIf="workspaceForm.get('latitude')?.invalid && workspaceForm.get('latitude')?.touched" class="error-text text-danger" style="display: block; margin-top: 5px;">
+              Please pick the location on the map.
+            </span>
           </div>
         </div>
 
@@ -137,9 +139,16 @@ export class AdminWorkspaceFormComponent implements OnInit {
       description: ['', Validators.required],
       address: ['', Validators.required],
       city: ['', Validators.required],
-      latitude: [0],
-      longitude: [0],
+      latitude: [null, Validators.required],
+      longitude: [null, Validators.required],
       rooms: this.fb.array([])
+    });
+  }
+
+  onLocationSelected(location: {lat: number, lng: number}): void {
+    this.workspaceForm.patchValue({
+      latitude: location.lat,
+      longitude: location.lng
     });
   }
 

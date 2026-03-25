@@ -3,7 +3,7 @@
   margin: 0 auto;
   padding: 2rem;
   min-height: 100vh;
-  background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
+  background-color: #0f172a;
 }
 
 .header {
@@ -25,7 +25,7 @@
 
   .btn-add-new {
     padding: 0.75rem 1.5rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-color: #0f172a;
     color: white;
     border: none;
     border-radius: 8px;
@@ -162,7 +162,7 @@
 }
 
 .workspace-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: #0f172a;
   color: white;
   padding: 1.75rem;
   display: flex;
@@ -317,7 +317,7 @@
 
         .edit-badge {
           padding: 0.5rem 1rem;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background-color: #0f172a;
           color: white;
           border-radius: 20px;
           font-weight: 600;
@@ -550,7 +550,7 @@
     }
 
     &.btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-color: #0f172a;
       color: white;
       box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 
@@ -705,7 +705,7 @@
 .error-banner {
   margin-bottom: 1.5rem;
   padding: 1rem;
-  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  background-color: #0f172a;
   border: 2px solid #ffc107;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);

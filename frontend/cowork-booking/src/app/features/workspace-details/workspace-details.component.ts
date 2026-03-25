@@ -211,6 +211,15 @@ export class WorkspaceDetailsComponent implements OnInit {
 
   // ─── Schedule ─────────────────────────────────────────────────────────────────
 
+  getMapLink(): string {
+    if (!this.workspace) return '#';
+    if (this.workspace.latitude && this.workspace.longitude) {
+      return `https://www.google.com/maps/search/?api=1&query=${this.workspace.latitude},${this.workspace.longitude}`;
+    }
+    const query = encodeURIComponent(`${this.workspace.name} ${this.workspace.address || ''} ${this.workspace.city || ''}`);
+    return `https://www.google.com/maps/search/?api=1&query=${query}`;
+  }
+
   getDaySchedule(dayOfWeek: number) {
     return this.schedulePeriod?.schedules.find(s => s.dayOfWeek === dayOfWeek);
   }

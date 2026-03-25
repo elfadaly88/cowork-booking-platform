@@ -3,7 +3,7 @@
   margin: 0 auto;
   padding: 2rem;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: #0f172a;
 }
 
 .header {
@@ -138,7 +138,7 @@
 
   .card-header {
     padding: 1.5rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-color: #0f172a;
     color: white;
     display: flex;
     justify-content: space-between;
@@ -192,7 +192,7 @@
       gap: 1.5rem;
       margin: 1.5rem 0;
       padding: 1rem;
-      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+      background-color: #f8fafc;
       border-radius: 12px;
 
       .stat-item {
@@ -259,7 +259,7 @@
               margin-left: 0.5rem;
               padding: 0.2rem 0.5rem;
               background: #dbeafe;
-              color: #1e40af;
+              color: #1e293b;
               border-radius: 4px;
               font-size: 0.8rem;
             }
@@ -291,7 +291,7 @@
       }
 
       &.btn-approve {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        background-color: #059669;
         color: white;
 
         &:hover:not(:disabled) {
@@ -301,7 +301,7 @@
       }
 
       &.btn-reject {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        background-color: #e11d48;
         color: white;
 
         &:hover:not(:disabled) {

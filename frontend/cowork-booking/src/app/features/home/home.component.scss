@@ -68,7 +68,7 @@
 
   &.active {
     background: #EFF6FF;
-    color: #2563EB;
+    color: #0f172a;
     font-weight: 600;
   }
 
@@ -83,7 +83,7 @@
 
 // ─── Search Hero ───────────────────────────────────────────────────────────────
 .search-hero {
-  background: linear-gradient(135deg, #1E40AF 0%, #6D28D9 100%);
+  background-color: #0f172a;
   padding: 3rem 1.5rem 2.5rem;
   text-align: center;
 
@@ -201,7 +201,7 @@
     transition: border-color 0.2s;
 
     &:focus {
-      border-color: #2563EB;
+      border-color: #0f172a;
     }
   }
 }
@@ -250,7 +250,7 @@
 
   &.active {
     background: white;
-    color: #2563EB;
+    color: #0f172a;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
 
@@ -275,7 +275,7 @@
   }
 
   .filtered-label {
-    color: #2563EB;
+    color: #0f172a;
     font-weight: 600;
   }
 }
@@ -314,7 +314,7 @@
   width: 48px;
   height: 48px;
   border: 4px solid #E2E8F0;
-  border-top-color: #2563EB;
+  border-top-color: #0f172a;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -326,7 +326,7 @@
 }
 
 .retry-btn {
-  background: #2563EB;
+  background: #0f172a;
   color: white;
   border: none;
   padding: 0.625rem 1.5rem;
@@ -366,7 +366,7 @@
   .link-btn {
     background: none;
     border: none;
-    color: #2563EB;
+    color: #0f172a;
     cursor: pointer;
     font-size: 1rem;
     font-weight: 600;
@@ -472,7 +472,7 @@
 
 .card-image {
   position: relative;
-  background: linear-gradient(135deg, #1E40AF 0%, #6D28D9 100%);
+  background-color: #0f172a;
   overflow: hidden;
   flex-shrink: 0;
 
@@ -595,7 +595,7 @@
 }
 
 .view-btn-card {
-  background: linear-gradient(135deg, #2563EB, #7C3AED);
+  background-color: #0f172a;
   color: white;
   border: none;
   padding: 0.5rem 1.25rem;

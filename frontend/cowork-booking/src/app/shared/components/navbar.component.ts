@@ -46,17 +46,17 @@ import { AuthService } from '../../core/services/auth.service';
   `,
   styles: [`
     .navbar {
-        background: linear-gradient(90deg, rgba(37,99,235,0.08) 0%, rgba(220,38,38,0.06) 100%);
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+        background-color: #ffffff;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         position: relative;
         width: 100%;
-      border-bottom: 1px solid rgba(15,23,42,0.04);
+        border-bottom: 1px solid #e2e8f0;
     }
 
     .navbar-container {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 0.5rem 1rem;
+      padding: 0.75rem 1.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -66,18 +66,19 @@ import { AuthService } from '../../core/services/auth.service';
     .navbar-brand {
       display: flex;
       align-items: center;
-      gap: 0.375rem;
+      gap: 0.5rem;
       text-decoration: none;
       color: #0f172a;
-      font-size: 1.125rem;
-      font-weight: 700;
+      font-size: 1.25rem;
+      font-weight: 800;
       transition: opacity 0.2s;
+      letter-spacing: -0.025em;
     }
 
-    .navbar-brand:hover { opacity: 0.9; }
+    .navbar-brand:hover { opacity: 0.8; }
 
     .brand-icon {
-      font-size: 1.25rem;
+      font-size: 1.5rem;
       display: flex;
       align-items: center;
     }
@@ -90,99 +91,86 @@ import { AuthService } from '../../core/services/auth.service';
 
     .navbar-menu {
       display: flex;
-      gap: 0.625rem;
+      gap: 0.75rem;
       align-items: center;
     }
 
     .nav-link {
       display: flex;
       align-items: center;
-      gap: 0.375rem;
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
+      gap: 0.5rem;
+      padding: 0.5rem 0.875rem;
+      border-radius: 0.5rem;
       text-decoration: none;
-      color: white;
+      color: #475569;
       font-weight: 500;
-      transition: all 0.3s ease;
-      background: rgba(255, 255, 255, 0.1);
-      border: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      background: transparent;
+      border: 1px solid transparent;
       cursor: pointer;
-      font-size: 0.8125rem;
+      font-size: 0.875rem;
       white-space: nowrap;
     }
 
-    /* Make home button more visible */
-    .home-link {
-      background: rgba(37,99,235,0.08);
-      color: #0f172a;
-      font-weight: 700;
-      box-shadow: 0 2px 6px rgba(37,99,235,0.06);
-    }
-
-    .home-link::before {
-      content: '';
-      display: inline-block;
-      width: 3px;
-      height: 18px;
-      background: #2563EB;
-      border-radius: 2px;
-      margin-right: 6px;
-      vertical-align: middle;
-    }
-
     .nav-link:hover {
-      background: rgba(255, 255, 255, 0.2);
-      transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-      padding: 0.4rem 0.8rem;
+      background: #f8fafc;
+      color: #0f172a;
     }
 
     .nav-link.active {
+      background: #f1f5f9;
       color: #0f172a;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
       font-weight: 600;
     }
 
     .nav-icon {
-      font-size: 0.875rem;
+      font-size: 1rem;
       display: flex;
       align-items: center;
       line-height: 1;
     }
 
-    .nav-text { display: inline; font-size: 0.85rem; }
+    .nav-text { display: inline; }
 
     @media (max-width: 640px) {
       .navbar-container { padding: 1rem; }
-      .nav-link { padding: 0.5rem 0.75rem; }
+      .nav-link { padding: 0.5rem; }
       .nav-text { display: none; }
     }
 
     .logout-btn {
       display: flex;
       align-items: center;
-      gap: 0.375rem;
-      padding: 0.35rem 0.6rem;
-      border-radius: 6px;
+      gap: 0.5rem;
+      padding: 0.5rem 0.875rem;
+      border-radius: 0.5rem;
       text-decoration: none;
-      color: #0f172a;
+      color: #e11d48;
       font-weight: 500;
-      transition: all 0.3s ease;
-      background: rgba(220, 38, 38, 0.9);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      background: transparent;
+      border: 1px solid #ffe4e6;
       cursor: pointer;
-      font-size: 0.8125rem;
+      font-size: 0.875rem;
+      margin-left: 0.5rem;
     }
 
     .logout-btn:hover {
-      background: rgba(185, 28, 28, 1);
-      transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      background: #fff1f2;
+      color: #be123c;
+      border-color: #fecdd3;
     }
 
     .logout-btn:active { transform: translateY(0); }
 
+    .svg-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
     @media (max-width: 640px) {
-      .logout-btn { padding: 0.5rem 0.75rem; }
+      .logout-btn { padding: 0.5rem; margin-left: 0; }
     }
   `]
 })

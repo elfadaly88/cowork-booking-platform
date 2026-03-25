@@ -27,7 +27,7 @@ export class HomeComponent implements OnInit {
   selectedCity = signal('');
   selectedMaxPrice = signal<number | null>(null);
   selectedMinCapacity = signal<number | null>(null);
-  sortBy = signal<'name' | 'price' | 'rating' | 'rooms'>('name');
+  sortBy = signal<'name' | 'price' | 'rating' | 'rooms' | 'distance'>('name');
   viewMode = signal<'grid' | 'list'>('grid');
 
   // ─── Derived lists ────────────────────────────────────────────────────
@@ -66,6 +66,9 @@ export class HomeComponent implements OnInit {
     // Sort
     const sort = this.sortBy();
     list.sort((a, b) => {
+      if (sort === 'distance' && a.distance !== undefined && b.distance !== undefined) return a.distance - b.distance;
+      if (sort === 'distance' && a.distance !== undefined) return -1;
+      if (sort === 'distance' && b.distance !== undefined) return 1;
       if (sort === 'name') return a.name.localeCompare(b.name);
       if (sort === 'rating') return (b.averageRating ?? 0) - (a.averageRating ?? 0);
       if (sort === 'rooms') return (b.rooms?.length ?? 0) - (a.rooms?.length ?? 0);
@@ -95,8 +98,31 @@ export class HomeComponent implements OnInit {
   loadWorkspaces(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.workspaceService.getAvailableWorkspaces().subscribe({
-      next: (data) => { this.allWorkspaces.set(data ?? []); this.loading.set(false); },
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          this.fetchWorkspaces(position.coords.latitude, position.coords.longitude);
+        },
+        (error) => {
+          console.warn('Geolocation error/denied. Fetching without location.', error);
+          this.fetchWorkspaces();
+        }
+      );
+    } else {
+      this.fetchWorkspaces();
+    }
+  }
+
+  private fetchWorkspaces(latitude?: number, longitude?: number): void {
+    this.workspaceService.getAvailableWorkspaces(latitude, longitude).subscribe({
+      next: (data) => {
+        this.allWorkspaces.set(data ?? []);
+        if (latitude !== undefined && data?.some(w => w.distance !== undefined)) {
+          this.sortBy.set('distance');
+        }
+        this.loading.set(false);
+      },
       error: (err) => {
         this.error.set('Unable to connect to backend. Please ensure the API server is running.');
         this.loading.set(false);

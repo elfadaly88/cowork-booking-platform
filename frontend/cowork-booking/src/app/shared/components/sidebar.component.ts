@@ -63,7 +63,7 @@ import { AuthService } from '../../core/services/auth.service';
     .sidebar {
       width: 240px;
       min-width: 64px;
-      background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+      background-color: #f8fafc;
       border-right: 1px solid rgba(30,41,59,0.06);
       position: fixed;
       left: 0;
@@ -144,7 +144,7 @@ import { AuthService } from '../../core/services/auth.service';
     }
 
     .nav-item.active {
-      background: linear-gradient(135deg, #2563EB 0%, #DC2626 100%);
+      background-color: #e11d48;
       color: #fff;
       box-shadow: 0 4px 12px rgba(37,99,235,0.12);
     }
@@ -161,7 +161,7 @@ import { AuthService } from '../../core/services/auth.service';
       padding: 0.5rem;
       border-radius: 8px;
       border: none;
-      background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+      background-color: #e11d48;
       color: #fff;
       font-weight: 700;
       cursor: pointer;

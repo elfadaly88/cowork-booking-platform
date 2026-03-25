@@ -46,14 +46,14 @@
 
       <!-- Max Price Filter -->
       <div class="filter-group">
-        <label>💵 Max Price/hr</label>
+        <label>EGP Max Price/hr</label>
         <select id="price-filter" [value]="selectedMaxPrice() ?? ''"
           (change)="selectedMaxPrice.set($any($event.target).value ? +$any($event.target).value : null)">
           <option value="">Any Price</option>
-          <option value="25">Up to $25</option>
-          <option value="50">Up to $50</option>
-          <option value="100">Up to $100</option>
-          <option value="200">Up to $200</option>
+          <option value="25">Up to EGP 25</option>
+          <option value="50">Up to EGP 50</option>
+          <option value="100">Up to EGP 100</option>
+          <option value="200">Up to EGP 200</option>
         </select>
       </div>
 
@@ -75,6 +75,7 @@
         <label>↕ Sort By</label>
         <select id="sort-filter" [value]="sortBy()" (change)="sortBy.set($any($event.target).value)">
           <option value="name">Name A–Z</option>
+          <option value="distance">Nearest</option>
           <option value="price">Lowest Price</option>
           <option value="rating">Top Rated</option>
           <option value="rooms">Most Rooms</option>
@@ -167,10 +168,13 @@
               👥 {{ getTotalSeats(ws) }} seats
             </span>
             <span class="stat-chip price-chip" *ngIf="getMinPrice(ws) !== null">
-              💵 from ${{ getMinPrice(ws) }}/hr
+              EGP {{ getMinPrice(ws) }}/hr (from)
             </span>
             <span class="stat-chip review-chip" *ngIf="ws.totalReviews">
               {{ ws.totalReviews }} reviews
+            </span>
+            <span class="stat-chip distance-chip" *ngIf="ws.distance !== undefined">
+              🚗 {{ ws.distance | number:'1.0-1' }} km
             </span>
           </div>
         </div>

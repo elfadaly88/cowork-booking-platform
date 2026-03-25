@@ -17,7 +17,7 @@
     .back-btn {
         background: none;
         border: none;
-        color: #2563EB;
+        color: #0f172a;
         font-size: 0.9rem;
         font-weight: 600;
         cursor: pointer;
@@ -71,7 +71,7 @@
 .avatar-circle {
     width: 80px;
     height: 80px;
-    background: linear-gradient(135deg, #2563EB, #7C3AED);
+    background-color: #0f172a;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -101,7 +101,7 @@
 .role-badge {
     display: inline-block;
     background: #EFF6FF;
-    color: #2563EB;
+    color: #0f172a;
     border: 1px solid #BFDBFE;
     padding: 0.3rem 0.875rem;
     border-radius: 50px;
@@ -139,7 +139,7 @@
 
     &.active {
         background: #EFF6FF;
-        color: #2563EB;
+        color: #0f172a;
         font-weight: 700;
     }
 
@@ -254,7 +254,7 @@
         box-sizing: border-box;
 
         &:focus {
-            border-color: #2563EB;
+            border-color: #0f172a;
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
@@ -300,7 +300,7 @@
 }
 
 .btn-save {
-    background: linear-gradient(135deg, #2563EB, #7C3AED);
+    background-color: #0f172a;
     color: white;
     border: none;
     padding: 0.75rem 2rem;
@@ -323,7 +323,7 @@
     }
 
     &.btn-danger {
-        background: linear-gradient(135deg, #DC2626, #B91C1C);
+        background-color: #e11d48;
 
         &:hover:not(:disabled) {
             box-shadow: 0 6px 20px rgba(220, 38, 38, 0.3);

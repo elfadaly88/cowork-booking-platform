@@ -95,11 +95,11 @@ export class BookingFormComponent implements OnInit {
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     this.bookingForm = this.fb.group({
-      bookingDate: [tomorrow, Validators.required],
+      bookingDate: [tomorrow.toISOString().split('T')[0], Validators.required],
       startTime: ['09:00', Validators.required],
       endTime: ['17:00', Validators.required]
       // userId is extracted from JWT on the backend — never sent from client
-    });
+    }, { validators: this.timeValidator });
   }
 
   loadRoomDetails(): void {
@@ -135,6 +135,39 @@ export class BookingFormComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  timeValidator(group: FormGroup) {
+    const dateStr = group.get('bookingDate')?.value;
+    const startStr = group.get('startTime')?.value;
+    const endStr = group.get('endTime')?.value;
+
+    if (!dateStr || !startStr || !endStr) return null;
+
+    const bookingDate = new Date(dateStr);
+    const now = new Date();
+    
+    const [startHour, startMinute] = startStr.split(':').map(Number);
+    const [endHour, endMinute] = endStr.split(':').map(Number);
+    
+    const startMinutes = startHour * 60 + startMinute;
+    const endMinutes = endHour * 60 + endMinute;
+    
+    const errors: any = {};
+    
+    if (endMinutes <= startMinutes) {
+      errors.endTimeBeforeStartTime = true;
+    }
+    
+    // Check if start time is in the past when booking today
+    if (bookingDate.toDateString() === now.toDateString()) {
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      if (startMinutes <= currentMinutes) {
+        errors.startTimeInPast = true;
+      }
+    }
+    
+    return Object.keys(errors).length > 0 ? errors : null;
   }
 
   get totalPrice(): number {
@@ -210,11 +243,18 @@ export class BookingFormComponent implements OnInit {
     this.bookingService.createBooking(booking).subscribe({
       next: (response) => {
         this.submitting = false;
-        this.snackBar.open('Booking created successfully! View it in My Bookings.', 'My Bookings', {
-          duration: 5000,
-          panelClass: ['success-snackbar']
-        }).onAction().subscribe(() => this.router.navigate(['/my-bookings']));
-        this.router.navigate(['/workspaces']);
+        
+        let newBookingId = (response as any)?.id;
+        
+        if (newBookingId) {
+          this.router.navigate(['/booking', newBookingId, 'payment']);
+        } else {
+          this.snackBar.open('Booking created successfully! View it in My Bookings.', 'My Bookings', {
+            duration: 5000,
+            panelClass: ['success-snackbar']
+          }).onAction().subscribe(() => this.router.navigate(['/my-bookings']));
+          this.router.navigate(['/workspaces']);
+        }
       },
       error: (err) => {
         this.submitting = false;

@@ -52,6 +52,9 @@
         <p class="workspace-address" *ngIf="workspace.address">
           <span class="address-icon">🏢</span>
           {{ workspace.address }}
+          <a class="map-link-btn" [href]="getMapLink()" target="_blank" rel="noopener noreferrer" title="View workspace location on Google Maps">
+            🗺️ View on Map
+          </a>
         </p>
         <p class="workspace-description" *ngIf="workspace.description">
           {{ workspace.description }}
@@ -104,9 +107,10 @@
                 <span class="capacity-icon">👥</span>
                 {{ room.capacity }} seats
               </span>
-              <span class="room-price" *ngIf="room.pricePerHour">
-                💵 ${{ room.pricePerHour }}/hr
-              </span>
+              <div class="room-price" *ngIf="room.pricePerHour">
+                <span class="price-icon">💰</span>
+                <span style="font-weight: 700; font-size: 1.15rem;">EGP {{ room.pricePerHour | number:'1.0-0' }}</span><span style="font-size: 0.8em; opacity: 0.8;">/hr</span>
+              </div>
             </div>
           </div>
           <div class="room-body">
@@ -122,7 +126,7 @@
               <div class="devices-list">
                 <span *ngFor="let device of room.devices" class="device-chip">
                   {{ device.name }}
-                  <span *ngIf="device.extraCostPerHour > 0" class="device-cost">+${{ device.extraCostPerHour
+                  <span *ngIf="device.extraCostPerHour > 0" class="device-cost">+EGP {{ device.extraCostPerHour
                     }}/hr</span>
                 </span>
               </div>

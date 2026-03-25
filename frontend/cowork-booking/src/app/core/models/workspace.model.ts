@@ -33,8 +33,8 @@ export interface Workspace {
   description: string;
   address: string;
   city: string;
-  latitude?: number;
-  longitude?: number;
+  latitude: number;
+  longitude: number;
   isApproved?: boolean;
   averageRating?: number;
   totalReviews?: number;
@@ -42,6 +42,7 @@ export interface Workspace {
   images?: WorkspaceImage[];
   mainImageUrl?: string;
   currentSchedulePeriod?: WorkspaceSchedulePeriod;
+  distance?: number;
 }
 
 export interface WorkspaceSchedule {
@@ -65,8 +66,8 @@ export interface CreateWorkspaceDto {
   description: string;
   address: string;
   city: string;
-  latitude?: number;
-  longitude?: number;
+  latitude: number;
+  longitude: number;
   rooms?: CreateRoomDto[];
 }
 
@@ -88,8 +89,8 @@ export interface UpdateWorkspaceDto {
   description: string;
   address: string;
   city: string;
-  latitude?: number;
-  longitude?: number;
+  latitude: number;
+  longitude: number;
   rooms?: UpdateRoomDto[];
 }
 
