@@ -1,112 +1,188 @@
-<div class="workspace-approval-container">
-  <div class="header">
-    <h2>🏢 Workspace Approval</h2>
-    <p class="subtitle">Review and approve workspaces submitted by owners</p>
+<div class="approval-page">
+
+  <!-- ─── Page Header ──────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-icon">🏢</div>
+      <div>
+        <h1>Workspace Approvals</h1>
+        <p>Review and approve workspaces submitted by owners</p>
+      </div>
+    </div>
+    <div class="page-header-right">
+      @if (!loading() && pendingWorkspaces().length > 0) {
+        <div class="queue-badge">
+          <span class="queue-count">{{ pendingWorkspaces().length }}</span>
+          <span class="queue-label">pending</span>
+        </div>
+      }
+      <button class="refresh-btn" (click)="loadPendingWorkspaces()" [disabled]="loading()">
+        <span class="refresh-icon" [class.spinning]="loading()">↻</span>
+        Refresh
+      </button>
+    </div>
   </div>
 
-  @if (loading()) {
-    <div class="loading-spinner">
-      <div class="spinner"></div>
-      <p>Loading pending workspaces...</p>
-    </div>
-  }
-
+  <!-- ─── Toast Messages ───────────────────────────────────────────────── -->
   @if (successMessage()) {
-    <div class="alert alert-success">
-      <span class="icon">✅</span>
+    <div class="toast toast-success">
+      <span class="toast-icon">✓</span>
       <span>{{ successMessage() }}</span>
     </div>
   }
-
-  @if (errorMessage()) {
-    <div class="alert alert-error">
-      <span class="icon">❌</span>
+  @if (errorMessage() && pendingWorkspaces().length > 0) {
+    <div class="toast toast-error">
+      <span class="toast-icon">✕</span>
       <span>{{ errorMessage() }}</span>
     </div>
   }
 
-  @if (!loading() && pendingWorkspaces().length === 0) {
-    <div class="empty-state">
-      <div class="empty-icon">📭</div>
-      <h3>No Pending Workspaces</h3>
-      <p>All workspaces have been reviewed</p>
+  <!-- ─── Skeleton Loader ───────────────────────────────────────────────── -->
+  @if (loading()) {
+    <div class="skeleton-grid">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="skeleton-card">
+          <div class="skeleton-banner"></div>
+          <div class="skeleton-body">
+            <div class="skeleton-line w-60"></div>
+            <div class="skeleton-line w-40"></div>
+            <div class="skeleton-line w-80"></div>
+            <div class="skeleton-stats">
+              <div class="skeleton-stat"></div>
+              <div class="skeleton-stat"></div>
+              <div class="skeleton-stat"></div>
+            </div>
+          </div>
+          <div class="skeleton-footer"></div>
+        </div>
+      }
     </div>
   }
 
+  <!-- ─── Empty State ───────────────────────────────────────────────────── -->
+  @if (!loading() && pendingWorkspaces().length === 0 && !errorMessage()) {
+    <div class="empty-state">
+      <div class="empty-check">✓</div>
+      <h2>All Caught Up!</h2>
+      <p>No workspaces are waiting for approval right now.</p>
+      <button class="refresh-btn outline" (click)="loadPendingWorkspaces()">↻ Check Again</button>
+    </div>
+  }
+
+  <!-- ─── Error State ───────────────────────────────────────────────────── -->
+  @if (!loading() && errorMessage() && pendingWorkspaces().length === 0) {
+    <div class="error-state">
+      <div class="error-icon">⚠</div>
+      <h3>Failed to Load</h3>
+      <p>{{ errorMessage() }}</p>
+      <button class="refresh-btn outline" (click)="loadPendingWorkspaces()">↻ Retry</button>
+    </div>
+  }
+
+  <!-- ─── Workspace Cards ───────────────────────────────────────────────── -->
   @if (!loading() && pendingWorkspaces().length > 0) {
     <div class="workspaces-grid">
-      @for (workspace of pendingWorkspaces(); track workspace.id) {
-        <div class="workspace-card">
-          <div class="card-header">
-            <h3>{{ workspace.name }}</h3>
-            <span class="status-badge pending">Pending Approval</span>
+      @for (workspace of pendingWorkspaces(); track workspace.id; let i = $index) {
+        <article class="workspace-card" [style.animation-delay]="(i * 80) + 'ms'">
+
+          <!-- Banner Image -->
+          <div class="card-banner">
+            @if (workspace.mainImageUrl) {
+              <img [src]="workspace.mainImageUrl" [alt]="workspace.name" class="banner-img" loading="lazy" />
+            } @else {
+              <div class="banner-placeholder">🏢</div>
+            }
+            <div class="banner-overlay">
+              <span class="pending-pill">⏳ Pending Review</span>
+            </div>
           </div>
 
+          <!-- Body -->
           <div class="card-body">
-            <div class="info-row">
-              <span class="label">Owner:</span>
-              <span class="value">{{ workspace.ownerName || 'Unknown' }}</span>
+
+            <!-- Title -->
+            <div class="workspace-title">
+              <h3>{{ workspace.name }}</h3>
+              <span class="city-tag">📍 {{ workspace.city }}</span>
             </div>
 
-            <div class="info-row">
-              <span class="label">Location:</span>
-              <span class="value">{{ workspace.address }}, {{ workspace.city }}</span>
-            </div>
-
-            <div class="info-row">
-              <span class="label">Description:</span>
-              <span class="value description">{{ workspace.description }}</span>
-            </div>
-
-            <div class="stats">
-              <div class="stat-item">
-                <span class="stat-icon">🚪</span>
-                <span class="stat-value">{{ getTotalRooms(workspace) }}</span>
-                <span class="stat-label">Rooms</span>
+            <!-- Meta -->
+            <div class="meta-grid">
+              <div class="meta-item">
+                <span class="meta-icon">👤</span>
+                <div class="meta-text">
+                  <span class="meta-label">Owner</span>
+                  <span class="meta-value">{{ workspace.ownerName || 'Unknown' }}</span>
+                </div>
               </div>
-              <div class="stat-item">
-                <span class="stat-icon">👥</span>
-                <span class="stat-value">{{ getTotalCapacity(workspace) }}</span>
-                <span class="stat-label">Total Capacity</span>
+              <div class="meta-item">
+                <span class="meta-icon">🏠</span>
+                <div class="meta-text">
+                  <span class="meta-label">Address</span>
+                  <span class="meta-value">{{ workspace.address }}</span>
+                </div>
               </div>
             </div>
 
+            <!-- Description -->
+            @if (workspace.description) {
+              <p class="description">{{ workspace.description }}</p>
+            }
+
+            <!-- Stats -->
+            <div class="stats-row">
+              <div class="stat-pill">
+                <span class="stat-num">{{ getTotalRooms(workspace) }}</span>
+                <span class="stat-lbl">Rooms</span>
+              </div>
+              <div class="stat-pill">
+                <span class="stat-num">{{ getTotalCapacity(workspace) }}</span>
+                <span class="stat-lbl">Total Seats</span>
+              </div>
+              @if (getMinPrice(workspace) !== null) {
+                <div class="stat-pill accent">
+                  <span class="stat-num">EGP {{ getMinPrice(workspace) }}</span>
+                  <span class="stat-lbl">From / hr</span>
+                </div>
+              }
+            </div>
+
+            <!-- Rooms -->
             @if (workspace.rooms && workspace.rooms.length > 0) {
               <div class="rooms-section">
-                <h4>Rooms Details:</h4>
+                <div class="rooms-heading">🚪 Rooms</div>
                 <div class="rooms-list">
                   @for (room of workspace.rooms; track room.id) {
-                    <div class="room-item">
-                      <span class="room-name">{{ room.name }}</span>
-                      <span class="room-details">
-                        Capacity: {{ room.capacity }} | EGP {{ room.pricePerHour }}/hr
+                    <div class="room-chip">
+                      <span class="room-chip-name">{{ room.name }}</span>
+                      <div class="room-chip-meta">
+                        <span>👥 {{ room.capacity }}</span>
+                        <span>EGP {{ room.pricePerHour }}/hr</span>
                         @if (room.hasDevices) {
-                          <span class="devices-badge">📱 Has Devices</span>
+                          <span class="devices-dot" title="Has devices">📱</span>
                         }
-                      </span>
+                      </div>
                     </div>
                   }
                 </div>
               </div>
             }
+
           </div>
 
-          <div class="card-footer">
-            <button
-              class="btn btn-approve"
-              (click)="approveWorkspace(workspace.id!)"
-              [disabled]="loading()">
-              ✅ Approve
+          <!-- Actions -->
+          <div class="card-actions">
+            <button class="btn-reject" (click)="rejectWorkspace(workspace.id!)" [disabled]="loading()">
+              <span>✕</span> Reject
             </button>
-            <button
-              class="btn btn-reject"
-              (click)="rejectWorkspace(workspace.id!)"
-              [disabled]="loading()">
-              ❌ Reject
+            <button class="btn-approve" (click)="approveWorkspace(workspace.id!)" [disabled]="loading()">
+              <span>✓</span> Approve
             </button>
           </div>
-        </div>
+
+        </article>
       }
     </div>
   }
+
 </div>

@@ -49,7 +49,8 @@ namespace CoworkBooking.Application.Services
                 .Include(b => b.User)
                 .Include(b => b.PaymentMethod)
                 .Include(b => b.Room)
-                    .ThenInclude(r => r!.WorkSpace);
+                    .ThenInclude(r => r!.WorkSpace)
+                        .ThenInclude(w => w!.Owner);
 
         // ─── Admin: all bookings ─────────────────────────────────────────
         public async Task<IEnumerable<BookingDto>> GetAllAsync()
@@ -79,6 +80,18 @@ namespace CoworkBooking.Application.Services
             return entities.Select(MapToDto);
         }
 
+        // ─── Owner: all bookings for rooms in owner's workspaces ─────────
+        public async Task<IEnumerable<BookingDto>> GetByWorkspaceOwnerAsync(string ownerId)
+        {
+            if (!Guid.TryParse(ownerId, out var ownerGuid)) return Enumerable.Empty<BookingDto>();
+
+            var entities = await BookingsWithDetails()
+                .Where(b => b.Room != null && b.Room.WorkSpace != null && b.Room.WorkSpace.OwnerId == ownerGuid)
+                .OrderByDescending(b => b.CreatedAt)
+                .ToListAsync();
+            return entities.Select(MapToDto);
+        }
+
         // ─── Conflict check ──────────────────────────────────────────────
         public async Task<bool> HasConflictAsync(int roomId, DateTime startTime, DateTime endTime, int? excludeBookingId = null)
         {
@@ -89,6 +102,8 @@ namespace CoworkBooking.Application.Services
             var overlappingCount = await _context.Bookings
                 .Where(b =>
                     b.RoomId == roomId &&
+                    // Approved (confirmed) reservations must always block capacity checks.
+                    // Pending reservations also block to avoid overbooking while payment/approval is in progress.
                     b.Status != BookingStatus.Cancelled &&
                     b.StartTime < endTime &&
                     b.EndTime > startTime &&
@@ -104,7 +119,10 @@ namespace CoworkBooking.Application.Services
             if (dto.EndTime <= dto.StartTime)
                 throw new ArgumentException("End time must be after start time.");
 
-            if (dto.StartTime < DateTime.UtcNow.AddMinutes(-5))
+            // Frontend sends local ISO strings (no Z), so compare against local now.
+            // Using DateTime.UtcNow here would compare a local-kind value against a UTC
+            // value and produce wrong results for UTC+ timezones.
+            if (dto.StartTime < DateTime.Now.AddMinutes(-5))
                 throw new ArgumentException("Start time cannot be in the past.");
 
             // Conflict check before creating
@@ -130,31 +148,6 @@ namespace CoworkBooking.Application.Services
             // Reload with details for full DTO
             var created = await BookingsWithDetails().FirstOrDefaultAsync(b => b.Id == entity.Id);
 
-            // Send confirmation email (fire-and-forget)
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    if (created?.User?.Email != null)
-                    {
-                        await _email.SendBookingConfirmationAsync(
-                            created.User.Email,
-                            created.User.FullName,
-                            new BookingEmailData(
-                                created.Id,
-                                created.Room?.WorkSpace?.Name ?? "Workspace",
-                                created.Room?.Name ?? "Room",
-                                created.Room?.WorkSpace?.City ?? "",
-                                created.StartTime,
-                                created.EndTime,
-                                created.TotalPrice
-                            )
-                        );
-                    }
-                }
-                catch (Exception ex) { _logger.LogWarning(ex, "Email notification failed"); }
-            });
-
             return MapToDto(created!);
         }
 
@@ -166,6 +159,15 @@ namespace CoworkBooking.Application.Services
 
             var entity = await _context.Bookings.FindAsync(dto.Id);
             if (entity == null) return;
+
+            // Only re-check conflicts when the time window actually changes.
+            bool timesChanged = entity.StartTime != dto.StartTime || entity.EndTime != dto.EndTime;
+            if (timesChanged)
+            {
+                bool hasConflict = await HasConflictAsync(dto.RoomId, dto.StartTime, dto.EndTime, excludeBookingId: dto.Id);
+                if (hasConflict)
+                    throw new InvalidOperationException("The selected room is fully booked for the requested time slot.");
+            }
 
             entity.StartTime = dto.StartTime;
             entity.EndTime = dto.EndTime;
@@ -179,19 +181,19 @@ namespace CoworkBooking.Application.Services
 
         public async Task<bool> ProcessPaymentAsync(int bookingId, int paymentMethodId)
         {
-            var entity = await _context.Bookings.FindAsync(bookingId);
+            var entity = await BookingsWithDetails().FirstOrDefaultAsync(b => b.Id == bookingId);
             if (entity == null) return false;
 
             var paymentMethod = await _context.PaymentMethods.FindAsync(paymentMethodId);
             if (paymentMethod == null) return false;
 
             entity.PaymentMethodId = paymentMethodId;
-            
+
             // "if user check cash payment the request send to database and be pending"
             if (paymentMethod.Name == "Cash")
             {
                 entity.PaymentStatus = PaymentStatus.Pending;
-                entity.Status = BookingStatus.Confirmed;
+                entity.Status = BookingStatus.Pending;
             }
             else
             {
@@ -201,6 +203,59 @@ namespace CoworkBooking.Application.Services
             }
 
             await _context.SaveChangesAsync();
+
+            QueueOwnerReservationEmail(entity);
+
+            if (entity.Status == BookingStatus.Confirmed)
+            {
+                QueueUserBookingConfirmationEmail(entity);
+            }
+
+            return true;
+        }
+
+        public async Task<bool> ApproveCashBookingAsync(int bookingId, string approverUserId, bool isAdmin = false)
+        {
+            if (!Guid.TryParse(approverUserId, out var approverGuid)) return false;
+
+            var entity = await BookingsWithDetails().FirstOrDefaultAsync(b => b.Id == bookingId);
+            if (entity == null) return false;
+
+            var ownerId = entity.Room?.WorkSpace?.OwnerId;
+            if (!isAdmin && ownerId != approverGuid) return false;
+
+            if (!string.Equals(entity.PaymentMethod?.Name, "Cash", StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            if (entity.Status == BookingStatus.Cancelled) return false;
+
+            entity.Status = BookingStatus.Confirmed;
+            await _context.SaveChangesAsync();
+
+            QueueCashApprovedEmail(entity);
+            return true;
+        }
+
+        public async Task<bool> RejectBookingAsync(int bookingId, string ownerUserId, bool isAdmin = false, string? reason = null)
+        {
+            if (!Guid.TryParse(ownerUserId, out var ownerGuid)) return false;
+
+            var entity = await BookingsWithDetails().FirstOrDefaultAsync(b => b.Id == bookingId);
+            if (entity == null) return false;
+
+            // Verify owner or admin
+            var workspaceOwnerId = entity.Room?.WorkSpace?.OwnerId;
+            if (!isAdmin && workspaceOwnerId != ownerGuid) return false;
+
+            // Cannot reject if already cancelled or confirmed
+            if (entity.Status != BookingStatus.Pending) return false;
+
+            entity.Status = BookingStatus.Cancelled;
+            entity.CancellationReason = reason;
+            entity.CancelledAt = DateTime.Now;
+            await _context.SaveChangesAsync();
+
+            QueueBookingRejectionEmail(entity, reason);
             return true;
         }
 
@@ -262,6 +317,128 @@ namespace CoworkBooking.Application.Services
                 _context.Bookings.Remove(entity);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        private void QueueOwnerReservationEmail(Booking booking)
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    var owner = booking.Room?.WorkSpace?.Owner;
+                    if (owner?.Email == null) return;
+
+                    await _email.SendOwnerReservationNotificationAsync(
+                        owner.Email,
+                        owner.FullName,
+                        new BookingEmailData(
+                            booking.Id,
+                            booking.Room?.WorkSpace?.Name ?? "Workspace",
+                            booking.Room?.Name ?? "Room",
+                            booking.Room?.WorkSpace?.City ?? "",
+                            booking.StartTime,
+                            booking.EndTime,
+                            booking.TotalPrice
+                        ),
+                        booking.User?.FullName ?? "Guest",
+                        booking.Status,
+                        booking.PaymentStatus
+                    );
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Owner reservation email failed");
+                }
+            });
+        }
+
+        private void QueueUserBookingConfirmationEmail(Booking booking)
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    if (booking.User?.Email == null) return;
+
+                    await _email.SendBookingConfirmationAsync(
+                        booking.User.Email,
+                        booking.User.FullName,
+                        new BookingEmailData(
+                            booking.Id,
+                            booking.Room?.WorkSpace?.Name ?? "Workspace",
+                            booking.Room?.Name ?? "Room",
+                            booking.Room?.WorkSpace?.City ?? "",
+                            booking.StartTime,
+                            booking.EndTime,
+                            booking.TotalPrice
+                        )
+                    );
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Booking confirmation email failed");
+                }
+            });
+        }
+
+        private void QueueCashApprovedEmail(Booking booking)
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    if (booking.User?.Email == null) return;
+
+                    await _email.SendCashReservationApprovedAsync(
+                        booking.User.Email,
+                        booking.User.FullName,
+                        new BookingEmailData(
+                            booking.Id,
+                            booking.Room?.WorkSpace?.Name ?? "Workspace",
+                            booking.Room?.Name ?? "Room",
+                            booking.Room?.WorkSpace?.City ?? "",
+                            booking.StartTime,
+                            booking.EndTime,
+                            booking.TotalPrice
+                        )
+                    );
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Cash approval email failed");
+                }
+            });
+        }
+
+        private void QueueBookingRejectionEmail(Booking booking, string? reason = null)
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    if (booking.User?.Email == null) return;
+
+                    await _email.SendBookingRejectionAsync(
+                        booking.User.Email,
+                        booking.User.FullName,
+                        new BookingEmailData(
+                            booking.Id,
+                            booking.Room?.WorkSpace?.Name ?? "Workspace",
+                            booking.Room?.Name ?? "Room",
+                            booking.Room?.WorkSpace?.City ?? "",
+                            booking.StartTime,
+                            booking.EndTime,
+                            booking.TotalPrice,
+                            reason
+                        ),
+                        reason
+                    );
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Booking rejection email failed");
+                }
+            });
         }
     }
 }

@@ -1,8 +1,8 @@
 <div class="owner-dashboard-container">
   <div class="header">
     <div class="header-content">
-      <h2>🏢 My Workspaces</h2>
-      <p class="subtitle">Manage your coworking spaces</p>
+      <h2>🏢 Owner Dashboard</h2>
+      <p class="subtitle">Manage your workspaces and monitor reservations</p>
     </div>
     <button class="btn-add-workspace" (click)="addNewWorkspace()">
       <span class="icon">➕</span>
@@ -10,85 +10,236 @@
     </button>
   </div>
 
-  @if (loading()) {
-    <div class="loading-spinner">
-      <div class="spinner"></div>
-      <p>Loading your workspaces...</p>
+  <div class="top-stats">
+    <div class="stat-box">
+      <span class="stat-value">{{ workspaces().length }}</span>
+      <span class="stat-label">Workspaces</span>
     </div>
-  }
-
-  @if (errorMessage()) {
-    <div class="alert alert-error">
-      <span class="icon">❌</span>
-      <span>{{ errorMessage() }}</span>
+    <div class="stat-box">
+      <span class="stat-value">{{ totalRooms() }}</span>
+      <span class="stat-label">Rooms</span>
     </div>
-  }
-
-  @if (!loading() && workspaces().length === 0) {
-    <div class="empty-state">
-      <div class="empty-icon">🏢</div>
-      <h3>No Workspaces Yet</h3>
-      <p>Start by creating your first coworking space</p>
-      <button class="btn-primary" (click)="addNewWorkspace()">
-        <span class="icon">➕</span>
-        Create Your First Workspace
-      </button>
+    <div class="stat-box">
+      <span class="stat-value">{{ activeBookings() }}</span>
+      <span class="stat-label">Active Reservations</span>
     </div>
-  }
+  </div>
 
-  @if (!loading() && workspaces().length > 0) {
-    <div class="workspaces-grid">
-      @for (workspace of workspaces(); track workspace.id) {
-        <div class="workspace-card">
-          <div class="card-header">
-            <h3>{{ workspace.name }}</h3>
-            <span [class]="getApprovalClass(workspace)" class="status-badge">
-              {{ getApprovalStatus(workspace) }}
-            </span>
+  <div class="tabs">
+    <button class="tab-btn" [class.active]="activeTab() === 'workspaces'" (click)="switchTab('workspaces')">
+      My Workspaces
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'reservations'" (click)="switchTab('reservations')">
+      Reservations
+      <span class="notif-dot" *ngIf="unreadNotifications() > 0">{{ unreadNotifications() }}</span>
+    </button>
+  </div>
+
+  @if (activeTab() === 'workspaces') {
+    @if (loading()) {
+      <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Loading your workspaces...</p>
+      </div>
+    }
+
+    @if (errorMessage()) {
+      <div class="alert alert-error">
+        <span class="icon">❌</span>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    @if (!loading() && workspaces().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">🏢</div>
+        <h3>No Workspaces Yet</h3>
+        <p>Start by creating your first coworking space</p>
+        <button class="btn-primary" (click)="addNewWorkspace()">
+          <span class="icon">➕</span>
+          Create Your First Workspace
+        </button>
+      </div>
+    }
+
+    @if (!loading() && workspaces().length > 0) {
+      <div class="workspaces-grid">
+        @for (workspace of workspaces(); track workspace.id) {
+          <div class="workspace-card">
+            <div class="card-header">
+              <h3>{{ workspace.name }}</h3>
+              <span [class]="getApprovalClass(workspace)" class="status-badge">
+                {{ getApprovalStatus(workspace) }}
+              </span>
+            </div>
+
+            <div class="card-body">
+              <div class="info-row">
+                <span class="label">Location:</span>
+                <span class="value">{{ workspace.address }}, {{ workspace.city }}</span>
+              </div>
+
+              <div class="info-row">
+                <span class="label">Description:</span>
+                <span class="value description">{{ workspace.description }}</span>
+              </div>
+
+              <div class="stats">
+                <div class="stat-item">
+                  <span class="stat-icon">🚪</span>
+                  <span class="stat-value">{{ getTotalRooms(workspace) }}</span>
+                  <span class="stat-label">Rooms</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-icon">👥</span>
+                  <span class="stat-value">{{ getTotalCapacity(workspace) }}</span>
+                  <span class="stat-label">Total Capacity</span>
+                </div>
+              </div>
+
+              @if (!workspace.isApproved) {
+                <div class="pending-notice">
+                  <span class="notice-icon">⏳</span>
+                  <span>This workspace is pending admin approval. It won't be visible to users until approved.</span>
+                </div>
+              }
+            </div>
+
+            <div class="card-footer">
+              <button class="btn btn-view" (click)="viewWorkspace(workspace.id!)">
+                👁️ View
+              </button>
+              <button class="btn btn-edit" (click)="editWorkspace(workspace.id!)">
+                ✏️ Edit
+              </button>
+            </div>
           </div>
+        }
+      </div>
+    }
+  }
 
-          <div class="card-body">
-            <div class="info-row">
-              <span class="label">Location:</span>
-              <span class="value">{{ workspace.address }}, {{ workspace.city }}</span>
-            </div>
+  @if (activeTab() === 'reservations') {
+    <div class="reservation-panel-header">
+      <p class="reservation-note">Newest reservations appear first.</p>
+      <button class="refresh-btn" (click)="loadReservations(true)">Refresh</button>
+    </div>
 
-            <div class="info-row">
-              <span class="label">Description:</span>
-              <span class="value description">{{ workspace.description }}</span>
-            </div>
+    @if (latestNotification()) {
+      <div class="alert alert-info">
+        <span class="icon">🔔</span>
+        <span>{{ latestNotification() }}</span>
+      </div>
+    }
 
-            <div class="stats">
-              <div class="stat-item">
-                <span class="stat-icon">🚪</span>
-                <span class="stat-value">{{ getTotalRooms(workspace) }}</span>
-                <span class="stat-label">Rooms</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-icon">👥</span>
-                <span class="stat-value">{{ getTotalCapacity(workspace) }}</span>
-                <span class="stat-label">Total Capacity</span>
-              </div>
-            </div>
+    @if (bookingsLoading()) {
+      <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Loading reservations...</p>
+      </div>
+    }
 
-            @if (!workspace.isApproved) {
-              <div class="pending-notice">
-                <span class="notice-icon">⏳</span>
-                <span>This workspace is pending admin approval. It won't be visible to users until approved.</span>
-              </div>
+    @if (bookingsError()) {
+      <div class="alert alert-error">
+        <span class="icon">❌</span>
+        <span>{{ bookingsError() }}</span>
+      </div>
+    }
+
+    @if (!bookingsLoading() && sortedBookings().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <h3>No Reservations Yet</h3>
+        <p>When users book your workspaces, reservations will appear here.</p>
+      </div>
+    }
+
+    @if (!bookingsLoading() && sortedBookings().length > 0) {
+      <div class="reservations-table-wrapper">
+        <table class="reservations-table">
+          <thead>
+            <tr>
+              <th>Booked At</th>
+              <th>Guest</th>
+              <th>Workspace</th>
+              <th>Room</th>
+              <th>Time</th>
+              <th>Total</th>
+              <th>Payment</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (booking of sortedBookings(); track booking.id) {
+              <tr>
+                <td>{{ booking.createdAt | date:'MMM d, y - HH:mm' }}</td>
+                <td>
+                  <div class="user-col">
+                    <strong>{{ booking.userFullName || 'Guest' }}</strong>
+                    <small>{{ booking.userEmail || '-' }}</small>
+                  </div>
+                </td>
+                <td>{{ booking.workspaceName || '-' }}</td>
+                <td>{{ booking.roomName || '-' }}</td>
+                <td>
+                  <div class="time-col">
+                    <span>{{ booking.startTime | date:'MMM d, HH:mm' }}</span>
+                    <span>→ {{ booking.endTime | date:'HH:mm' }}</span>
+                  </div>
+                </td>
+                <td>EGP {{ booking.totalPrice | number:'1.0-0' }}</td>
+                <td>
+                  <div class="payment-col">
+                    <span class="payment-badge" [class]="getPaymentStatusClass(booking.paymentStatus)">
+                      {{ booking.paymentStatus || 'Pending' }}
+                    </span>
+                    <small>{{ booking.paymentMethodName || 'Not selected' }}</small>
+                  </div>
+                </td>
+                <td>
+                  <span class="booking-badge" [class]="getStatusClass(booking.status)">
+                    {{ getStatusIcon(booking.status) }} {{ booking.status }}
+                  </span>
+                </td>
+                <td>
+                  <div class="action-group">
+                    <!-- Cash Approval Action -->
+                    @if (canApproveCash(booking)) {
+                      <button
+                        class="action-btn action-approve"
+                        title="Approve this cash reservation"
+                        (click)="approveCashBooking(booking)">
+                        ✓ Approve
+                      </button>
+                    }
+
+                    <!-- Reject Action for Pending Bookings -->
+                    @if (booking.status === 'Pending' && !canApproveCash(booking)) {
+                      <button
+                        class="action-btn action-reject"
+                        title="Reject this reservation"
+                        (click)="rejectBooking(booking)">
+                        ✕ Reject
+                      </button>
+                    }
+
+                    <!-- No Actions for Confirmed/Completed -->
+                    @if (booking.status !== 'Pending' && booking.status !== 'Cancelled') {
+                      <span class="action-none">—</span>
+                    }
+
+                    <!-- Cancelled Status -->
+                    @if (booking.status === 'Cancelled') {
+                      <span class="action-cancelled">Cancelled</span>
+                    }
+                  </div>
+                </td>
+              </tr>
             }
-          </div>
-
-          <div class="card-footer">
-            <button class="btn btn-view" (click)="viewWorkspace(workspace.id!)">
-              👁️ View
-            </button>
-            <button class="btn btn-edit" (click)="editWorkspace(workspace.id!)">
-              ✏️ Edit
-            </button>
-          </div>
-        </div>
-      }
-    </div>
+          </tbody>
+        </table>
+      </div>
+    }
   }
 </div>

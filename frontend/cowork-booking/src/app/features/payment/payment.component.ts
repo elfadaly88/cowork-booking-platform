@@ -36,7 +36,7 @@ export class PaymentComponent implements OnInit {
   bookingId: number | null = null;
   paymentMethods: PaymentMethod[] = [];
   selectedMethodId: number | null = null;
-  
+
   loading = true;
   submitting = false;
   error: string | null = null;
@@ -72,10 +72,17 @@ export class PaymentComponent implements OnInit {
     if (!this.bookingId || !this.selectedMethodId) return;
 
     this.submitting = true;
+    const selectedMethod = this.paymentMethods.find(m => m.id === this.selectedMethodId);
+    const isCashPayment = selectedMethod?.name?.toLowerCase() === 'cash';
+
     this.bookingService.processPayment(this.bookingId, this.selectedMethodId).subscribe({
       next: () => {
         this.submitting = false;
-        this.snackBar.open('Payment processed successfully!', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
+        const successMessage = isCashPayment
+          ? 'Reservation submitted. Waiting owner approval for cash payment.'
+          : 'Payment processed successfully!';
+
+        this.snackBar.open(successMessage, 'Close', { duration: 3500, panelClass: ['success-snackbar'] });
         this.router.navigate(['/my-bookings']);
       },
       error: (err) => {

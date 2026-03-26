@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WorkspaceService } from '../../core/services/workspace.service';
 import { Workspace } from '../../core/models/workspace.model';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-workspace-approval',
@@ -39,13 +40,21 @@ export class WorkspaceApprovalComponent implements OnInit {
   }
 
   approveWorkspace(workspaceId: number): void {
-    if (!confirm('Are you sure you want to approve this workspace?')) {
-      return;
-    }
+    Swal.fire({
+      title: 'Approve Workspace?',
+      text: 'This will make the workspace visible to all users for booking.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Approve',
+      confirmButtonColor: '#16a34a',
+      cancelButtonColor: '#6b7280',
+      reverseButtons: true
+    }).then(result => {
+      if (!result.isConfirmed) return;
 
-    this.loading.set(true);
-    this.errorMessage.set('');
-    this.successMessage.set('');
+      this.loading.set(true);
+      this.errorMessage.set('');
+      this.successMessage.set('');
 
     this.workspaceService.approveWorkspace(workspaceId).subscribe({
       next: (response) => {
@@ -64,19 +73,29 @@ export class WorkspaceApprovalComponent implements OnInit {
         this.loading.set(false);
       }
     });
+    });
   }
 
   rejectWorkspace(workspaceId: number): void {
-    if (!confirm('Are you sure you want to reject this workspace? This will delete it permanently.')) {
-      return;
-    }
+    Swal.fire({
+      title: 'Reject Workspace?',
+      text: 'This will permanently delete the workspace and cannot be undone.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Reject',
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#6b7280',
+      reverseButtons: true
+    }).then(result => {
+      if (!result.isConfirmed) return;
 
-    // For now, just remove from UI - you can implement a delete endpoint later
-    this.pendingWorkspaces.update(workspaces =>
-      workspaces.filter(w => w.id !== workspaceId)
-    );
-    this.successMessage.set('Workspace rejected');
-    setTimeout(() => this.successMessage.set(''), 3000);
+      // For now, just remove from UI - you can implement a delete endpoint later
+      this.pendingWorkspaces.update(workspaces =>
+        workspaces.filter(w => w.id !== workspaceId)
+      );
+      this.successMessage.set('Workspace rejected');
+      setTimeout(() => this.successMessage.set(''), 3000);
+    });
   }
 
   getTotalRooms(workspace: Workspace): number {
@@ -85,5 +104,10 @@ export class WorkspaceApprovalComponent implements OnInit {
 
   getTotalCapacity(workspace: Workspace): number {
     return workspace.rooms?.reduce((sum, room) => sum + room.capacity, 0) || 0;
+  }
+
+  getMinPrice(workspace: Workspace): number | null {
+    const prices = workspace.rooms?.map(r => r.pricePerHour) ?? [];
+    return prices.length ? Math.min(...prices) : null;
   }
 }

@@ -29,6 +29,7 @@ namespace CoworkBooking.Domain.Entities.Auth
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<ApplicationUserRole> UserRoles { get; set; } = new List<ApplicationUserRole>();
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
         public ICollection<WorkSpace> OwnedWorkspaces { get; set; } = new List<WorkSpace>();
     }

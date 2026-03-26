@@ -104,11 +104,11 @@
       </div>
 
       <div formArrayName="rooms" class="rooms-list">
-        @for (room of rooms.controls; track $index) {
-          <div [formGroupName]="$index" class="room-card">
+        @for (room of rooms.controls; track room; let roomIndex = $index) {
+          <div [formGroupName]="roomIndex" class="room-card">
             <div class="room-header">
-              <h4>Room {{ $index + 1 }}</h4>
-              <button type="button" class="btn-remove" (click)="removeRoom($index)" title="Remove Room">
+              <h4>Room {{ roomIndex + 1 }}</h4>
+              <button type="button" class="btn-remove" (click)="removeRoom(roomIndex)" title="Remove Room">
                 🗑️
               </button>
             </div>
@@ -120,7 +120,7 @@
                   type="text"
                   formControlName="name"
                   placeholder="e.g., Meeting Room A"
-                  [class.invalid]="isRoomFieldInvalid($index, 'name')"
+                  [class.invalid]="isRoomFieldInvalid(roomIndex, 'name')"
                 />
               </div>
 
@@ -131,7 +131,7 @@
                   formControlName="capacity"
                   min="1"
                   placeholder="10"
-                  [class.invalid]="isRoomFieldInvalid($index, 'capacity')"
+                  [class.invalid]="isRoomFieldInvalid(roomIndex, 'capacity')"
                 />
               </div>
 
@@ -143,7 +143,7 @@
                   min="0"
                   step="0.01"
                   placeholder="50.00"
-                  [class.invalid]="isRoomFieldInvalid($index, 'pricePerHour')"
+                  [class.invalid]="isRoomFieldInvalid(roomIndex, 'pricePerHour')"
                 />
               </div>
             </div>
@@ -152,20 +152,20 @@
             <div class="devices-section">
               <div class="devices-header">
                 <h5>📱 Devices (Optional)</h5>
-                <button type="button" class="btn-add-device" (click)="addDevice($index)">
+                <button type="button" class="btn-add-device" (click)="addDevice(roomIndex)">
                   ➕ Add Device
                 </button>
               </div>
 
               <div formArrayName="devices" class="devices-list">
-                @for (device of getDevices($index).controls; track deviceIdx; let deviceIdx = $index) {
+                @for (device of getDevices(roomIndex).controls; track device; let deviceIdx = $index) {
                   <div [formGroupName]="deviceIdx" class="device-row">
                     <div class="form-group">
                       <input
                         type="text"
                         formControlName="name"
                         placeholder="Device name (e.g., Projector)"
-                        [class.invalid]="isDeviceFieldInvalid($index, deviceIdx, 'name')"
+                        [class.invalid]="isDeviceFieldInvalid(roomIndex, deviceIdx, 'name')"
                       />
                     </div>
 
@@ -176,17 +176,17 @@
                         min="0"
                         step="0.01"
                         placeholder="Extra cost/hr"
-                        [class.invalid]="isDeviceFieldInvalid($index, deviceIdx, 'extraCostPerHour')"
+                        [class.invalid]="isDeviceFieldInvalid(roomIndex, deviceIdx, 'extraCostPerHour')"
                       />
                     </div>
 
-                    <button type="button" class="btn-remove-device" (click)="removeDevice($index, deviceIdx)">
+                    <button type="button" class="btn-remove-device" (click)="removeDevice(roomIndex, deviceIdx)">
                       ❌
                     </button>
                   </div>
                 }
 
-                @if (getDevices($index).length === 0) {
+                @if (getDevices(roomIndex).length === 0) {
                   <p class="no-devices">No devices added yet</p>
                 }
               </div>

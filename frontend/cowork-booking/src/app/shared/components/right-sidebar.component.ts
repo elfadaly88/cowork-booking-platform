@@ -64,8 +64,8 @@ import { AuthService } from '../../core/services/auth.service';
       position: fixed;
       right: 0;
       top: 0;
-      height: 100vh;
-      width: 260px;
+      height: 100dvh;
+      width: var(--right-sidebar-width);
       background: #ffffff;
       border-left: 1px solid rgba(30,41,59,0.06);
       padding: 0.5rem;
@@ -77,7 +77,7 @@ import { AuthService } from '../../core/services/auth.service';
     }
 
     .right-sidebar.collapsed {
-      width: 72px;
+      width: var(--right-sidebar-collapsed-width);
     }
 
     .toggle-area {
@@ -127,12 +127,12 @@ import { AuthService } from '../../core/services/auth.service';
 
     @media (max-width: 900px) {
       .right-sidebar { transform: translateX(0); position: fixed; }
-      .right-sidebar.collapsed { transform: translateX(188px); }
+      .right-sidebar.collapsed { transform: translateX(var(--right-sidebar-width)); }
     }
 
     @media (max-width: 640px) {
       .right-sidebar { width: 64px; }
-      .right-sidebar.collapsed { transform: translateX(200px); }
+      .right-sidebar.collapsed { transform: translateX(var(--right-sidebar-width)); }
     }
     `
   ]

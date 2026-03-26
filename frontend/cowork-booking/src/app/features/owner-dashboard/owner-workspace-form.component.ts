@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { WorkspaceService } from '../../core/services/workspace.service';
-import { CreateWorkspaceDto, CreateRoomDto, CreateDeviceDto } from '../../core/models/workspace.model';
+import { CreateWorkspaceDto, CreateRoomDto, CreateDeviceDto, UpdateWorkspaceDto, UpdateRoomDto, UpdateDeviceDto } from '../../core/models/workspace.model';
 import { MapLocationPickerComponent } from '../../shared/components/map-location-picker.component';
 import Swal from 'sweetalert2';
 
@@ -36,8 +36,74 @@ export class OwnerWorkspaceFormComponent implements OnInit {
     if (id) {
       this.workspaceId = +id;
       this.isEditMode.set(true);
-      // TODO: Load workspace data for editing
+      this.loadWorkspaceForEdit(this.workspaceId);
     }
+  }
+
+  loadWorkspaceForEdit(id: number): void {
+    this.loading.set(true);
+    this.workspaceService.getWorkspaceById(id).subscribe({
+      next: (ws) => {
+        const wsAny = ws as any;
+
+        // Patch basic fields including lat/lng (pre-fills the map marker)
+        this.workspaceForm.patchValue({
+          name: wsAny.name ?? wsAny.Name ?? '',
+          description: wsAny.description ?? wsAny.Description ?? '',
+          address: wsAny.address ?? wsAny.Address ?? '',
+          city: wsAny.city ?? wsAny.City ?? '',
+          latitude: wsAny.latitude ?? wsAny.Latitude ?? null,
+          longitude: wsAny.longitude ?? wsAny.Longitude ?? null
+        });
+
+        // Rebuild the rooms FormArray from loaded data in one shot to avoid stale bindings.
+        const rooms = wsAny.rooms ?? wsAny.Rooms ?? [];
+        const roomsArray = this.fb.array<FormGroup>([]);
+
+        rooms.forEach((room: any) => {
+          const roomName = room.name ?? room.roomName ?? room.Name ?? room.RoomName ?? '';
+          const roomCapacity = room.capacity ?? room.Capacity ?? 1;
+          const roomPricePerHour = room.pricePerHour ?? room.PricePerHour ?? 0;
+          const roomDevices = room.devices ?? room.Devices ?? [];
+
+          const devicesArray = this.fb.array(
+            roomDevices.map((device: any) =>
+              this.fb.group({
+                id: [device.id ?? device.Id ?? null],
+                name: [device.name ?? device.Name ?? '', Validators.required],
+                extraCostPerHour: [device.extraCostPerHour ?? device.ExtraCostPerHour ?? 0, [Validators.required, Validators.min(0)]]
+              })
+            )
+          );
+
+          roomsArray.push(this.fb.group({
+            id: [room.id ?? room.Id ?? null],
+            name: [roomName, Validators.required],
+            capacity: [roomCapacity, [Validators.required, Validators.min(1)]],
+            pricePerHour: [roomPricePerHour, [Validators.required, Validators.min(0)]],
+            devices: devicesArray
+          }));
+        });
+
+        if (roomsArray.length === 0) {
+          roomsArray.push(this.fb.group({
+            id: [null],
+            name: ['', Validators.required],
+            capacity: [1, [Validators.required, Validators.min(1)]],
+            pricePerHour: [0, [Validators.required, Validators.min(0)]],
+            devices: this.fb.array([])
+          }));
+        }
+
+        this.workspaceForm.setControl('rooms', roomsArray);
+
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed to load workspace data');
+        this.loading.set(false);
+      }
+    });
   }
 
   initializeForm(): void {
@@ -65,6 +131,7 @@ export class OwnerWorkspaceFormComponent implements OnInit {
 
   addRoom(): void {
     const roomForm = this.fb.group({
+      id: [null],  // For new rooms, id is null; for existing rooms, it will be set during load
       name: ['', Validators.required],
       capacity: [1, [Validators.required, Validators.min(1)]],
       pricePerHour: [0, [Validators.required, Validators.min(0)]],
@@ -106,7 +173,12 @@ export class OwnerWorkspaceFormComponent implements OnInit {
 
   onSubmit(): void {
     if (this.workspaceForm.invalid) {
-      this.errorMessage.set('Please fill in all required fields');
+      this.workspaceForm.markAllAsTouched();
+      this.errorMessage.set(
+        this.workspaceForm.get('latitude')?.invalid
+          ? 'Please pick the workspace location on the map.'
+          : 'Please fill in all required fields.'
+      );
       return;
     }
 
@@ -115,26 +187,63 @@ export class OwnerWorkspaceFormComponent implements OnInit {
     this.successMessage.set('');
 
     const formValue = this.workspaceForm.value;
-    const workspaceData: CreateWorkspaceDto = {
-      name: formValue.name,
-      description: formValue.description,
-      address: formValue.address,
-      city: formValue.city,
-      latitude: formValue.latitude,
-      longitude: formValue.longitude,
-      rooms: formValue.rooms.map((room: any) => ({
-        name: room.name,
-        capacity: room.capacity,
-        pricePerHour: room.pricePerHour,
-        devices: room.devices.map((device: any) => ({
-          name: device.name,
-          extraCostPerHour: device.extraCostPerHour
-        }))
-      }))
-    };
 
-    // For now, just use create - TODO: Implement update
-    this.createWorkspace(workspaceData);
+    if (this.isEditMode() && this.workspaceId) {
+      const updateData: UpdateWorkspaceDto = {
+        id: this.workspaceId,
+        name: formValue.name,
+        description: formValue.description,
+        address: formValue.address,
+        city: formValue.city,
+        latitude: formValue.latitude,
+        longitude: formValue.longitude,
+        rooms: formValue.rooms.map((room: any) => ({
+          id: room.id || undefined,
+          name: room.name,
+          capacity: room.capacity,
+          pricePerHour: room.pricePerHour,
+          devices: room.devices.map((device: any) => ({
+            id: device.id || undefined,
+            name: device.name,
+            extraCostPerHour: device.extraCostPerHour
+          } as UpdateDeviceDto))
+        } as UpdateRoomDto))
+      };
+      this.doUpdateWorkspace(updateData);
+    } else {
+      const createData: CreateWorkspaceDto = {
+        name: formValue.name,
+        description: formValue.description,
+        address: formValue.address,
+        city: formValue.city,
+        latitude: formValue.latitude,
+        longitude: formValue.longitude,
+        rooms: formValue.rooms.map((room: any) => ({
+          name: room.name,
+          capacity: room.capacity,
+          pricePerHour: room.pricePerHour,
+          devices: room.devices.map((device: any) => ({
+            name: device.name,
+            extraCostPerHour: device.extraCostPerHour
+          } as CreateDeviceDto))
+        } as CreateRoomDto))
+      };
+      this.createWorkspace(createData);
+    }
+  }
+
+  doUpdateWorkspace(data: UpdateWorkspaceDto): void {
+    this.workspaceService.updateWorkspaceWithRooms(this.workspaceId!, data).subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.successMessage.set('Workspace updated successfully!');
+        setTimeout(() => this.router.navigate(['/owner/dashboard']), 2000);
+      },
+      error: (error) => {
+        this.loading.set(false);
+        this.errorMessage.set(error.message || 'Failed to update workspace');
+      }
+    });
   }
 
   createWorkspace(data: CreateWorkspaceDto): void {

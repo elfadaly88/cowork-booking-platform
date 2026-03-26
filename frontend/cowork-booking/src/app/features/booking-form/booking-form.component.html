@@ -57,6 +57,19 @@
             <span class="detail-value">{{ room.devices.length }} available</span>
           </div>
         </div>
+
+        <div class="detail-item" *ngIf="workspace?.currentSchedulePeriod">
+          <span class="detail-icon">🕒</span>
+          <div class="detail-content">
+            <span class="detail-label">Working Hours</span>
+            <span class="detail-value" style="font-size: 0.9em;">
+              <span *ngFor="let s of workspace?.currentSchedulePeriod?.schedules" style="display: block; margin-top: 2px;">
+                <strong>{{ getDayName(s.dayOfWeek) }}</strong>:
+                {{ s.isWeekend ? 'Closed' : ((s.openTime | slice:0:5) + ' - ' + (s.closeTime | slice:0:5)) }}
+              </span>
+            </span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -78,7 +91,7 @@
               type="date"
               class="form-input"
               formControlName="bookingDate"
-              [min]="minDate.toISOString().split('T')[0]"
+              [min]="minDateStr"
               required
             />
             <span class="form-error" *ngIf="bookingForm.get('bookingDate')?.hasError('required') && bookingForm.get('bookingDate')?.touched">
@@ -92,12 +105,14 @@
                 <span class="label-icon">🕐</span>
                 Start Time
               </label>
-              <input
-                type="time"
+              <select
                 class="form-input"
                 formControlName="startTime"
                 required
-              />
+              >
+                <option value="" disabled selected>Select start time</option>
+                <option *ngFor="let time of timeOptions" [value]="time">{{ time }}</option>
+              </select>
               <span class="form-error" *ngIf="bookingForm.get('startTime')?.hasError('required') && bookingForm.get('startTime')?.touched">
                 Start time is required
               </span>
@@ -111,12 +126,14 @@
                 <span class="label-icon">🕐</span>
                 End Time
               </label>
-              <input
-                type="time"
+              <select
                 class="form-input"
                 formControlName="endTime"
                 required
-              />
+              >
+                <option value="" disabled selected>Select end time</option>
+                <option *ngFor="let time of timeOptions" [value]="time">{{ time }}</option>
+              </select>
               <span class="form-error" *ngIf="bookingForm.get('endTime')?.hasError('required') && bookingForm.get('endTime')?.touched">
                 End time is required
               </span>
@@ -124,6 +141,26 @@
                 End time must be after start time
               </span>
             </div>
+          </div>
+
+          <div class="form-error" style="display:block; margin-top:0.75rem;" *ngIf="bookingForm.hasError('notScheduled')">
+            ⚠️ The selected date has no schedule — please choose another day.
+          </div>
+          <div class="form-error" style="display:block; margin-top:0.75rem;" *ngIf="bookingForm.hasError('isWeekend')">
+            ⚠️ The workspace is closed on the selected day — please choose a working day.
+          </div>
+          <div class="form-error" style="display:block; margin-top:0.75rem;" *ngIf="bookingForm.hasError('outsideWorkingHours') && bookingForm.touched">
+            Selected time falls outside of the workspace's working hours.
+          </div>
+
+          <!-- Availability check feedback -->
+          <div class="availability-checking" *ngIf="checkingAvailability" style="display:flex; align-items:center; gap:0.5rem; margin-top:0.75rem; color:#666; font-size:0.875rem;">
+            <span class="spinner" style="width:14px; height:14px; border-width:2px;"></span>
+            Checking availability...
+          </div>
+          <div class="form-error conflict-error" *ngIf="conflictError && !checkingAvailability"
+               style="display:block; margin-top:0.75rem; background:#fff3f3; border:1px solid #e74c3c; border-radius:6px; padding:0.6rem 0.85rem;">
+            <span style="margin-right:0.4rem;">⚠️</span>{{ conflictError }}
           </div>
         </div>
 
@@ -174,7 +211,7 @@
           <button
             type="submit"
             class="btn-primary"
-            [disabled]="bookingForm.invalid || submitting"
+            [disabled]="bookingForm.invalid || submitting || !!conflictError || checkingAvailability"
           >
             <span *ngIf="!submitting">Confirm Booking</span>
             <span *ngIf="submitting">

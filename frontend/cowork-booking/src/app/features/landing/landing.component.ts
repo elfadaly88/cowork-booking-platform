@@ -1,7 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { WorkspaceService } from '../../core/services/workspace.service';
+import { Workspace } from '../../core/models/workspace.model';
 
 @Component({
     selector: 'app-landing',
@@ -10,9 +12,37 @@ import { AuthService } from '../../core/services/auth.service';
     templateUrl: './landing.component.html',
     styleUrls: ['./landing.component.scss']
 })
-export class LandingComponent {
+export class LandingComponent implements OnInit {
     private readonly authService = inject(AuthService);
     private readonly router = inject(Router);
+    private readonly workspaceService = inject(WorkspaceService);
+
+    private readonly cardIcons = ['🏙️', '⭐', '🎯', '🏢', '💼', '🌟'];
+
+    featuredWorkspaces: Workspace[] = [];
+
+    ngOnInit(): void {
+        this.workspaceService.getAvailableWorkspaces().subscribe({
+            next: (workspaces) => {
+                this.featuredWorkspaces = workspaces.slice(0, 3);
+            },
+            error: () => { /* silent fail – landing page is public */ }
+        });
+    }
+
+    getCardIcon(index: number): string {
+        return this.cardIcons[index % this.cardIcons.length];
+    }
+
+    getMinPrice(workspace: Workspace): string {
+        const prices = workspace.rooms?.map(r => r.pricePerHour) ?? [];
+        return prices.length ? `EGP ${Math.min(...prices)}/hr` : '';
+    }
+
+    getSeatsLabel(workspace: Workspace): string {
+        const seats = workspace.rooms?.reduce((sum, r) => sum + (r.availableSeats ?? r.capacity), 0) ?? 0;
+        return seats > 0 ? `${seats} seats available` : workspace.city;
+    }
 
     features = [
         { icon: '🏢', title: 'Flexible Spaces', desc: 'Choose from private offices, shared desks, and conference rooms.' },

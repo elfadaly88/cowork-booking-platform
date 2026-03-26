@@ -45,7 +45,7 @@ namespace CoworkBooking.Application.Services
  Rooms = e.Rooms.Select(r =>
  {
      var now = DateTime.UtcNow;
-     var bookedCount = r.Bookings.Count(b => b.Status != Domain.Enums.BookingStatus.Cancelled && b.StartTime <= now && b.EndTime > now);
+     var bookedCount = r.Bookings.Count(b => b.Status != BookingStatus.Cancelled && b.StartTime <= now && b.EndTime > now);
      var available = Math.Max(0, r.Capacity - bookedCount);
      return new RoomDto
  {
@@ -95,7 +95,7 @@ namespace CoworkBooking.Application.Services
          Rooms = e.Rooms.Select(r =>
          {
              var now = DateTime.UtcNow;
-             var bookedCount = r.Bookings.Count(b => b.Status != Domain.Enums.BookingStatus.Cancelled && b.StartTime <= now && b.EndTime > now);
+             var bookedCount = r.Bookings.Count(b => b.Status != BookingStatus.Cancelled && b.StartTime <= now && b.EndTime > now);
              var available = Math.Max(0, r.Capacity - bookedCount);
              return new RoomDto
              {
@@ -130,6 +130,8 @@ namespace CoworkBooking.Application.Services
          .Include(w => w.Rooms)
              .ThenInclude(r => r.Devices)
          .Include(w => w.Images)
+         .Include(w => w.SchedulePeriods)
+             .ThenInclude(sp => sp.Schedules)
          .ToListAsync();
 
      var available = workspaces
@@ -156,9 +158,24 @@ namespace CoworkBooking.Application.Services
                  IsMain = i.IsMain,
                  Order = i.Order
              }).ToList(),
+             CurrentSchedulePeriod = w.SchedulePeriods.FirstOrDefault() == null ? null : new WorkspaceSchedulePeriodDto
+             {
+                 Id = w.SchedulePeriods.First().Id,
+                 WorkspaceId = w.SchedulePeriods.First().WorkspaceId,
+                 StartDate = w.SchedulePeriods.First().StartDate,
+                 EndDate = w.SchedulePeriods.First().EndDate,
+                 Schedules = w.SchedulePeriods.First().Schedules.Select(s => new WorkspaceScheduleDto
+                 {
+                     Id = s.Id,
+                     DayOfWeek = s.DayOfWeek,
+                     OpenTime = s.OpenTime,
+                     CloseTime = s.CloseTime,
+                     IsWeekend = s.IsWeekend
+                 }).ToList()
+             },
              Rooms = w.Rooms.Select(r =>
              {
-                 var booked = r.Bookings.Count(b => b.Status != Domain.Enums.BookingStatus.Cancelled && b.StartTime <= moment && b.EndTime > moment);
+                 var booked = r.Bookings.Count(b => b.Status != BookingStatus.Cancelled && b.StartTime <= moment && b.EndTime > moment);
                  var seats = Math.Max(0, r.Capacity - booked);
                  return new RoomDto
                  {
@@ -178,7 +195,7 @@ namespace CoworkBooking.Application.Services
                          RoomId = d.RoomId
                      }).ToList()
                  };
-             }).Where(r => r.AvailableSeats > 0).ToList()
+             }).ToList()
          })
          .Where(w => w.Rooms != null && w.Rooms.Any())
          .ToList();
@@ -212,6 +229,8 @@ namespace CoworkBooking.Application.Services
      .Include(w => w.Rooms)
          .ThenInclude(r => r.Bookings)
      .Include(w => w.Images)
+     .Include(w => w.SchedulePeriods)
+         .ThenInclude(sp => sp.Schedules)
      .FirstOrDefaultAsync(w => w.Id == id);
 
  if (e == null) return null;
@@ -239,9 +258,24 @@ namespace CoworkBooking.Application.Services
          IsMain = i.IsMain,
          Order = i.Order
      }).ToList(),
+     CurrentSchedulePeriod = e.SchedulePeriods.FirstOrDefault() == null ? null : new WorkspaceSchedulePeriodDto
+     {
+         Id = e.SchedulePeriods.First().Id,
+         WorkspaceId = e.SchedulePeriods.First().WorkspaceId,
+         StartDate = e.SchedulePeriods.First().StartDate,
+         EndDate = e.SchedulePeriods.First().EndDate,
+         Schedules = e.SchedulePeriods.First().Schedules.Select(s => new WorkspaceScheduleDto
+         {
+             Id = s.Id,
+             DayOfWeek = s.DayOfWeek,
+             OpenTime = s.OpenTime,
+             CloseTime = s.CloseTime,
+             IsWeekend = s.IsWeekend
+         }).ToList()
+     },
      Rooms = e.Rooms.Select(r =>
      {
-         var bookedCount = r.Bookings.Count(b => b.Status != Domain.Enums.BookingStatus.Cancelled && b.StartTime <= now && b.EndTime > now);
+         var bookedCount = r.Bookings.Count(b => b.Status != BookingStatus.Cancelled && b.StartTime <= now && b.EndTime > now);
          var available = Math.Max(0, r.Capacity - bookedCount);
          return new RoomDto
          {

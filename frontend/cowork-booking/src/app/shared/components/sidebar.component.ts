@@ -1,7 +1,8 @@
-import { Component, inject, HostBinding } from '@angular/core';
+import { Component, inject, HostBinding, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { Subscription, filter } from 'rxjs';
 
 @Component({
   selector: 'app-sidebar',
@@ -61,7 +62,7 @@ import { AuthService } from '../../core/services/auth.service';
   styles: [
     `
     .sidebar {
-      width: 240px;
+      width: var(--sidebar-width);
       min-width: 64px;
       background-color: #f8fafc;
       border-right: 1px solid rgba(30,41,59,0.06);
@@ -69,7 +70,7 @@ import { AuthService } from '../../core/services/auth.service';
       left: 0;
       top: 0;
       bottom: 0;
-      height: 100vh;
+      height: 100dvh;
       display: flex;
       flex-direction: column;
       padding: 0.5rem;
@@ -79,12 +80,12 @@ import { AuthService } from '../../core/services/auth.service';
     }
 
     .sidebar.collapsed {
-      width: 72px;
+      width: var(--sidebar-collapsed-width);
     }
 
     /* when the host has collapsed class, shrink the inner sidebar as well */
     :host(.collapsed) .sidebar {
-      width: 72px;
+      width: var(--sidebar-collapsed-width);
     }
 
     .sidebar-top {
@@ -175,13 +176,30 @@ import { AuthService } from '../../core/services/auth.service';
     `
   ]
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit, OnDestroy {
   auth = inject(AuthService);
+  private router = inject(Router);
   isCollapsed = false;
+  private routerSub?: Subscription;
 
   @HostBinding('class.collapsed')
   get hostCollapsed(): boolean {
     return this.isCollapsed;
+  }
+
+  ngOnInit(): void {
+    // On mobile, auto-close the sidebar whenever navigation completes.
+    this.routerSub = this.router.events
+      .pipe(filter(e => e instanceof NavigationEnd))
+      .subscribe(() => {
+        if (window.innerWidth <= 768) {
+          this.isCollapsed = true;
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.routerSub?.unsubscribe();
   }
 
   toggleCollapse() {

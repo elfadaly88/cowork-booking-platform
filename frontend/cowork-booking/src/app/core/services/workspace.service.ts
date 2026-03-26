@@ -149,10 +149,23 @@ export class WorkspaceService {
   }
 
   /**
-   * PUT /workspaces/{id} → update an existing workspace
+   * PUT /workspaces/{id} → update an existing workspace (basic fields only, Admin)
    */
   updateWorkspace(id: number, workspace: any): Observable<Workspace> {
     const url = `${this.baseUrl}/workspaces/${id}`;
+    return this.http.put<Workspace>(url, workspace).pipe(
+      catchError((err) => {
+        const message = err?.error?.message || `Failed to update workspace ${id}`;
+        return throwError(() => new Error(message));
+      })
+    );
+  }
+
+  /**
+   * PUT /workspaces/{id}/with-rooms → update workspace with rooms and devices (Owner/Admin)
+   */
+  updateWorkspaceWithRooms(id: number, workspace: any): Observable<Workspace> {
+    const url = `${this.baseUrl}/workspaces/${id}/with-rooms`;
     return this.http.put<Workspace>(url, workspace).pipe(
       catchError((err) => {
         const message = err?.error?.message || `Failed to update workspace ${id}`;

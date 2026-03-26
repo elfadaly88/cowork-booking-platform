@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, AfterViewInit, OnDestroy, ElementRef, ViewChild, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, AfterViewInit, OnDestroy, ElementRef, ViewChild, OnChanges, SimpleChanges, NgZone, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import * as L from 'leaflet';
 
@@ -7,17 +7,36 @@ import * as L from 'leaflet';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="map-container">
-      <div #mapElement class="map-frame"></div>
-      <div class="map-overlay" *ngIf="!initialLocationSet">
-        Click on the map to select workspace location
+    <div class="map-picker-wrapper">
+      <div class="map-actions-bar">
+        <button type="button" class="btn-use-location" (click)="useCurrentLocation()" [disabled]="geolocating">
+          <span *ngIf="!geolocating">📍 Use My Current Location</span>
+          <span *ngIf="geolocating">⏳ Detecting location...</span>
+        </button>
+      </div>
+      <div class="map-container">
+        <div #mapElement class="map-frame"></div>
+        <div class="map-overlay" *ngIf="!initialLocationSet">
+          📍 Click on the map or use the button above to set the workspace location
+        </div>
+      </div>
+      <div class="geo-error" *ngIf="geoError">⚠️ {{ geoError }}</div>
+      <div class="map-coordinates" *ngIf="selectedLat !== null && selectedLng !== null">
+        ✅ Selected: {{ selectedLat | number:'1.6-6' }}, {{ selectedLng | number:'1.6-6' }}
       </div>
     </div>
   `,
   styles: [`
-    .map-container { position: relative; width: 100%; height: 350px; border-radius: 8px; overflow: hidden; border: 1px solid #ccc; margin-bottom: 15px; }
+    .map-picker-wrapper { width: 100%; }
+    .map-actions-bar { margin-bottom: 8px; }
+    .btn-use-location { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-weight: 500; transition: background 0.2s; }
+    .btn-use-location:hover:not(:disabled) { background: #1d4ed8; }
+    .btn-use-location:disabled { opacity: 0.6; cursor: not-allowed; }
+    .map-container { position: relative; width: 100%; height: 350px; border-radius: 8px; overflow: hidden; border: 1px solid #ccc; margin-bottom: 8px; }
     .map-frame { width: 100%; height: 100%; z-index: 1; }
-    .map-overlay { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 6px 16px; border-radius: 20px; z-index: 1000; pointer-events: none; font-size: 0.9em; font-weight: 500;}
+    .map-overlay { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 6px 16px; border-radius: 20px; z-index: 1000; pointer-events: none; font-size: 0.9em; font-weight: 500; white-space: nowrap; }
+    .geo-error { color: #dc2626; font-size: 0.85rem; margin-top: 4px; }
+    .map-coordinates { color: #16a34a; font-size: 0.85rem; margin-top: 4px; font-weight: 500; }
   `]
 })
 export class MapLocationPickerComponent implements AfterViewInit, OnDestroy, OnChanges {
@@ -26,9 +45,14 @@ export class MapLocationPickerComponent implements AfterViewInit, OnDestroy, OnC
   @Input() initialLongitude: number | null = null;
   @Output() locationSelected = new EventEmitter<{lat: number, lng: number}>();
 
+  private zone = inject(NgZone);
   private map: L.Map | null = null;
   private marker: L.Marker | null = null;
   initialLocationSet = false;
+  geolocating = false;
+  geoError: string | null = null;
+  selectedLat: number | null = null;
+  selectedLng: number | null = null;
 
   ngAfterViewInit(): void {
     this.initMap();
@@ -46,12 +70,57 @@ export class MapLocationPickerComponent implements AfterViewInit, OnDestroy, OnC
     }
   }
 
+  /** Places / moves the marker and updates coordinate display. */
   private updateMarker(lat: number, lng: number): void {
+    this.selectedLat = lat;
+    this.selectedLng = lng;
+    const popupText = `📍 ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
     if (this.marker) {
       this.marker.setLatLng([lat, lng]);
+      this.marker.setPopupContent(popupText).openPopup();
     } else if (this.map) {
-      this.marker = L.marker([lat, lng]).addTo(this.map);
+      this.marker = L.marker([lat, lng])
+        .bindPopup(popupText)
+        .addTo(this.map)
+        .openPopup();
     }
+  }
+
+  /** Uses the browser Geolocation API to detect the user's current position. */
+  useCurrentLocation(): void {
+    if (!navigator.geolocation) {
+      this.geoError = 'Geolocation is not supported by your browser.';
+      return;
+    }
+    this.geolocating = true;
+    this.geoError = null;
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        // Geolocation callback also runs outside NgZone.
+        this.zone.run(() => {
+          this.geolocating = false;
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          this.initialLocationSet = true;
+          this.updateMarker(lat, lng);
+          this.map?.setView([lat, lng], 16);
+          this.locationSelected.emit({ lat, lng });
+        });
+      },
+      (error) => {
+        this.zone.run(() => {
+          this.geolocating = false;
+          if (error.code === error.PERMISSION_DENIED) {
+            this.geoError = 'Location access denied. Please allow location access or click on the map.';
+          } else if (error.code === error.POSITION_UNAVAILABLE) {
+            this.geoError = 'Location unavailable. Please click on the map to set the position.';
+          } else {
+            this.geoError = 'Could not detect location. Please click on the map.';
+          }
+        });
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
   }
 
   private initMap(): void {
@@ -82,11 +151,17 @@ export class MapLocationPickerComponent implements AfterViewInit, OnDestroy, OnC
       this.updateMarker(this.initialLatitude, this.initialLongitude);
     }
 
+    // Leaflet fires events outside Angular's NgZone.
+    // zone.run() ensures patchValue() in the parent triggers change detection
+    // so workspaceForm.invalid is re-evaluated and the submit button un-disables.
     this.map.on('click', (e: L.LeafletMouseEvent) => {
-      this.initialLocationSet = true;
-      const { lat, lng } = e.latlng;
-      this.updateMarker(lat, lng);
-      this.locationSelected.emit({ lat, lng });
+      this.zone.run(() => {
+        this.initialLocationSet = true;
+        this.geoError = null;
+        const { lat, lng } = e.latlng;
+        this.updateMarker(lat, lng);
+        this.locationSelected.emit({ lat, lng });
+      });
     });
   }
 

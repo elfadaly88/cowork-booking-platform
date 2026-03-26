@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { User } from '../../core/models/auth.model';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-owner-approval',
@@ -40,38 +41,58 @@ export class OwnerApprovalComponent implements OnInit {
   }
 
   approveOwner(userId: string): void {
-    if (!confirm('Are you sure you want to approve this owner account?')) {
-      return;
-    }
+    Swal.fire({
+      title: 'Approve Owner Account?',
+      text: 'This will grant the user Owner access and allow them to list workspaces.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Approve',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#16a34a',
+      cancelButtonColor: '#6b7280',
+      reverseButtons: true
+    }).then(result => {
+      if (!result.isConfirmed) return;
 
-    this.authService.approveOwner(userId, true).subscribe({
-      next: () => {
-        this.successMessage.set('Owner account approved successfully');
-        this.loadPendingOwners();
-        setTimeout(() => this.successMessage.set(null), 3000);
-      },
-      error: (error) => {
-        console.error('Failed to approve owner', error);
-        this.errorMessage.set('Failed to approve owner account');
-      }
+      this.authService.approveOwner(userId, true).subscribe({
+        next: () => {
+          this.successMessage.set('Owner account approved successfully');
+          this.loadPendingOwners();
+          setTimeout(() => this.successMessage.set(null), 3000);
+        },
+        error: (error) => {
+          console.error('Failed to approve owner', error);
+          this.errorMessage.set('Failed to approve owner account');
+        }
+      });
     });
   }
 
   rejectOwner(userId: string): void {
-    if (!confirm('Are you sure you want to reject this owner account?')) {
-      return;
-    }
+    Swal.fire({
+      title: 'Reject Owner Account?',
+      text: 'This will deny the owner request. The user will remain a regular user.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Reject',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#6b7280',
+      reverseButtons: true
+    }).then(result => {
+      if (!result.isConfirmed) return;
 
-    this.authService.approveOwner(userId, false).subscribe({
-      next: () => {
-        this.successMessage.set('Owner account rejected');
-        this.loadPendingOwners();
-        setTimeout(() => this.successMessage.set(null), 3000);
-      },
-      error: (error) => {
-        console.error('Failed to reject owner', error);
-        this.errorMessage.set('Failed to reject owner account');
-      }
+      this.authService.approveOwner(userId, false).subscribe({
+        next: () => {
+          this.successMessage.set('Owner account rejected');
+          this.loadPendingOwners();
+          setTimeout(() => this.successMessage.set(null), 3000);
+        },
+        error: (error) => {
+          console.error('Failed to reject owner', error);
+          this.errorMessage.set('Failed to reject owner account');
+        }
+      });
     });
   }
 }

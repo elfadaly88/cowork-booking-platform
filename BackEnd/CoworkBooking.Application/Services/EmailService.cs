@@ -1,4 +1,5 @@
 using CoworkBooking.Application.Interfaces;
+using CoworkBooking.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Net;
@@ -40,6 +41,109 @@ namespace CoworkBooking.Application.Services
         {
             var subject = $"❌ Booking Cancelled — {data.WorkspaceName}";
             var body = BuildBookingHtml(userName, data, confirmed: false);
+            await SendAsync(toEmail, subject, body);
+        }
+
+        public async Task SendOwnerReservationNotificationAsync(string toEmail, string ownerName, BookingEmailData data, string guestName, BookingStatus bookingStatus, PaymentStatus paymentStatus)
+        {
+            var bookingStatusText = bookingStatus.ToString();
+            var paymentStatusText = paymentStatus.ToString();
+            var subject = $"🔔 New Reservation #{data.BookingId} ({bookingStatusText}/{paymentStatusText})";
+            var body = $@"
+            <div style='font-family:Inter,sans-serif;max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #E2E8F0;'>
+              <div style='background:linear-gradient(135deg,#0F172A,#1E293B);padding:2rem;text-align:center;'>
+                <h1 style='color:white;margin:0;font-size:1.5rem;'>🏢 CoworkHub Owner Alert</h1>
+              </div>
+              <div style='padding:2rem;'>
+                <h2 style='margin:0 0 0.75rem 0;'>Hi {ownerName},</h2>
+                <p style='color:#334155;'>A user has made a reservation in your workspace. Please review the details below.</p>
+                <div style='background:#F8FAFC;border-radius:10px;padding:1.2rem;margin:1rem 0;'>
+                  <table style='width:100%;border-collapse:collapse;'>
+                    <tr><td style='padding:0.4rem 0;color:#64748B;'>Booking #</td><td style='font-weight:700;'>#{data.BookingId}</td></tr>
+                    <tr><td style='padding:0.4rem 0;color:#64748B;'>Guest</td><td style='font-weight:700;'>{guestName}</td></tr>
+                    <tr><td style='padding:0.4rem 0;color:#64748B;'>Workspace</td><td style='font-weight:700;'>{data.WorkspaceName}</td></tr>
+                    <tr><td style='padding:0.4rem 0;color:#64748B;'>Room</td><td style='font-weight:700;'>{data.RoomName}</td></tr>
+                    <tr><td style='padding:0.4rem 0;color:#64748B;'>Start</td><td style='font-weight:700;'>{data.StartTime:ddd, MMM d yyyy h:mm tt}</td></tr>
+                    <tr><td style='padding:0.4rem 0;color:#64748B;'>End</td><td style='font-weight:700;'>{data.EndTime:ddd, MMM d yyyy h:mm tt}</td></tr>
+                    <tr><td style='padding:0.4rem 0;color:#64748B;'>Total</td><td style='font-weight:700;'>EGP {data.TotalPrice:0.00}</td></tr>
+                    <tr><td style='padding:0.4rem 0;color:#64748B;'>Reservation Status</td><td style='font-weight:700;'>{bookingStatusText}</td></tr>
+                    <tr><td style='padding:0.4rem 0;color:#64748B;'>Payment Status</td><td style='font-weight:700;'>{paymentStatusText}</td></tr>
+                  </table>
+                </div>
+                <p style='margin:0;color:#64748B;'>Open your owner dashboard to take action if needed.</p>
+              </div>
+            </div>";
+            await SendAsync(toEmail, subject, body);
+        }
+
+        public async Task SendCashReservationApprovedAsync(string toEmail, string userName, BookingEmailData data)
+        {
+            var subject = $"✅ Cash Reservation Approved — {data.WorkspaceName}";
+            var body = $@"
+            <div style='font-family:Inter,sans-serif;max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #E2E8F0;'>
+              <div style='background:linear-gradient(135deg,#14532D,#15803D);padding:2rem;text-align:center;'>
+                <h1 style='color:white;margin:0;font-size:1.5rem;'>✅ Reservation Approved</h1>
+              </div>
+              <div style='padding:2rem;'>
+                <h2 style='margin:0 0 0.75rem 0;'>Hi {userName},</h2>
+                <p style='color:#334155;'>Great news. The owner approved your cash reservation.</p>
+                <div style='background:#F8FAFC;border-radius:10px;padding:1.2rem;margin:1rem 0;'>
+                  <table style='width:100%;border-collapse:collapse;'>
+                    <tr><td style='padding:0.4rem 0;color:#64748B;'>Booking #</td><td style='font-weight:700;'>#{data.BookingId}</td></tr>
+                    <tr><td style='padding:0.4rem 0;color:#64748B;'>Workspace</td><td style='font-weight:700;'>{data.WorkspaceName}</td></tr>
+                    <tr><td style='padding:0.4rem 0;color:#64748B;'>Room</td><td style='font-weight:700;'>{data.RoomName}</td></tr>
+                    <tr><td style='padding:0.4rem 0;color:#64748B;'>Start</td><td style='font-weight:700;'>{data.StartTime:ddd, MMM d yyyy h:mm tt}</td></tr>
+                    <tr><td style='padding:0.4rem 0;color:#64748B;'>End</td><td style='font-weight:700;'>{data.EndTime:ddd, MMM d yyyy h:mm tt}</td></tr>
+                    <tr><td style='padding:0.4rem 0;color:#64748B;'>Total</td><td style='font-weight:700;'>EGP {data.TotalPrice:0.00}</td></tr>
+                    <tr><td style='padding:0.4rem 0;color:#64748B;'>Payment Method</td><td style='font-weight:700;'>Cash</td></tr>
+                    <tr><td style='padding:0.4rem 0;color:#64748B;'>Reservation Status</td><td style='font-weight:700;'>Confirmed</td></tr>
+                  </table>
+                </div>
+                <a href='http://localhost:4200/my-bookings'
+                   style='display:inline-block;background:linear-gradient(135deg,#14532D,#15803D);color:white;padding:0.75rem 2rem;border-radius:8px;text-decoration:none;font-weight:600;'>
+                  View My Bookings →
+                </a>
+              </div>
+            </div>";
+            await SendAsync(toEmail, subject, body);
+        }
+
+        public async Task SendBookingRejectionAsync(string toEmail, string userName, BookingEmailData data, string? reason = null)
+        {
+            var subject = $"❌ Reservation Rejected — {data.WorkspaceName}";
+            var reasonHtml = string.IsNullOrEmpty(reason)
+                ? "<p style='color:#64748B;font-style:italic;'>No reason provided.</p>"
+                : $"<p style='color:#64748B;'><strong>Reason:</strong> {reason}</p>";
+
+            var body = $@"
+            <div style='font-family:Inter,sans-serif;max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #E2E8F0;'>
+              <div style='background:linear-gradient(135deg,#7F1D1D,#DC2626);padding:2rem;text-align:center;'>
+                <h1 style='color:white;margin:0;font-size:1.5rem;'>❌ Reservation Rejected</h1>
+              </div>
+              <div style='padding:2rem;'>
+                <h2 style='margin:0 0 0.75rem 0;'>Hi {userName},</h2>
+                <p style='color:#334155;'>Unfortunately, the workspace owner has rejected your reservation. Please feel free to browse other available spaces or contact support for assistance.</p>
+                <div style='background:#FEF2F2;border-radius:10px;padding:1.2rem;margin:1rem 0;border-left:4px solid #DC2626;'>
+                  <table style='width:100%;border-collapse:collapse;'>
+                    <tr><td style='padding:0.4rem 0;color:#64748B;'>Booking #</td><td style='font-weight:700;'>#{data.BookingId}</td></tr>
+                    <tr><td style='padding:0.4rem 0;color:#64748B;'>Workspace</td><td style='font-weight:700;'>{data.WorkspaceName}</td></tr>
+                    <tr><td style='padding:0.4rem 0;color:#64748B;'>Room</td><td style='font-weight:700;'>{data.RoomName}</td></tr>
+                    <tr><td style='padding:0.4rem 0;color:#64748B;'>Scheduled</td><td style='font-weight:700;'>{data.StartTime:ddd, MMM d yyyy h:mm tt}</td></tr>
+                  </table>
+                </div>
+                <div style='background:#F8FAFC;border-radius:10px;padding:1.2rem;margin:1rem 0;'>
+                  <p style='margin:0 0 0.5rem 0;color:#475569;'><strong>Reason for Rejection:</strong></p>
+                  {reasonHtml}
+                </div>
+                <a href='http://localhost:4200/workspaces'
+                   style='display:inline-block;background:linear-gradient(135deg,#3B82F6,#2563EB);color:white;padding:0.75rem 2rem;border-radius:8px;text-decoration:none;font-weight:600;'>
+                  Browse Other Workspaces →
+                </a>
+              </div>
+              <div style='background:#F8FAFC;padding:1rem;text-align:center;border-top:1px solid #E2E8F0;'>
+                <p style='margin:0;font-size:0.85rem;color:#64748B;'>If you have any questions, contact support at support@coworkhub.com</p>
+              </div>
+            </div>";
             await SendAsync(toEmail, subject, body);
         }
 

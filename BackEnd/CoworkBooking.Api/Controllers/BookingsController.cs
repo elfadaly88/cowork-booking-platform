@@ -35,6 +35,20 @@ namespace CoworkBooking.Api.Controllers
             return Ok(bookings);
         }
 
+        // ─── GET: api/bookings/workspace-bookings ───────────────────────
+        [HttpGet("workspace-bookings")]
+        [Authorize]
+        public async Task<IActionResult> GetWorkspaceBookings()
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                         ?? User.FindFirst("sub")?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var bookings = await _service.GetByWorkspaceOwnerAsync(userId);
+            return Ok(bookings);
+        }
+
         // ─── GET: api/bookings/{id} ──────────────────────────────────────
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
@@ -49,6 +63,32 @@ namespace CoworkBooking.Api.Controllers
                 return Forbid();
 
             return Ok(b);
+        }
+
+        // ─── GET: api/bookings/check-availability ─────────────────────────
+        // Returns whether a room is free for the requested window.
+        // Requires authentication so anonymous callers cannot probe the schedule.
+        [HttpGet("check-availability")]
+        [Authorize]
+        public async Task<IActionResult> CheckAvailability(
+            [FromQuery] int roomId,
+            [FromQuery] DateTime startTime,
+            [FromQuery] DateTime endTime)
+        {
+            if (roomId <= 0)
+                return BadRequest(new { available = false, message = "Invalid room ID." });
+
+            if (startTime >= endTime)
+                return BadRequest(new { available = false, message = "End time must be after start time." });
+
+            var hasConflict = await _service.HasConflictAsync(roomId, startTime, endTime);
+            return Ok(new
+            {
+                available = !hasConflict,
+                message = hasConflict
+                    ? "This room is already fully booked for the selected time slot."
+                    : "Time slot is available."
+            });
         }
 
         // ─── POST: api/bookings ──────────────────────────────────────────
@@ -75,7 +115,13 @@ namespace CoworkBooking.Api.Controllers
             }
             catch (InvalidOperationException ex)
             {
+                // Room is fully booked for the requested slot.
                 return Conflict(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                // End time before start, or start time in the past.
+                return BadRequest(new { message = ex.Message });
             }
         }
 
@@ -113,6 +159,38 @@ namespace CoworkBooking.Api.Controllers
             return Ok(new { message = "Payment updated successfully" });
         }
 
+        // ─── POST: api/bookings/{id}/approve-cash ─────────────────────
+        [HttpPost("{id}/approve-cash")]
+        [Authorize(Roles = "Owner,Admin")]
+        public async Task<IActionResult> ApproveCashReservation(int id)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var success = await _service.ApproveCashBookingAsync(id, userId, User.IsInRole("Admin"));
+            if (!success)
+                return BadRequest(new { message = "Unable to approve cash reservation. It may not be pending, not cash, or not owned by you." });
+
+            return Ok(new { message = "Cash reservation approved and user notified successfully" });
+        }
+
+        // ─── POST: api/bookings/{id}/reject ───────────────────────────
+        [HttpPost("{id}/reject")]
+        [Authorize(Roles = "Owner,Admin")]
+        public async Task<IActionResult> RejectReservation(int id, [FromBody] RejectBookingDto? dto)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var success = await _service.RejectBookingAsync(id, userId, User.IsInRole("Admin"), dto?.Reason);
+            if (!success)
+                return BadRequest(new { message = "Unable to reject reservation. It may not exist, already be rejected, or not owned by you." });
+
+            return Ok(new { message = "Reservation rejected and user notified successfully" });
+        }
+
         // ─── PUT: api/bookings/{id} (Admin or booking owner) ────────────
         [HttpPut("{id}")]
         [Authorize]
@@ -128,7 +206,18 @@ namespace CoworkBooking.Api.Controllers
             if (!isAdmin && existing.UserId?.ToString() != userId)
                 return Forbid();
 
-            await _service.UpdateAsync(dto);
+            try
+            {
+                await _service.UpdateAsync(dto);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
             return NoContent();
         }
 
@@ -147,5 +236,10 @@ namespace CoworkBooking.Api.Controllers
     public class PaymentRequest
     {
         public int PaymentMethodId { get; set; }
+    }
+
+    public class RejectBookingDto
+    {
+        public string? Reason { get; set; }
     }
 }

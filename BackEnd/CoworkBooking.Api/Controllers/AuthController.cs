@@ -2,11 +2,15 @@ using CoworkBooking.Application.DTOs.Auth;
 using CoworkBooking.Application.Services;
 using CoworkBooking.Domain.Entities.Auth;
 using CoworkBooking.Infrastructure.Configuration;
+using CoworkBooking.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace CoworkBooking.Api.Controllers
@@ -19,16 +23,19 @@ namespace CoworkBooking.Api.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly JwtService _jwtService;
         private readonly JwtSettings _jwtSettings;
+        private readonly AppDbContext _context;
 
         public AuthController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             JwtService jwtService,
+            AppDbContext context,
             IOptions<JwtSettings> jwtSettings)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _jwtService = jwtService;
+            _context = context;
             _jwtSettings = jwtSettings.Value;
         }
 
@@ -58,28 +65,7 @@ namespace CoworkBooking.Api.Controllers
             if (!result.Succeeded)
                 return Unauthorized(new { message = "Invalid email or password" });
 
-            var token = await _jwtService.GenerateTokenAsync(user);
-            var roles = await _userManager.GetRolesAsync(user);
-
-            return Ok(new AuthResponseDto
-            {
-                Token = token,
-                ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.DurationInMinutes),
-                User = new UserDto
-                {
-                    Id = user.Id,
-                    Email = user.Email ?? string.Empty,
-                    FirstName = user.FirstName,
-                    LastName  = user.LastName,
-                    FullName  = user.FullName,
-                    Phone     = user.PhoneNumber,
-                    ProfileImageUrl = user.ProfileImageUrl,
-                    Roles      = roles.ToList(),
-                    IsActive   = user.IsActive,
-                    IsApproved = user.IsApproved,
-                    CreatedAt  = user.CreatedAt
-                }
-            });
+            return Ok(await BuildAuthResponseAsync(user));
         }
 
         /// <summary>
@@ -119,26 +105,47 @@ namespace CoworkBooking.Api.Controllers
             var userRole = allowedRoles.Contains(registerDto.UserType) ? registerDto.UserType : "User";
             await _userManager.AddToRoleAsync(newUser, userRole);
 
-            // Generate token for auto-login
-            var token = await _jwtService.GenerateTokenAsync(newUser);
-            var roles = await _userManager.GetRolesAsync(newUser);
+            return Ok(await BuildAuthResponseAsync(newUser));
+        }
 
-            return Ok(new AuthResponseDto
+        /// <summary>
+        /// Exchange a valid refresh token for a new access token and refresh token.
+        /// </summary>
+        [HttpPost("refresh")]
+        [AllowAnonymous]
+        public async Task<ActionResult<AuthResponseDto>> Refresh([FromBody] RefreshTokenRequestDto request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.RefreshToken))
+                return Unauthorized(new { message = "Invalid refresh token." });
+
+            var incomingHash = ComputeSha256(request.RefreshToken.Trim());
+            var existing = await _context.RefreshTokens
+                .Include(rt => rt.User)
+                .FirstOrDefaultAsync(rt => rt.TokenHash == incomingHash);
+
+            if (existing == null || !existing.IsActive || existing.User == null || !existing.User.IsActive)
+                return Unauthorized(new { message = "Refresh token is invalid or expired." });
+
+            // Rotate refresh token (single-use token chain).
+            var newRawRefreshToken = GenerateSecureToken();
+            var newRefreshHash = ComputeSha256(newRawRefreshToken);
+            var refreshExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenDurationInDays <= 0 ? 14 : _jwtSettings.RefreshTokenDurationInDays);
+
+            existing.RevokedAt = DateTime.UtcNow;
+            existing.ReplacedByTokenHash = newRefreshHash;
+
+            _context.RefreshTokens.Add(new RefreshToken
             {
-                Token = token,
-                ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.DurationInMinutes),
-                User = new UserDto
-                {
-                    Id = newUser.Id,
-                    Email = newUser.Email ?? string.Empty,
-                    FullName = newUser.FullName,
-                    ProfileImageUrl = newUser.ProfileImageUrl,
-                    Roles = roles.ToList(),
-                    IsActive = newUser.IsActive,
-                    IsApproved = newUser.IsApproved,
-                    CreatedAt = newUser.CreatedAt
-                }
+                Id = Guid.NewGuid(),
+                UserId = existing.UserId,
+                TokenHash = newRefreshHash,
+                ExpiresAt = refreshExpiresAt,
+                CreatedAt = DateTime.UtcNow
             });
+
+            await _context.SaveChangesAsync();
+
+            return Ok(await BuildAuthResponseAsync(existing.User, newRawRefreshToken, refreshExpiresAt));
         }
 
         /// <summary>
@@ -176,10 +183,20 @@ namespace CoworkBooking.Api.Controllers
         /// </summary>
         [HttpPost("logout")]
         [Authorize]
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout([FromBody] RefreshTokenRequestDto? request)
         {
-            // Since we're using JWT (stateless), logout is handled client-side
-            // This endpoint can be used for logging purposes or future refresh token invalidation
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrWhiteSpace(userId) && Guid.TryParse(userId, out var userGuid) && request != null && !string.IsNullOrWhiteSpace(request.RefreshToken))
+            {
+                var hash = ComputeSha256(request.RefreshToken.Trim());
+                var token = await _context.RefreshTokens.FirstOrDefaultAsync(rt => rt.UserId == userGuid && rt.TokenHash == hash);
+                if (token != null && !token.IsRevoked)
+                {
+                    token.RevokedAt = DateTime.UtcNow;
+                    await _context.SaveChangesAsync();
+                }
+            }
+
             return Ok(new { message = "Logged out successfully" });
         }
 
@@ -310,6 +327,66 @@ namespace CoworkBooking.Api.Controllers
             // Remove HTML tags and encode dangerous chars
             var stripped = Regex.Replace(input.Trim(), "<[^>]*>", string.Empty);
             return stripped.Length > 500 ? stripped[..500] : stripped; // hard cap
+        }
+
+        private async Task<AuthResponseDto> BuildAuthResponseAsync(ApplicationUser user, string? providedRefreshToken = null, DateTime? providedRefreshTokenExpiresAt = null)
+        {
+            var token = await _jwtService.GenerateTokenAsync(user);
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var refreshRawToken = providedRefreshToken;
+            var refreshExpiresAt = providedRefreshTokenExpiresAt;
+
+            if (string.IsNullOrEmpty(refreshRawToken) || !refreshExpiresAt.HasValue)
+            {
+                refreshRawToken = GenerateSecureToken();
+                refreshExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenDurationInDays <= 0 ? 14 : _jwtSettings.RefreshTokenDurationInDays);
+
+                _context.RefreshTokens.Add(new RefreshToken
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = user.Id,
+                    TokenHash = ComputeSha256(refreshRawToken),
+                    ExpiresAt = refreshExpiresAt.Value,
+                    CreatedAt = DateTime.UtcNow
+                });
+
+                await _context.SaveChangesAsync();
+            }
+
+            return new AuthResponseDto
+            {
+                Token = token,
+                RefreshToken = refreshRawToken!,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.DurationInMinutes),
+                RefreshTokenExpiresAt = refreshExpiresAt!.Value,
+                User = new UserDto
+                {
+                    Id = user.Id,
+                    Email = user.Email ?? string.Empty,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    FullName = user.FullName,
+                    Phone = user.PhoneNumber,
+                    ProfileImageUrl = user.ProfileImageUrl,
+                    Roles = roles.ToList(),
+                    IsActive = user.IsActive,
+                    IsApproved = user.IsApproved,
+                    CreatedAt = user.CreatedAt
+                }
+            };
+        }
+
+        private static string GenerateSecureToken()
+        {
+            return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+        }
+
+        private static string ComputeSha256(string input)
+        {
+            var bytes = Encoding.UTF8.GetBytes(input);
+            var hash = SHA256.HashData(bytes);
+            return Convert.ToHexString(hash);
         }
     }
 }

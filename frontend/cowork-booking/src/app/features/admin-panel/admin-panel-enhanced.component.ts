@@ -7,6 +7,7 @@ import { environment } from '../../../environments/environment';
 import { Workspace, CreateWorkspaceDto, UpdateWorkspaceDto } from '../../core/models/workspace.model';
 import { catchError, throwError } from 'rxjs';
 import { MapPickerComponent } from '../../shared/components/map-picker.component';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-admin-panel-enhanced',
@@ -69,9 +70,20 @@ export class AdminPanelEnhancedComponent implements OnInit {
   }
 
   removeRoom(index: number): void {
-    if (confirm('Are you sure you want to remove this room?')) {
-      this.rooms.removeAt(index);
-    }
+    Swal.fire({
+      title: 'Remove Room?',
+      text: 'Are you sure you want to remove this room?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Remove',
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#6b7280',
+      reverseButtons: true
+    }).then(result => {
+      if (result.isConfirmed) {
+        this.rooms.removeAt(index);
+      }
+    });
   }
 
   addDevice(roomIndex: number): void {
@@ -84,9 +96,20 @@ export class AdminPanelEnhancedComponent implements OnInit {
   }
 
   removeDevice(roomIndex: number, deviceIndex: number): void {
-    if (confirm('Are you sure you want to remove this device?')) {
-      this.getDevices(roomIndex).removeAt(deviceIndex);
-    }
+    Swal.fire({
+      title: 'Remove Device?',
+      text: 'Are you sure you want to remove this device?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Remove',
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#6b7280',
+      reverseButtons: true
+    }).then(result => {
+      if (result.isConfirmed) {
+        this.getDevices(roomIndex).removeAt(deviceIndex);
+      }
+    });
   }
 
   loadWorkspaces(): void {
@@ -247,12 +270,20 @@ export class AdminPanelEnhancedComponent implements OnInit {
   }
 
   deleteWorkspace(id: number): void {
-    if (!confirm('Are you sure you want to delete this workspace? This will also delete all associated rooms and devices.')) {
-      return;
-    }
+    Swal.fire({
+      title: 'Delete Workspace?',
+      text: 'This will also delete all associated rooms and devices. This action cannot be undone.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Delete',
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#6b7280',
+      reverseButtons: true
+    }).then(result => {
+      if (!result.isConfirmed) return;
 
-    this.isLoading.set(true);
-    this.errorMessage.set(null);
+      this.isLoading.set(true);
+      this.errorMessage.set(null);
 
     this.http.delete(`${this.baseUrl}/workspaces/${id}`)
       .pipe(
@@ -268,6 +299,7 @@ export class AdminPanelEnhancedComponent implements OnInit {
         this.isLoading.set(false);
         this.loadWorkspaces();
       });
+    });
   }
 
   resetForm(): void {

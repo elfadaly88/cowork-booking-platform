@@ -138,8 +138,8 @@
             </div>
           </div>
           <div class="room-actions">
-            <button class="book-button" 
-                    [disabled]="room.availableSeats === 0" 
+            <button class="book-button"
+                    [disabled]="room.availableSeats === 0"
                     (click)="bookRoom(room)">
               {{ room.availableSeats === 0 ? 'Currently Full' : 'Book Now' }}
             </button>

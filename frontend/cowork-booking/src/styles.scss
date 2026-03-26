@@ -66,6 +66,12 @@
   --spacing-md: 1.5rem;
   --spacing-lg: 2rem;
   --spacing-xl: 3rem;
+  /* Layout: sidebar widths used by layout and components */
+  --sidebar-width: 240px;
+  --sidebar-collapsed-width: 72px;
+  /* Right sidebar (optional) */
+  --right-sidebar-width: 260px;
+  --right-sidebar-collapsed-width: 72px;
 }
 
 /* Global styles - Responsive & Cross-Platform */
@@ -296,25 +302,25 @@ label {
 
 /* Layout when using a left sidebar */
 .main-content {
-  margin-left: 240px; /* matches the sidebar width */
+  margin-left: var(--sidebar-width);
   transition: margin-left 0.2s ease, padding 0.2s ease;
-  min-height: 100vh;
+  min-height: 100dvh;
   padding: 0.5rem 1rem; /* keep content away from edges */
 }
 
 /* When the sidebar component has `.collapsed`, reduce the content margin */
 .app-sidebar.collapsed + .main-content {
-  margin-left: 80px; /* small collapsed width (72px) + gap */
+  margin-left: var(--sidebar-collapsed-width);
 }
 
 /* support the component tag selector (actual host element) */
 app-sidebar.collapsed + .main-content {
-  margin-left: 80px;
+  margin-left: var(--sidebar-collapsed-width);
 }
 
 /* legacy selector for projects that may put the .sidebar on host elements */
 .sidebar.collapsed + .main-content {
-  margin-left: 80px;
+  margin-left: var(--sidebar-collapsed-width);
 }
 
 @media (max-width: 900px) {

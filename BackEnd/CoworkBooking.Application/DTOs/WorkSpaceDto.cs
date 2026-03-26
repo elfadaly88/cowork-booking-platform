@@ -20,6 +20,7 @@ namespace CoworkBooking.Application.DTOs
         public double? Distance { get; set; }
         public List<RoomDto>? Rooms { get; set; }
         public List<WorkspaceImageDto>? Images { get; set; }
+        public WorkspaceSchedulePeriodDto? CurrentSchedulePeriod { get; set; }
 
         /// <summary>Convenience: URL of the main/cover image</summary>
         public string? MainImageUrl => Images?.FirstOrDefault(i => i.IsMain)?.Url

@@ -39,30 +39,15 @@
         </div>
 
         <!-- Floating workspace cards decoration -->
-        <div class="hero-floating-cards">
-            <div class="float-card fc1">
-                <span>🏙️</span>
+        <div class="hero-floating-cards" *ngIf="featuredWorkspaces.length">
+            <div class="float-card" *ngFor="let ws of featuredWorkspaces; let i = index"
+                 [ngClass]="'fc' + (i + 1)">
+                <span>{{ getCardIcon(i) }}</span>
                 <div>
-                    <strong>Downtown Hub</strong>
-                    <small>12 seats available</small>
+                    <strong>{{ ws.name }}</strong>
+                    <small>{{ getSeatsLabel(ws) }}</small>
                 </div>
-                <span class="fc-price">EGP 8/hr</span>
-            </div>
-            <div class="float-card fc2">
-                <span>⭐</span>
-                <div>
-                    <strong>Creative Loft</strong>
-                    <small>Just booked!</small>
-                </div>
-                <span class="fc-price">EGP 12/hr</span>
-            </div>
-            <div class="float-card fc3">
-                <span>🎯</span>
-                <div>
-                    <strong>Tech Campus</strong>
-                    <small>3 rooms open</small>
-                </div>
-                <span class="fc-price">EGP 15/hr</span>
+                <span class="fc-price">{{ getMinPrice(ws) }}</span>
             </div>
         </div>
     </section>

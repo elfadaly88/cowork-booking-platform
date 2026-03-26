@@ -1,12 +1,10 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
-import { catchError, throwError } from 'rxjs';
-import { Router } from '@angular/router';
+import { catchError, switchMap, throwError } from 'rxjs';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
-  const router = inject(Router);
   const token = authService.getToken();
 
   // Clone request and add Authorization header if token exists and is not empty
@@ -20,13 +18,29 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error) => {
-      // Handle 401 Unauthorized - token expired or invalid
-      // ⚠️ Skip if this IS the logout request — avoids triggering logout() recursively
+      // Handle 401: attempt token refresh once, then retry original request.
       const isLogoutRequest = req.url.includes('/auth/logout');
-      if (error.status === 401 && !isLogoutRequest) {
-        console.error('Unauthorized request - logging out');
-        authService.logout(); // AuthService.isLoggingOut guard also protects here
+      const isRefreshRequest = req.url.includes('/auth/refresh');
+      const isLoginRequest = req.url.includes('/auth/login');
+      const isRegisterRequest = req.url.includes('/auth/register');
+
+      if (error.status === 401 && !isLogoutRequest && !isRefreshRequest && !isLoginRequest && !isRegisterRequest) {
+        return authService.refreshAccessToken().pipe(
+          switchMap((response) => {
+            const retryReq = req.clone({
+              setHeaders: {
+                Authorization: `Bearer ${response.token}`
+              }
+            });
+            return next(retryReq);
+          }),
+          catchError((refreshError) => {
+            authService.logout();
+            return throwError(() => refreshError);
+          })
+        );
       }
+
       return throwError(() => error);
     })
   );

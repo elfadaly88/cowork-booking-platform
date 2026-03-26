@@ -1,5 +1,5 @@
 
-import { Component, inject } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
@@ -29,17 +29,31 @@ import { AuthService } from '../../core/services/auth.service';
             <span class="nav-icon">⚙️</span>
             <span class="nav-text">Admin Panel</span>
           </a>
-            <button class="logout-btn" (click)="logout()" *ngIf="authService.isAuthenticated()" aria-label="Logout">
-              <span class="nav-icon svg-icon" aria-hidden="true">
-                <!-- simple logout SVG -->
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M16 17L21 12L16 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M21 12H9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M13 19H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </span>
-              <span class="nav-text">Logout</span>
-            </button>
+
+          <!-- ─── User info chip ──────────────────────────────────────── -->
+          <div class="user-chip" *ngIf="authService.isAuthenticated() && authService.currentUser() as user">
+            <div class="user-avatar">{{ initials() }}</div>
+            <div class="user-info">
+              <span class="user-name">{{ user.firstName }} {{ user.lastName }}</span>
+              <span class="user-role">{{ roleLabel() }}</span>
+            </div>
+          </div>
+
+          <div class="session-chip" *ngIf="authService.isAuthenticated()" title="Session remaining time">
+            <span class="session-label">Session</span>
+            <span class="session-time">{{ authService.sessionCountdown() }}</span>
+          </div>
+
+          <button class="logout-btn" (click)="logout()" *ngIf="authService.isAuthenticated()" aria-label="Logout">
+            <span class="nav-icon svg-icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16 17L21 12L16 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M21 12H9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M13 19H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span class="nav-text">Logout</span>
+          </button>
         </div>
       </div>
     </nav>
@@ -168,14 +182,105 @@ import { AuthService } from '../../core/services/auth.service';
       align-items: center;
       justify-content: center;
     }
-    
+
+    /* ─── User chip ─────────────────────────────────────────────────── */
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 0.35rem 0.85rem 0.35rem 0.35rem;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 999px;
+      cursor: default;
+      margin-right: 0.25rem;
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #818cf8);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      letter-spacing: 0.03em;
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .user-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #0f172a;
+      white-space: nowrap;
+    }
+
+    .user-role {
+      font-size: 0.7rem;
+      color: #6366f1;
+      font-weight: 500;
+    }
+
+    .session-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #0f172a;
+      font-size: 0.75rem;
+      font-weight: 600;
+      line-height: 1;
+      margin-right: 0.25rem;
+      white-space: nowrap;
+    }
+
+    .session-label {
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .session-time {
+      font-variant-numeric: tabular-nums;
+      color: #0f172a;
+    }
+
     @media (max-width: 640px) {
+      .user-info { display: none; }
+      .user-chip { padding: 0.25rem; background: transparent; border-color: transparent; }
+      .session-label { display: none; }
+      .session-chip { padding: 0.35rem 0.5rem; margin-right: 0; }
       .logout-btn { padding: 0.5rem; margin-left: 0; }
     }
   `]
 })
 export class NavbarComponent {
   authService = inject(AuthService);
+
+  initials = computed(() => {
+    const u = this.authService.currentUser();
+    if (!u) return '';
+    return `${u.firstName?.[0] ?? ''}${u.lastName?.[0] ?? ''}`.toUpperCase();
+  });
+
+  roleLabel = computed(() => {
+    const u = this.authService.currentUser();
+    if (!u) return '';
+    if (u.roles?.includes('Admin')) return 'Admin';
+    if (u.roles?.includes('Owner')) return 'Owner';
+    return 'Member';
+  });
 
   logout(): void {
     this.authService.logout();

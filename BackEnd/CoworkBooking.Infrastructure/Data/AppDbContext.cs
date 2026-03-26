@@ -26,6 +26,7 @@ namespace CoworkBooking.Infrastructure.Data
         public DbSet<WorkspaceImage> WorkspaceImages { get; set; }
         public DbSet<WorkspaceReview> WorkspaceReviews { get; set; }
         public DbSet<PaymentMethod> PaymentMethods { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -124,6 +125,25 @@ namespace CoworkBooking.Infrastructure.Data
                     .HasForeignKey(ur => ur.RoleId)
                     .IsRequired();
             });
+
+            modelBuilder.Entity<RefreshToken>()
+                .HasIndex(rt => rt.TokenHash)
+                .IsUnique();
+
+            modelBuilder.Entity<RefreshToken>()
+                .Property(rt => rt.TokenHash)
+                .HasMaxLength(128)
+                .IsRequired();
+
+            modelBuilder.Entity<RefreshToken>()
+                .Property(rt => rt.ReplacedByTokenHash)
+                .HasMaxLength(128);
+
+            modelBuilder.Entity<RefreshToken>()
+                .HasOne(rt => rt.User)
+                .WithMany(u => u.RefreshTokens)
+                .HasForeignKey(rt => rt.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
