@@ -1,0 +1,128 @@
+<section class="business-dashboard">
+  <div class="hero-bg" aria-hidden="true"></div>
+
+  <header class="hero">
+    <div>
+      <p class="eyebrow">Growth command center</p>
+      <h1>Business Dashboard</h1>
+      <p class="intro">
+        Welcome, {{ userName() }}. This view translates your real booking data into campaign-ready insights for acquiring more partners and customers.
+      </p>
+      <div class="chips">
+        <span class="chip">{{ roleLabel() }}</span>
+        <span class="chip">Live Data</span>
+        <span class="chip">EGP Market</span>
+      </div>
+    </div>
+
+    <button class="refresh-btn" (click)="refresh()">Refresh Insights</button>
+  </header>
+
+  @if (loading()) {
+    <div class="loading-panel">
+      <div class="loader"></div>
+      <p>Building your business snapshot...</p>
+    </div>
+  }
+
+  @if (loadingError()) {
+    <div class="error-panel">
+      <h3>Dashboard data is unavailable</h3>
+      <p>{{ loadingError() }}</p>
+    </div>
+  }
+
+  @if (!loading() && !loadingError()) {
+    <section class="kpi-grid">
+      <article class="kpi-card revenue">
+        <h3>Monthly Revenue</h3>
+        <p class="kpi-value">EGP {{ thisMonthRevenue() | number:'1.0-0' }}</p>
+        <p class="kpi-note">From confirmed and paid bookings in current month.</p>
+      </article>
+
+      <article class="kpi-card occupancy">
+        <h3>Occupancy Signal</h3>
+        <p class="kpi-value">{{ occupancyRate() }}%</p>
+        <p class="kpi-note">Estimated utilization across available rooms.</p>
+      </article>
+
+      <article class="kpi-card conversion">
+        <h3>Payment Conversion</h3>
+        <p class="kpi-value">{{ conversionRate() }}%</p>
+        <p class="kpi-note">Share of bookings that reached paid status.</p>
+      </article>
+
+      <article class="kpi-card leads">
+        <h3>Active Leads</h3>
+        <p class="kpi-value">{{ activeLeads() }}</p>
+        <p class="kpi-note">Pending bookings that need follow-up.</p>
+      </article>
+    </section>
+
+    <section class="insight-grid">
+      <article class="panel trend-panel">
+        <div class="panel-head">
+          <h3>Revenue Trend This Month</h3>
+          <p>Weekly pace for your pitch deck and investor updates.</p>
+        </div>
+
+        <div class="bars">
+          @for (point of trendPoints(); track point.label) {
+            <div class="bar-row">
+              <span class="bar-label">{{ point.label }}</span>
+              <div class="bar-track">
+                <div class="bar-fill" [style.width.%]="point.pct"></div>
+              </div>
+              <span class="bar-value">EGP {{ point.value | number:'1.0-0' }}</span>
+            </div>
+          }
+        </div>
+      </article>
+
+      <article class="panel market-panel">
+        <div class="panel-head">
+          <h3>Top Cities by Inventory</h3>
+          <p>Where you can amplify ad spend or recruit more workspace owners.</p>
+        </div>
+
+        <div class="city-list" *ngIf="cityPoints().length > 0; else emptyCities">
+          @for (city of cityPoints(); track city.city) {
+            <div class="city-item">
+              <span>{{ city.city }}</span>
+              <strong>{{ city.count }} spaces</strong>
+            </div>
+          }
+        </div>
+
+        <ng-template #emptyCities>
+          <p class="empty">No city distribution data available yet.</p>
+        </ng-template>
+      </article>
+
+      <article class="panel action-panel">
+        <div class="panel-head">
+          <h3>Sales Opportunities</h3>
+          <p>Immediate actions to increase bookings and partner growth.</p>
+        </div>
+
+        <div class="opportunity-list">
+          @for (op of opportunities(); track op.title) {
+            <div class="opportunity">
+              <h4>{{ op.title }}</h4>
+              <p>{{ op.detail }}</p>
+              <span class="cta">{{ op.action }}</span>
+            </div>
+          }
+        </div>
+      </article>
+    </section>
+
+    <section class="launch-strip">
+      <h3>Business launch message</h3>
+      <p>
+        CoworkBooking is now positioned as a growth platform, not only a booking tool. Use this dashboard in demos to show revenue visibility,
+        conversion control, and expansion strategy in one place.
+      </p>
+    </section>
+  }
+</section>

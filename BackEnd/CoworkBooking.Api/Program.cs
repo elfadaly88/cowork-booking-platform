@@ -15,6 +15,8 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Diagnostics;
+using System.Net.Mime;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -246,6 +248,51 @@ using (var scope = app.Services.CreateScope())
 // ==========================
 // 🚀 Middleware Pipeline
 // ==========================
+
+// ─── Global Exception Handler ─────────────────────────────────────────────
+// MUST be first — wraps every downstream middleware and controller.
+// Dev: re-exposes the built-in developer exception page.
+// Prod: logs full details via ILogger, returns safe + consistent JSON body.
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler(errorApp =>
+    {
+        errorApp.Run(async context =>
+        {
+            var exceptionFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+            var logger = context.RequestServices
+                .GetRequiredService<ILoggerFactory>()
+                .CreateLogger("GlobalExceptionHandler");
+
+            if (exceptionFeature?.Error is { } ex)
+            {
+                logger.LogError(
+                    ex,
+                    "Unhandled exception. Path: {Path}  Method: {Method}  TraceId: {TraceId}",
+                    exceptionFeature.Path,
+                    context.Request.Method,
+                    context.TraceIdentifier
+                );
+            }
+
+            context.Response.StatusCode  = StatusCodes.Status500InternalServerError;
+            context.Response.ContentType = MediaTypeNames.Application.Json;
+
+            await context.Response.WriteAsJsonAsync(new
+            {
+                status  = 500,
+                message = "An unexpected error occurred. Please try again later.",
+                traceId = context.TraceIdentifier
+            });
+        });
+    });
+}
+// ──────────────────────────────────────────────────────────────────────────
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

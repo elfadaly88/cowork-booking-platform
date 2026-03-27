@@ -37,6 +37,11 @@ import { Subscription, filter } from 'rxjs';
           <span class="label" *ngIf="!isCollapsed">My Workspaces</span>
         </a>
 
+        <a routerLink="/business-dashboard" routerLinkActive="active" class="nav-item" *ngIf="auth.hasAnyRole(['Owner', 'Admin'])">
+          <span class="icon">📈</span>
+          <span class="label" *ngIf="!isCollapsed">Business Dashboard</span>
+        </a>
+
         <a routerLink="/admin" routerLinkActive="active" class="nav-item" *ngIf="auth.isAdmin()">
           <span class="icon">⚙️</span>
           <span class="label" *ngIf="!isCollapsed">Admin Panel</span>

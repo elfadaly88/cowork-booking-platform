@@ -81,6 +81,22 @@ export const ownerGuard: CanActivateFn = (route, state) => {
 };
 
 /**
+ * Admin or Owner Guard - Protects shared business routes
+ */
+export const adminOrOwnerGuard: CanActivateFn = (route, state) => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+  const token = authService.getToken();
+
+  if (token && !isTokenExpired(token) && authService.isAuthenticated() && (authService.isAdmin() || authService.isOwner())) {
+    return true;
+  }
+
+  router.navigate(['/']);
+  return false;
+};
+
+/**
  * Guest Guard - Redirects authenticated users away from login/register pages
  */
 export const guestGuard: CanActivateFn = (route, state) => {

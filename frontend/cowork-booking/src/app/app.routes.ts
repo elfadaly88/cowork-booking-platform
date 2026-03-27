@@ -15,9 +15,10 @@ import { WorkspaceApprovalComponent } from './features/admin-panel/workspace-app
 import { OwnerDashboardComponent } from './features/owner-dashboard/owner-dashboard.component';
 import { OwnerWorkspaceFormComponent } from './features/owner-dashboard/owner-workspace-form.component';
 import { AdminWorkspaceFormComponent } from './features/admin-panel/admin-workspace-form.component';
+import { BusinessDashboardComponent } from './features/business-dashboard/business-dashboard.component';
 import { LoginComponent } from './features/auth/login.component';
 import { RegisterComponent } from './features/auth/register.component';
-import { authGuard, adminGuard, ownerGuard, guestGuard } from './core/guards/auth.guard';
+import { authGuard, adminGuard, ownerGuard, guestGuard, adminOrOwnerGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   // ─── Public routes (no auth required) ────────────────────────────
@@ -115,6 +116,11 @@ export const routes: Routes = [
     path: 'owner/dashboard',
     component: OwnerDashboardComponent,
     canActivate: [ownerGuard]
+  },
+  {
+    path: 'business-dashboard',
+    component: BusinessDashboardComponent,
+    canActivate: [adminOrOwnerGuard]
   },
   {
     path: 'owner/workspace/new',
