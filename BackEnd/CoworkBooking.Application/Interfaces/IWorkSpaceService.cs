@@ -13,6 +13,7 @@ namespace CoworkBooking.Application.Interfaces
  Task<WorkSpaceDto> CreateWithRoomsAsync(CreateWorkSpaceDto dto);
  Task UpdateAsync(WorkSpaceDto dto);
  Task<WorkSpaceDto> UpdateWithRoomsAsync(UpdateWorkSpaceDto dto);
+ Task<bool> ConfirmWorkspaceFeePaymentAsync(int workspaceId);
  Task<bool> ApproveWorkspaceAsync(int workspaceId);
  Task DeleteAsync(int id);
  }

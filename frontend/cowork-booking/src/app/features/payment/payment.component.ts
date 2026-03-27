@@ -71,8 +71,21 @@ export class PaymentComponent implements OnInit {
   onConfirmPayment(): void {
     if (!this.bookingId || !this.selectedMethodId) return;
 
-    this.submitting = true;
     const selectedMethod = this.paymentMethods.find(m => m.id === this.selectedMethodId);
+    const isCreditCardPayment = selectedMethod?.name?.toLowerCase() === 'credit card';
+
+    if (isCreditCardPayment) {
+      this.router.navigate(['/payment/test'], {
+        queryParams: {
+          flow: 'booking',
+          bookingId: this.bookingId,
+          methodId: this.selectedMethodId
+        }
+      });
+      return;
+    }
+
+    this.submitting = true;
     const isCashPayment = selectedMethod?.name?.toLowerCase() === 'cash';
 
     this.bookingService.processPayment(this.bookingId, this.selectedMethodId).subscribe({

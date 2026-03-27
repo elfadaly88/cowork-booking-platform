@@ -1,13 +1,37 @@
 import { Component, Input, Output, EventEmitter, AfterViewInit, OnDestroy, ElementRef, ViewChild, OnChanges, SimpleChanges, NgZone, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import * as L from 'leaflet';
 
 @Component({
   selector: 'app-map-location-picker',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="map-picker-wrapper">
+      <div class="map-search-bar">
+        <input
+          type="text"
+          class="search-input"
+          [(ngModel)]="searchQuery"
+          (keyup.enter)="searchLocation()"
+          placeholder="Search by address or place name"
+        />
+        <button type="button" class="btn-search" (click)="searchLocation()" [disabled]="searching || !searchQuery.trim()">
+          <span *ngIf="!searching">Search</span>
+          <span *ngIf="searching">Searching...</span>
+        </button>
+      </div>
+      <div class="search-error" *ngIf="searchError">⚠️ {{ searchError }}</div>
+      <div class="search-results" *ngIf="searchResults.length > 0">
+        <button
+          type="button"
+          class="search-result-item"
+          *ngFor="let result of searchResults"
+          (click)="selectSearchResult(result)">
+          {{ result.display_name }}
+        </button>
+      </div>
       <div class="map-actions-bar">
         <button type="button" class="btn-use-location" (click)="useCurrentLocation()" [disabled]="geolocating">
           <span *ngIf="!geolocating">📍 Use My Current Location</span>
@@ -28,6 +52,16 @@ import * as L from 'leaflet';
   `,
   styles: [`
     .map-picker-wrapper { width: 100%; }
+    .map-search-bar { display: flex; gap: 8px; margin-bottom: 8px; }
+    .search-input { flex: 1; min-width: 0; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; }
+    .search-input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12); }
+    .btn-search { padding: 8px 14px; background: #0f766e; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-weight: 500; }
+    .btn-search:hover:not(:disabled) { background: #0d675f; }
+    .btn-search:disabled { opacity: 0.6; cursor: not-allowed; }
+    .search-error { color: #dc2626; font-size: 0.85rem; margin-bottom: 6px; }
+    .search-results { display: grid; gap: 6px; margin-bottom: 8px; max-height: 180px; overflow: auto; }
+    .search-result-item { text-align: left; border: 1px solid #e2e8f0; background: #fff; border-radius: 6px; padding: 8px 10px; font-size: 0.85rem; cursor: pointer; }
+    .search-result-item:hover { border-color: #93c5fd; background: #f8fbff; }
     .map-actions-bar { margin-bottom: 8px; }
     .btn-use-location { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-weight: 500; transition: background 0.2s; }
     .btn-use-location:hover:not(:disabled) { background: #1d4ed8; }
@@ -53,6 +87,10 @@ export class MapLocationPickerComponent implements AfterViewInit, OnDestroy, OnC
   geoError: string | null = null;
   selectedLat: number | null = null;
   selectedLng: number | null = null;
+  searching = false;
+  searchQuery = '';
+  searchError: string | null = null;
+  searchResults: Array<{ display_name: string; lat: string; lon: string }> = [];
 
   ngAfterViewInit(): void {
     this.initMap();
@@ -121,6 +159,63 @@ export class MapLocationPickerComponent implements AfterViewInit, OnDestroy, OnC
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
+  }
+
+  /** Searches locations with OpenStreetMap Nominatim and displays quick-pick results. */
+  async searchLocation(): Promise<void> {
+    const query = this.searchQuery.trim();
+    if (!query) {
+      this.searchResults = [];
+      this.searchError = 'Please type a place or address to search.';
+      return;
+    }
+
+    this.searching = true;
+    this.searchError = null;
+    this.searchResults = [];
+
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&limit=6&q=${encodeURIComponent(query)}`;
+      const response = await fetch(url, {
+        headers: {
+          Accept: 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Location search failed.');
+      }
+
+      const results = await response.json();
+      if (!Array.isArray(results) || results.length === 0) {
+        this.searchError = 'No locations found. Try another search.';
+        return;
+      }
+
+      this.searchResults = results;
+    } catch {
+      this.searchError = 'Unable to search locations right now. Please try again.';
+    } finally {
+      this.searching = false;
+    }
+  }
+
+  selectSearchResult(result: { display_name: string; lat: string; lon: string }): void {
+    const lat = Number(result.lat);
+    const lng = Number(result.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      this.searchError = 'Invalid location result.';
+      return;
+    }
+
+    this.initialLocationSet = true;
+    this.geoError = null;
+    this.searchError = null;
+    this.searchResults = [];
+
+    this.updateMarker(lat, lng);
+    this.map?.setView([lat, lng], 16);
+    this.locationSelected.emit({ lat, lng });
   }
 
   private initMap(): void {

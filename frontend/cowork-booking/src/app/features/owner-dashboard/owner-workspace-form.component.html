@@ -94,6 +94,47 @@
       </div>
     </div>
 
+    <div class="form-section">
+      <h3 class="section-title">💳 Workspace Subscription</h3>
+
+      <div class="subscription-card">
+        <div>
+          <div class="subscription-label">Monthly listing fee</div>
+          <div class="subscription-price">EGP 1000 / month</div>
+          <p class="subscription-note">Owner workspaces cannot be approved until this subscription fee is paid.</p>
+        </div>
+
+        @if (!isEditMode()) {
+          <div class="form-group payment-method-group">
+            <label for="approvalPaymentMethodId">Payment Method *</label>
+            <select
+              id="approvalPaymentMethodId"
+              formControlName="approvalPaymentMethodId"
+              [class.invalid]="isFieldInvalid('approvalPaymentMethodId')">
+              <option [ngValue]="null">Select a payment method</option>
+              @for (method of paymentMethods(); track method.id) {
+                <option [ngValue]="method.id">{{ method.name }}</option>
+              }
+            </select>
+            @if (isFieldInvalid('approvalPaymentMethodId')) {
+              <span class="error-text">Payment method is required</span>
+            }
+          </div>
+        } @else {
+          <div class="subscription-status-box">
+            <span class="subscription-status-label">Selected method</span>
+            <strong>{{ selectedPaymentMethodName || 'Not selected yet' }}</strong>
+          </div>
+        }
+      </div>
+
+      @if (!isEditMode() && selectedPaymentMethodName === 'Cash') {
+        <div class="payment-warning">
+          Cash payment will stay pending until an admin confirms receiving the monthly workspace fee.
+        </div>
+      }
+    </div>
+
     <!-- Rooms Section -->
     <div class="form-section">
       <div class="section-header">

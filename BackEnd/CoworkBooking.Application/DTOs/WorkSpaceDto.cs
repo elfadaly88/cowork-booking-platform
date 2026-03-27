@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using CoworkBooking.Domain.Entities;
 
 namespace CoworkBooking.Application.DTOs
 {
@@ -15,6 +16,13 @@ namespace CoworkBooking.Application.DTOs
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         public bool IsApproved { get; set; }
+        public decimal MonthlyFeeAmount { get; set; }
+        public int? ApprovalPaymentMethodId { get; set; }
+        public string? ApprovalPaymentMethodName { get; set; }
+        public PaymentStatus ApprovalPaymentStatus { get; set; } = PaymentStatus.Pending;
+        public DateTime? ApprovalPaymentPaidAt { get; set; }
+        public DateTime? SubscriptionStartDate { get; set; }
+        public DateTime? SubscriptionEndDate { get; set; }
         public double? AverageRating { get; set; }
         public int TotalReviews { get; set; }
         public double? Distance { get; set; }

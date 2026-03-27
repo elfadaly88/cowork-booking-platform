@@ -4,6 +4,7 @@ import { HomeComponent } from './features/home/home.component';
 import { WorkspaceDetailsComponent } from './features/workspace-details/workspace-details.component';
 import { BookingFormComponent } from './features/booking-form/booking-form.component';
 import { PaymentComponent } from './features/payment/payment.component';
+import { TestPaymentComponent } from './features/payment/test-payment.component';
 import { MyBookingsComponent } from './features/my-bookings/my-bookings.component';
 import { ProfileComponent } from './features/profile/profile.component';
 import { AdminPanelEnhancedComponent } from './features/admin-panel/admin-panel-enhanced.component';
@@ -54,6 +55,11 @@ export const routes: Routes = [
   {
     path: 'booking/:bookingId/payment',
     component: PaymentComponent,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'payment/test',
+    component: TestPaymentComponent,
     canActivate: [authGuard]
   },
   {

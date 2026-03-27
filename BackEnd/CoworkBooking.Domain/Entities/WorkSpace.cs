@@ -25,6 +25,15 @@ namespace CoworkBooking.Domain.Entities
         // Approval status - Workspaces created by Owner must be approved by Admin before being visible to users
         public bool IsApproved { get; set; } = false;
 
+        // Owner listing subscription fee (1000 EGP/month) that must be settled before admin approval.
+        public decimal MonthlyFeeAmount { get; set; } = 1000m;
+        public int? ApprovalPaymentMethodId { get; set; }
+        public PaymentMethod? ApprovalPaymentMethod { get; set; }
+        public PaymentStatus ApprovalPaymentStatus { get; set; } = PaymentStatus.Pending;
+        public DateTime? ApprovalPaymentPaidAt { get; set; }
+        public DateTime? SubscriptionStartDate { get; set; }
+        public DateTime? SubscriptionEndDate { get; set; }
+
         // Ratings
         public double? AverageRating { get; set; }
         public int TotalReviews { get; set; } = 0;

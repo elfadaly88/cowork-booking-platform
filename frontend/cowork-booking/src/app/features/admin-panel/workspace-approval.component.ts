@@ -40,6 +40,13 @@ export class WorkspaceApprovalComponent implements OnInit {
   }
 
   approveWorkspace(workspaceId: number): void {
+    const workspace = this.pendingWorkspaces().find(w => w.id === workspaceId);
+    if (workspace?.approvalPaymentStatus !== 'Paid') {
+      this.errorMessage.set('Workspace fee must be paid before approval.');
+      setTimeout(() => this.errorMessage.set(''), 3000);
+      return;
+    }
+
     Swal.fire({
       title: 'Approve Workspace?',
       text: 'This will make the workspace visible to all users for booking.',
@@ -73,6 +80,45 @@ export class WorkspaceApprovalComponent implements OnInit {
         this.loading.set(false);
       }
     });
+    });
+  }
+
+  confirmFeePayment(workspaceId: number): void {
+    Swal.fire({
+      title: 'Confirm Workspace Fee Payment?',
+      text: 'Use this after receiving the owner subscription fee for this workspace.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Confirm Payment',
+      confirmButtonColor: '#2563eb',
+      cancelButtonColor: '#6b7280',
+      reverseButtons: true
+    }).then(result => {
+      if (!result.isConfirmed) return;
+
+      this.loading.set(true);
+      this.workspaceService.confirmWorkspaceFeePayment(workspaceId).subscribe({
+        next: (response) => {
+          this.successMessage.set(response.message || 'Workspace fee payment confirmed');
+          this.pendingWorkspaces.update(workspaces =>
+            workspaces.map(w => w.id === workspaceId
+              ? {
+                  ...w,
+                  approvalPaymentStatus: 'Paid',
+                  approvalPaymentPaidAt: new Date().toISOString(),
+                  subscriptionStartDate: new Date().toISOString(),
+                  subscriptionEndDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString()
+                }
+              : w)
+          );
+          this.loading.set(false);
+          setTimeout(() => this.successMessage.set(''), 3000);
+        },
+        error: (error) => {
+          this.errorMessage.set(error.message || 'Failed to confirm fee payment');
+          this.loading.set(false);
+        }
+      });
     });
   }
 

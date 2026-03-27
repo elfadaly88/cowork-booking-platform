@@ -101,7 +101,10 @@ export class RegisterComponent {
   getErrorMessage(fieldName: string): string {
     const field = this.registerForm.get(fieldName);
     if (field?.hasError('required')) {
-      return `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1).replace(/([A-Z])/g, ' EGP 1')} is required`;
+      const readableName = fieldName
+        .charAt(0)
+        .toUpperCase() + fieldName.slice(1).replace(/([A-Z])/g, ' $1');
+      return `${readableName} is required`;
     }
     if (field?.hasError('email')) {
       return 'Please enter a valid email address';

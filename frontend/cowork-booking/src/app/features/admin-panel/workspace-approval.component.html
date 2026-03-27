@@ -147,6 +147,21 @@
               }
             </div>
 
+            <div class="billing-row">
+              <div class="billing-pill accent">
+                <span class="billing-label">Monthly Fee</span>
+                <span class="billing-value">EGP {{ workspace.monthlyFeeAmount || 1000 }}</span>
+              </div>
+              <div class="billing-pill">
+                <span class="billing-label">Payment Method</span>
+                <span class="billing-value">{{ workspace.approvalPaymentMethodName || 'Not selected' }}</span>
+              </div>
+              <div class="billing-pill" [class.paid]="workspace.approvalPaymentStatus === 'Paid'" [class.pending]="workspace.approvalPaymentStatus !== 'Paid'">
+                <span class="billing-label">Payment Status</span>
+                <span class="billing-value">{{ workspace.approvalPaymentStatus || 'Pending' }}</span>
+              </div>
+            </div>
+
             <!-- Rooms -->
             @if (workspace.rooms && workspace.rooms.length > 0) {
               <div class="rooms-section">
@@ -175,7 +190,12 @@
             <button class="btn-reject" (click)="rejectWorkspace(workspace.id!)" [disabled]="loading()">
               <span>✕</span> Reject
             </button>
-            <button class="btn-approve" (click)="approveWorkspace(workspace.id!)" [disabled]="loading()">
+            @if (workspace.approvalPaymentStatus !== 'Paid') {
+              <button class="btn-confirm-payment" (click)="confirmFeePayment(workspace.id!)" [disabled]="loading()">
+                <span>💳</span> Confirm Payment
+              </button>
+            }
+            <button class="btn-approve" (click)="approveWorkspace(workspace.id!)" [disabled]="loading() || workspace.approvalPaymentStatus !== 'Paid'">
               <span>✓</span> Approve
             </button>
           </div>

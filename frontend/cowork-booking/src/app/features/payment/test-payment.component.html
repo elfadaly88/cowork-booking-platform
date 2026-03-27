@@ -1,0 +1,41 @@
+<div class="test-payment-container">
+  <mat-card class="test-payment-card">
+    <mat-card-header>
+      <mat-card-title>Test Payment Gateway</mat-card-title>
+      <mat-card-subtitle>
+        @if (flow() === 'booking') {
+          Complete card payment to finalize your booking.
+        } @else {
+          Complete card payment for your workspace monthly subscription.
+        }
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="payment-summary">
+        @if (flow() === 'booking') {
+          <p><strong>Flow:</strong> Booking Payment</p>
+          <p><strong>Booking ID:</strong> {{ bookingId() }}</p>
+        } @else {
+          <p><strong>Flow:</strong> Workspace Subscription</p>
+          <p><strong>Workspace ID:</strong> {{ workspaceId() }}</p>
+          <p><strong>Amount:</strong> {{ amount() }} EGP / month</p>
+        }
+        <p><strong>Method:</strong> Credit Card (Test)</p>
+      </div>
+
+      <p class="hint">This is a sandbox page for testing payment redirection workflow.</p>
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+      <button mat-button color="warn" [disabled]="loading()" (click)="cancel()">Cancel</button>
+      <button mat-raised-button color="primary" [disabled]="loading()" (click)="completePayment()">
+        @if (loading()) {
+          Processing...
+        } @else {
+          Complete Test Payment
+        }
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

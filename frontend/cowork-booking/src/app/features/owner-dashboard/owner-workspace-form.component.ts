@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } fr
 import { Router, ActivatedRoute } from '@angular/router';
 import { WorkspaceService } from '../../core/services/workspace.service';
 import { CreateWorkspaceDto, CreateRoomDto, CreateDeviceDto, UpdateWorkspaceDto, UpdateRoomDto, UpdateDeviceDto } from '../../core/models/workspace.model';
+import { PaymentMethod } from '../../core/models/booking.model';
 import { MapLocationPickerComponent } from '../../shared/components/map-location-picker.component';
 import Swal from 'sweetalert2';
 
@@ -21,6 +22,8 @@ export class OwnerWorkspaceFormComponent implements OnInit {
   errorMessage = signal('');
   isEditMode = signal(false);
   workspaceId: number | null = null;
+  paymentMethods = signal<PaymentMethod[]>([]);
+  readonly monthlyWorkspaceFee = 1000;
 
   constructor(
     private fb: FormBuilder,
@@ -32,11 +35,20 @@ export class OwnerWorkspaceFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.loadPaymentMethods();
+
     const id = this.route.snapshot.paramMap.get('id');
+    const paymentMethodControl = this.workspaceForm.get('approvalPaymentMethodId');
+
     if (id) {
       this.workspaceId = +id;
       this.isEditMode.set(true);
+      paymentMethodControl?.clearValidators();
+      paymentMethodControl?.updateValueAndValidity();
       this.loadWorkspaceForEdit(this.workspaceId);
+    } else {
+      paymentMethodControl?.setValidators(Validators.required);
+      paymentMethodControl?.updateValueAndValidity();
     }
   }
 
@@ -53,7 +65,8 @@ export class OwnerWorkspaceFormComponent implements OnInit {
           address: wsAny.address ?? wsAny.Address ?? '',
           city: wsAny.city ?? wsAny.City ?? '',
           latitude: wsAny.latitude ?? wsAny.Latitude ?? null,
-          longitude: wsAny.longitude ?? wsAny.Longitude ?? null
+          longitude: wsAny.longitude ?? wsAny.Longitude ?? null,
+          approvalPaymentMethodId: wsAny.approvalPaymentMethodId ?? wsAny.ApprovalPaymentMethodId ?? null
         });
 
         // Rebuild the rooms FormArray from loaded data in one shot to avoid stale bindings.
@@ -114,11 +127,19 @@ export class OwnerWorkspaceFormComponent implements OnInit {
       city: ['', Validators.required],
       latitude: [null, Validators.required],
       longitude: [null, Validators.required],
+      approvalPaymentMethodId: [null],
       rooms: this.fb.array([])
     });
 
     // Add one room by default
     this.addRoom();
+  }
+
+  loadPaymentMethods(): void {
+    this.workspaceService.getPaymentMethods().subscribe({
+      next: methods => this.paymentMethods.set(methods),
+      error: err => this.errorMessage.set(err.message || 'Failed to load payment methods')
+    });
   }
 
   get rooms(): FormArray {
@@ -172,6 +193,12 @@ export class OwnerWorkspaceFormComponent implements OnInit {
   }
 
   onSubmit(): void {
+    if (!this.isEditMode() && !this.workspaceForm.get('approvalPaymentMethodId')?.value) {
+      this.workspaceForm.get('approvalPaymentMethodId')?.markAsTouched();
+      this.errorMessage.set('Please select how you will pay the 1000 EGP monthly workspace fee.');
+      return;
+    }
+
     if (this.workspaceForm.invalid) {
       this.workspaceForm.markAllAsTouched();
       this.errorMessage.set(
@@ -197,6 +224,7 @@ export class OwnerWorkspaceFormComponent implements OnInit {
         city: formValue.city,
         latitude: formValue.latitude,
         longitude: formValue.longitude,
+        approvalPaymentMethodId: formValue.approvalPaymentMethodId || undefined,
         rooms: formValue.rooms.map((room: any) => ({
           id: room.id || undefined,
           name: room.name,
@@ -218,6 +246,7 @@ export class OwnerWorkspaceFormComponent implements OnInit {
         city: formValue.city,
         latitude: formValue.latitude,
         longitude: formValue.longitude,
+        approvalPaymentMethodId: formValue.approvalPaymentMethodId,
         rooms: formValue.rooms.map((room: any) => ({
           name: room.name,
           capacity: room.capacity,
@@ -249,8 +278,31 @@ export class OwnerWorkspaceFormComponent implements OnInit {
   createWorkspace(data: CreateWorkspaceDto): void {
     this.workspaceService.createWorkspaceWithRooms(data).subscribe({
       next: (response) => {
+        const createdWorkspaceId = (response as any)?.id ?? (response as any)?.Id;
+        const isCreditCard = this.selectedPaymentMethodName.toLowerCase() === 'credit card';
+
+        if (isCreditCard && createdWorkspaceId) {
+          this.loading.set(false);
+          this.successMessage.set('Workspace submitted. Redirecting to test payment page...');
+
+          setTimeout(() => {
+            this.router.navigate(['/payment/test'], {
+              queryParams: {
+                flow: 'workspace',
+                workspaceId: createdWorkspaceId,
+                amount: this.monthlyWorkspaceFee
+              }
+            });
+          }, 800);
+          return;
+        }
+
         this.loading.set(false);
-        this.successMessage.set('Workspace created successfully! It will be visible to users after admin approval.');
+        this.successMessage.set(
+          this.selectedPaymentMethodName === 'Cash'
+            ? 'Workspace submitted. Cash subscription payment must be confirmed by admin before approval.'
+            : 'Workspace created successfully. Subscription fee recorded and workspace is waiting for admin approval.'
+        );
 
         // Redirect to owner dashboard after 2 seconds
         setTimeout(() => {
@@ -281,5 +333,10 @@ export class OwnerWorkspaceFormComponent implements OnInit {
   isDeviceFieldInvalid(roomIndex: number, deviceIndex: number, fieldName: string): boolean {
     const field = this.getDevices(roomIndex).at(deviceIndex).get(fieldName);
     return !!(field && field.invalid && (field.dirty || field.touched));
+  }
+
+  get selectedPaymentMethodName(): string {
+    const selectedId = this.workspaceForm.get('approvalPaymentMethodId')?.value;
+    return this.paymentMethods().find(method => method.id === selectedId)?.name ?? '';
   }
 }

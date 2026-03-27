@@ -20,6 +20,7 @@ namespace CoworkBooking.Application.Services
  {
  var entities = await _context.Workspaces
      .Include(w => w.Owner)
+     .Include(w => w.ApprovalPaymentMethod)
      .Include(w => w.Rooms)
      .ThenInclude(r => r.Devices)
      .Include(w => w.Rooms)
@@ -39,6 +40,13 @@ namespace CoworkBooking.Application.Services
  Latitude = e.Latitude,
  Longitude = e.Longitude,
  IsApproved = e.IsApproved,
+ MonthlyFeeAmount = e.MonthlyFeeAmount,
+ ApprovalPaymentMethodId = e.ApprovalPaymentMethodId,
+ ApprovalPaymentMethodName = e.ApprovalPaymentMethod?.Name,
+ ApprovalPaymentStatus = e.ApprovalPaymentStatus,
+ ApprovalPaymentPaidAt = e.ApprovalPaymentPaidAt,
+ SubscriptionStartDate = e.SubscriptionStartDate,
+ SubscriptionEndDate = e.SubscriptionEndDate,
  AverageRating = e.AverageRating,
  TotalReviews = e.TotalReviews,
  Images = e.Images.OrderBy(i => i.Order).Select(i => new WorkspaceImageDto { Id = i.Id, Url = i.Url, Caption = i.Caption, IsMain = i.IsMain, Order = i.Order }).ToList(),
@@ -74,6 +82,7 @@ namespace CoworkBooking.Application.Services
      var entities = await _context.Workspaces
          .Where(w => w.OwnerId == ownerId)
          .Include(w => w.Owner)
+         .Include(w => w.ApprovalPaymentMethod)
          .Include(w => w.Rooms)
          .ThenInclude(r => r.Devices)
          .Include(w => w.Rooms)
@@ -92,6 +101,13 @@ namespace CoworkBooking.Application.Services
          Latitude = e.Latitude,
          Longitude = e.Longitude,
          IsApproved = e.IsApproved,
+         MonthlyFeeAmount = e.MonthlyFeeAmount,
+         ApprovalPaymentMethodId = e.ApprovalPaymentMethodId,
+         ApprovalPaymentMethodName = e.ApprovalPaymentMethod?.Name,
+         ApprovalPaymentStatus = e.ApprovalPaymentStatus,
+         ApprovalPaymentPaidAt = e.ApprovalPaymentPaidAt,
+         SubscriptionStartDate = e.SubscriptionStartDate,
+         SubscriptionEndDate = e.SubscriptionEndDate,
          Rooms = e.Rooms.Select(r =>
          {
              var now = DateTime.UtcNow;
@@ -125,6 +141,7 @@ namespace CoworkBooking.Application.Services
      var workspaces = await _context.Workspaces
          .Where(w => w.IsApproved)
          .Include(w => w.Owner)
+         .Include(w => w.ApprovalPaymentMethod)
          .Include(w => w.Rooms)
              .ThenInclude(r => r.Bookings)
          .Include(w => w.Rooms)
@@ -147,6 +164,13 @@ namespace CoworkBooking.Application.Services
              Latitude = w.Latitude,
              Longitude = w.Longitude,
              IsApproved = w.IsApproved,
+             MonthlyFeeAmount = w.MonthlyFeeAmount,
+             ApprovalPaymentMethodId = w.ApprovalPaymentMethodId,
+             ApprovalPaymentMethodName = w.ApprovalPaymentMethod?.Name,
+             ApprovalPaymentStatus = w.ApprovalPaymentStatus,
+             ApprovalPaymentPaidAt = w.ApprovalPaymentPaidAt,
+             SubscriptionStartDate = w.SubscriptionStartDate,
+             SubscriptionEndDate = w.SubscriptionEndDate,
              AverageRating = w.AverageRating,
              TotalReviews = w.TotalReviews,
              Distance = (latitude.HasValue && longitude.HasValue) ? CalculateDistance(latitude.Value, longitude.Value, w.Latitude, w.Longitude) : (double?)null,
@@ -224,6 +248,7 @@ namespace CoworkBooking.Application.Services
  {
  var e = await _context.Workspaces
      .Include(w => w.Owner)
+     .Include(w => w.ApprovalPaymentMethod)
      .Include(w => w.Rooms)
          .ThenInclude(r => r.Devices)
      .Include(w => w.Rooms)
@@ -248,6 +273,13 @@ namespace CoworkBooking.Application.Services
      Latitude = e.Latitude,
      Longitude = e.Longitude,
      IsApproved = e.IsApproved,
+    MonthlyFeeAmount = e.MonthlyFeeAmount,
+    ApprovalPaymentMethodId = e.ApprovalPaymentMethodId,
+    ApprovalPaymentMethodName = e.ApprovalPaymentMethod?.Name,
+    ApprovalPaymentStatus = e.ApprovalPaymentStatus,
+    ApprovalPaymentPaidAt = e.ApprovalPaymentPaidAt,
+    SubscriptionStartDate = e.SubscriptionStartDate,
+    SubscriptionEndDate = e.SubscriptionEndDate,
      AverageRating = e.AverageRating,
      TotalReviews = e.TotalReviews,
      Images = e.Images.OrderBy(i => i.Order).Select(i => new WorkspaceImageDto
@@ -328,8 +360,40 @@ namespace CoworkBooking.Application.Services
  Latitude = dto.Latitude,
  Longitude = dto.Longitude,
  OwnerId = dto.OwnerId,
- IsApproved = dto.OwnerId.HasValue ? false : true // Owner workspaces need approval, Admin workspaces auto-approved
+ IsApproved = dto.OwnerId.HasValue ? false : true, // Owner workspaces need approval, Admin workspaces auto-approved
+ MonthlyFeeAmount = 1000m
  };
+
+ if (dto.OwnerId.HasValue)
+ {
+     if (!dto.ApprovalPaymentMethodId.HasValue)
+         throw new InvalidOperationException("A payment method is required before submitting a workspace for approval.");
+
+     var paymentMethod = await _context.PaymentMethods.FirstOrDefaultAsync(p => p.Id == dto.ApprovalPaymentMethodId.Value && p.IsActive);
+     if (paymentMethod == null)
+         throw new InvalidOperationException("Selected payment method is invalid.");
+
+     entity.ApprovalPaymentMethodId = paymentMethod.Id;
+
+     if (string.Equals(paymentMethod.Name, "Cash", StringComparison.OrdinalIgnoreCase))
+     {
+         entity.ApprovalPaymentStatus = PaymentStatus.Pending;
+     }
+     else
+     {
+         entity.ApprovalPaymentStatus = PaymentStatus.Paid;
+         entity.ApprovalPaymentPaidAt = DateTime.UtcNow;
+         entity.SubscriptionStartDate = DateTime.UtcNow;
+         entity.SubscriptionEndDate = DateTime.UtcNow.AddMonths(1);
+     }
+ }
+ else
+ {
+     entity.ApprovalPaymentStatus = PaymentStatus.Paid;
+     entity.ApprovalPaymentPaidAt = DateTime.UtcNow;
+     entity.SubscriptionStartDate = DateTime.UtcNow;
+     entity.SubscriptionEndDate = DateTime.UtcNow.AddMonths(1);
+ }
 
  // Add rooms if provided
  if (dto.Rooms != null && dto.Rooms.Any())
@@ -400,6 +464,15 @@ namespace CoworkBooking.Application.Services
  entity.City = dto.City;
  entity.Latitude = dto.Latitude;
  entity.Longitude = dto.Longitude;
+
+ if (dto.ApprovalPaymentMethodId.HasValue && entity.ApprovalPaymentStatus != PaymentStatus.Paid)
+ {
+     var paymentMethod = await _context.PaymentMethods.FirstOrDefaultAsync(p => p.Id == dto.ApprovalPaymentMethodId.Value && p.IsActive);
+     if (paymentMethod != null)
+     {
+         entity.ApprovalPaymentMethodId = paymentMethod.Id;
+     }
+ }
 
  // Handle rooms update
  if (dto.Rooms != null)
@@ -516,6 +589,7 @@ namespace CoworkBooking.Application.Services
      var entities = await _context.Workspaces
          .Where(w => !w.IsApproved)
          .Include(w => w.Owner)
+         .Include(w => w.ApprovalPaymentMethod)
          .Include(w => w.Rooms)
          .ThenInclude(r => r.Devices)
          .ToListAsync();
@@ -532,6 +606,13 @@ namespace CoworkBooking.Application.Services
          Latitude = e.Latitude,
          Longitude = e.Longitude,
          IsApproved = e.IsApproved,
+         MonthlyFeeAmount = e.MonthlyFeeAmount,
+         ApprovalPaymentMethodId = e.ApprovalPaymentMethodId,
+         ApprovalPaymentMethodName = e.ApprovalPaymentMethod?.Name,
+         ApprovalPaymentStatus = e.ApprovalPaymentStatus,
+         ApprovalPaymentPaidAt = e.ApprovalPaymentPaidAt,
+         SubscriptionStartDate = e.SubscriptionStartDate,
+         SubscriptionEndDate = e.SubscriptionEndDate,
          Rooms = e.Rooms.Select(r => new RoomDto
          {
              Id = r.Id,
@@ -551,10 +632,47 @@ namespace CoworkBooking.Application.Services
      });
  }
 
+ public async Task<bool> ConfirmWorkspaceFeePaymentAsync(int workspaceId)
+ {
+     var workspace = await _context.Workspaces
+         .Include(w => w.ApprovalPaymentMethod)
+         .FirstOrDefaultAsync(w => w.Id == workspaceId);
+
+     if (workspace == null)
+         return false;
+
+     // Idempotent behavior: if already paid, treat as successful confirmation.
+     if (workspace.ApprovalPaymentStatus == PaymentStatus.Paid)
+         return true;
+
+     // Backward compatibility for older records created before payment method became required.
+     // If missing, default to Cash when available so admin confirmation can complete.
+     if (!workspace.ApprovalPaymentMethodId.HasValue)
+     {
+         var cashMethod = await _context.PaymentMethods
+             .FirstOrDefaultAsync(p => p.IsActive && p.Name != null && p.Name.Equals("Cash", StringComparison.OrdinalIgnoreCase));
+
+         if (cashMethod != null)
+         {
+             workspace.ApprovalPaymentMethodId = cashMethod.Id;
+         }
+     }
+
+     workspace.ApprovalPaymentStatus = PaymentStatus.Paid;
+     workspace.ApprovalPaymentPaidAt = DateTime.UtcNow;
+     workspace.SubscriptionStartDate = DateTime.UtcNow;
+     workspace.SubscriptionEndDate = DateTime.UtcNow.AddMonths(1);
+     await _context.SaveChangesAsync();
+     return true;
+ }
+
  public async Task<bool> ApproveWorkspaceAsync(int workspaceId)
  {
      var workspace = await _context.Workspaces.FindAsync(workspaceId);
      if (workspace == null) return false;
+
+     if (workspace.ApprovalPaymentStatus != PaymentStatus.Paid)
+         return false;
 
      workspace.IsApproved = true;
      await _context.SaveChangesAsync();

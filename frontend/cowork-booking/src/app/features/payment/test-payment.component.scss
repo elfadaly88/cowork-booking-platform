@@ -1,0 +1,29 @@
+.test-payment-container {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.test-payment-card {
+  width: 100%;
+  max-width: 640px;
+}
+
+.payment-summary {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.payment-summary p {
+  margin: 0.35rem 0;
+}
+
+.hint {
+  color: #475569;
+  margin: 0;
+}

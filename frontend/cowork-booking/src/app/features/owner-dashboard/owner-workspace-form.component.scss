@@ -126,7 +126,7 @@
     font-size: 0.95rem;
   }
 
-  input, textarea {
+  input, textarea, select {
     padding: 0.75rem;
     border: 2px solid #e2e8f0;
     border-radius: 8px;
@@ -158,6 +158,67 @@
     font-size: 0.85rem;
     margin-top: 0.25rem;
   }
+}
+
+.subscription-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 1.5rem;
+  padding: 1.25rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #ecfdf5, #f8fafc);
+  border: 1px solid #a7f3d0;
+}
+
+.subscription-label {
+  font-size: 0.9rem;
+  color: #065f46;
+  font-weight: 600;
+}
+
+.subscription-price {
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: #064e3b;
+  margin-top: 0.2rem;
+}
+
+.subscription-note {
+  margin: 0.45rem 0 0;
+  color: #334155;
+  max-width: 36rem;
+}
+
+.payment-method-group {
+  min-width: 260px;
+}
+
+.subscription-status-box {
+  min-width: 220px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.subscription-status-label {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.payment-warning {
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+  color: #9a3412;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  font-weight: 500;
 }
 
 .rooms-list {

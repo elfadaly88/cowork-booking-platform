@@ -44,6 +44,10 @@ namespace CoworkBooking.Infrastructure.Data
                 .Property(b => b.TotalPrice)
                 .HasPrecision(18, 2);
 
+            modelBuilder.Entity<WorkSpace>()
+                .Property(w => w.MonthlyFeeAmount)
+                .HasPrecision(18, 2);
+
             modelBuilder.Entity<Booking>()
                 .Property(b => b.TotalPrice)
                 .HasPrecision(18, 2);
@@ -52,6 +56,12 @@ namespace CoworkBooking.Infrastructure.Data
                 .HasOne(b => b.PaymentMethod)
                 .WithMany()
                 .HasForeignKey(b => b.PaymentMethodId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<WorkSpace>()
+                .HasOne(w => w.ApprovalPaymentMethod)
+                .WithMany()
+                .HasForeignKey(w => w.ApprovalPaymentMethodId)
                 .OnDelete(DeleteBehavior.SetNull);
 
             // Default Payment Methods Seeding

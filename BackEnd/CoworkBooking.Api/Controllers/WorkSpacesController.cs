@@ -192,11 +192,27 @@ namespace CoworkBooking.Api.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ApproveWorkspace(int id)
         {
-            var success = await _service.ApproveWorkspaceAsync(id);
-            if (!success)
+            var existing = await _service.GetByIdAsync(id);
+            if (existing == null)
                 return NotFound(new { message = "Workspace not found" });
 
+            var success = await _service.ApproveWorkspaceAsync(id);
+            if (!success)
+                return BadRequest(new { message = "Workspace subscription fee must be paid before approval." });
+
             return Ok(new { message = "Workspace approved successfully" });
+        }
+
+        // ✅ POST: api/workspaces/{id}/confirm-fee-payment (admin confirms owner cash/offline payment)
+        [HttpPost("{id}/confirm-fee-payment")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ConfirmFeePayment(int id)
+        {
+            var success = await _service.ConfirmWorkspaceFeePaymentAsync(id);
+            if (!success)
+                return BadRequest(new { message = "Unable to confirm workspace fee payment." });
+
+            return Ok(new { message = "Workspace fee payment confirmed successfully" });
         }
 
         // ✅ DELETE: api/workspaces/5

@@ -29,6 +29,8 @@ namespace CoworkBooking.Application.DTOs
         [Range(-180, 180, ErrorMessage = "Longitude must be between -180 and 180")]
         public double Longitude { get; set; }
 
+        public int? ApprovalPaymentMethodId { get; set; }
+
         public List<UpdateRoomDto>? Rooms { get; set; }
     }
 }

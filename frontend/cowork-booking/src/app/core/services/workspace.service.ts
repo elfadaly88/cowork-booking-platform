@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Workspace, WorkspaceImage, WorkspaceSchedulePeriod } from '../models/workspace.model';
+import { PaymentMethod } from '../models/booking.model';
 
 export interface WorkspaceReview {
   id: number;
@@ -86,6 +87,22 @@ export class WorkspaceService {
         const message = err?.error?.message || 'Failed to approve workspace';
         return throwError(() => new Error(message));
       })
+    );
+  }
+
+  confirmWorkspaceFeePayment(id: number): Observable<{ message: string }> {
+    const url = `${this.baseUrl}/workspaces/${id}/confirm-fee-payment`;
+    return this.http.post<{ message: string }>(url, {}).pipe(
+      catchError((err) => {
+        const message = err?.error?.message || 'Failed to confirm workspace fee payment';
+        return throwError(() => new Error(message));
+      })
+    );
+  }
+
+  getPaymentMethods(): Observable<PaymentMethod[]> {
+    return this.http.get<PaymentMethod[]>(`${this.baseUrl}/paymentmethods`).pipe(
+      catchError(err => throwError(() => new Error(err?.error?.message || 'Failed to load payment methods')))
     );
   }
 

@@ -36,6 +36,13 @@ export interface Workspace {
   latitude: number;
   longitude: number;
   isApproved?: boolean;
+  monthlyFeeAmount?: number;
+  approvalPaymentMethodId?: number;
+  approvalPaymentMethodName?: string;
+  approvalPaymentStatus?: 'Pending' | 'Paid' | 'Failed';
+  approvalPaymentPaidAt?: string;
+  subscriptionStartDate?: string;
+  subscriptionEndDate?: string;
   averageRating?: number;
   totalReviews?: number;
   rooms?: Room[];
@@ -68,6 +75,7 @@ export interface CreateWorkspaceDto {
   city: string;
   latitude: number;
   longitude: number;
+  approvalPaymentMethodId?: number;
   rooms?: CreateRoomDto[];
 }
 
@@ -91,6 +99,7 @@ export interface UpdateWorkspaceDto {
   city: string;
   latitude: number;
   longitude: number;
+  approvalPaymentMethodId?: number;
   rooms?: UpdateRoomDto[];
 }
 
