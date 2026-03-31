@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #172554;
+  background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);
   padding: 2rem;
 }
 
@@ -330,5 +330,60 @@
       align-items: center;
       min-width: 1.25rem;
     }
+  }
+}
+
+// ─── RTL Support ──────────────────────────────────────────────────────────────
+:host-context([dir="rtl"]) {
+  .auth-card {
+    text-align: right;
+  }
+
+  .auth-header {
+    text-align: right;
+  }
+
+  .form-group {
+    text-align: right;
+
+    label {
+      text-align: right;
+    }
+
+    input {
+      text-align: right;
+    }
+  }
+
+  .password-input-wrapper {
+    input {
+      padding-right: 1rem;
+      padding-left: 3rem;
+    }
+
+    .toggle-password-btn {
+      right: auto;
+      left: 0.75rem;
+    }
+  }
+
+  .user-type-selector {
+    direction: rtl;
+  }
+
+  .radio-card {
+    text-align: right;
+  }
+
+  .radio-content {
+    flex-direction: row-reverse;
+  }
+
+  .requirement {
+    flex-direction: row-reverse;
+  }
+
+  .auth-footer {
+    text-align: right;
   }
 }

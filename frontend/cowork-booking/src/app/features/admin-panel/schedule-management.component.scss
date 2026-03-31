@@ -1,6 +1,6 @@
 .schedule-container {
   min-height: 100dvh;
-  background-color: #172554;
+  background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);
   padding: 2rem 1rem;
 }
 
@@ -427,5 +427,41 @@
     button {
       width: 100%;
     }
+  }
+}
+
+// ─── RTL Support ──────────────────────────────────────────────────────────────
+:host-context([dir="rtl"]) {
+  .schedule-header {
+    text-align: right;
+  }
+
+  .section-header {
+    flex-direction: row-reverse;
+    text-align: right;
+  }
+
+  .form-group {
+    text-align: right;
+
+    label {
+      text-align: right;
+    }
+
+    input, select {
+      text-align: right;
+    }
+  }
+
+  .schedule-card {
+    text-align: right;
+  }
+
+  .form-actions {
+    flex-direction: row-reverse;
+  }
+
+  .day-schedule {
+    flex-direction: row-reverse;
   }
 }

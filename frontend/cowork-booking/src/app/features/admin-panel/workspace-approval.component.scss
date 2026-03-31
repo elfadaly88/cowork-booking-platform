@@ -770,3 +770,35 @@
   from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+// ─── RTL Support ──────────────────────────────────────────────────────────────
+:host-context([dir="rtl"]) {
+  .approval-header {
+    text-align: right;
+  }
+
+  .workspace-card {
+    text-align: right;
+  }
+
+  .card-header {
+    flex-direction: row-reverse;
+  }
+
+  .workspace-info {
+    flex-direction: row-reverse;
+    text-align: right;
+  }
+
+  .card-actions {
+    flex-direction: row-reverse;
+  }
+
+  .detail-grid {
+    direction: rtl;
+  }
+
+  .rooms-list {
+    text-align: right;
+  }
+}

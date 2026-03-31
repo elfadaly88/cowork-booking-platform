@@ -456,3 +456,61 @@
     }
   }
 }
+
+// ─── RTL Support ──────────────────────────────────────────────────────────────
+:host-context([dir="rtl"]) {
+  .back-btn {
+    flex-direction: row-reverse;
+
+    &:hover {
+      transform: translateX(4px);
+    }
+  }
+
+  .booking-layout {
+    direction: rtl;
+  }
+
+  .form-group label {
+    text-align: right;
+  }
+
+  .time-inputs {
+    direction: rtl;
+  }
+
+  .room-info-card {
+    text-align: right;
+  }
+
+  .room-detail {
+    flex-direction: row-reverse;
+    text-align: right;
+  }
+
+  .price-summary {
+    text-align: right;
+  }
+
+  .price-row {
+    flex-direction: row-reverse;
+  }
+
+  .form-actions {
+    flex-direction: row-reverse;
+  }
+
+  .device-option {
+    flex-direction: row-reverse;
+    text-align: right;
+  }
+
+  .availability-result {
+    text-align: right;
+    flex-direction: row-reverse;
+  }
+
+  .error-text {
+    text-align: right;
+  }
+}

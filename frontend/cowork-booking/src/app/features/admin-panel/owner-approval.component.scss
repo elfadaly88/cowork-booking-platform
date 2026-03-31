@@ -283,3 +283,27 @@
     }
   }
 }
+
+// ─── RTL Support ──────────────────────────────────────────────────────────────
+:host-context([dir="rtl"]) {
+  .approval-card {
+    text-align: right;
+  }
+
+  .card-header {
+    flex-direction: row-reverse;
+  }
+
+  .owner-info {
+    flex-direction: row-reverse;
+    text-align: right;
+  }
+
+  .card-actions {
+    flex-direction: row-reverse;
+  }
+
+  .info-grid {
+    direction: rtl;
+  }
+}

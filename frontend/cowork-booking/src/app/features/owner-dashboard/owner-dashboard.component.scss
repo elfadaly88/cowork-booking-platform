@@ -3,7 +3,7 @@
   margin: 0 auto;
   padding: 2rem;
   min-height: 100dvh;
-  background-color: #172554;
+  background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);
 }
 
 .top-stats {
@@ -478,7 +478,7 @@
 
   .card-header {
     padding: 1.5rem;
-    background-color: #172554;
+    background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);
     color: white;
     display: flex;
     justify-content: space-between;
@@ -767,5 +767,70 @@
       width: 100%;
       justify-content: center;
     }
+  }
+}
+
+// ─── RTL Support ──────────────────────────────────────────────────────────────
+:host-context([dir="rtl"]) {
+  .dashboard-header {
+    flex-direction: row-reverse;
+    text-align: right;
+  }
+
+  .top-stats {
+    direction: rtl;
+  }
+
+  .stat-box {
+    text-align: right;
+    flex-direction: row-reverse;
+  }
+
+  .stat-icon {
+    margin-right: 0;
+    margin-left: 0.75rem;
+  }
+
+  .tabs-section {
+    text-align: right;
+  }
+
+  .tab-btn {
+    flex-direction: row-reverse;
+  }
+
+  .workspace-card {
+    text-align: right;
+  }
+
+  .card-header {
+    flex-direction: row-reverse;
+  }
+
+  .approval-badge {
+    margin-left: 0;
+    margin-right: auto;
+  }
+
+  .card-stats {
+    flex-direction: row-reverse;
+  }
+
+  .card-footer {
+    flex-direction: row-reverse;
+  }
+
+  .reservations-table th,
+  .reservations-table td {
+    text-align: right;
+  }
+
+  .btn-approve,
+  .btn-reject {
+    flex-direction: row-reverse;
+  }
+
+  .empty-state {
+    text-align: center;
   }
 }

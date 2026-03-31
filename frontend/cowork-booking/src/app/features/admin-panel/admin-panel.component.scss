@@ -3,7 +3,7 @@
   margin: 0 auto;
   padding: 2rem;
   min-height: 100dvh;
-  background-color: #172554;
+  background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);
 }
 
 .header {
@@ -162,7 +162,7 @@
 }
 
 .workspace-header {
-  background-color: #172554;
+  background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);
   color: white;
   padding: 1.75rem;
   display: flex;

@@ -3,7 +3,7 @@
   margin: 0 auto;
   padding: 2rem;
   min-height: 100dvh;
-  background-color: #172554;
+  background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);
 }
 
 .header {
@@ -503,5 +503,41 @@
 
   .room-card {
     padding: 0.75rem;
+  }
+}
+
+// ─── RTL Support ──────────────────────────────────────────────────────────────
+:host-context([dir="rtl"]) {
+  .header {
+    text-align: right;
+  }
+
+  .form-group {
+    text-align: right;
+
+    label {
+      text-align: right;
+    }
+
+    input, textarea, select {
+      text-align: right;
+    }
+  }
+
+  .section-header {
+    flex-direction: row-reverse;
+  }
+
+  .room-card .card-header {
+    flex-direction: row-reverse;
+  }
+
+  .form-actions {
+    flex-direction: row-reverse;
+  }
+
+  .subscription-card {
+    flex-direction: row-reverse;
+    text-align: right;
   }
 }

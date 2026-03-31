@@ -140,12 +140,12 @@
 
 // ─── Workspace Header ─────────────────────────────────────────────────────────
 .workspace-header {
-  background-color: #172554;
+  background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);
   color: white;
   padding: 2.5rem;
   border-radius: 1rem;
   margin-bottom: 2rem;
-  box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 10px 30px -5px rgba(23, 37, 84, 0.25);
 
   .header-image-placeholder {
     text-align: center;
@@ -320,7 +320,7 @@
 }
 
 .room-header {
-  background-color: #172554;
+  background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);
   color: white;
   padding: 1.25rem 1.5rem;
 
@@ -399,8 +399,8 @@
 }
 
 .device-chip {
-  background: #EDE9FE;
-  color: #5B21B6;
+  background: #EFF6FF;
+  color: #1e3a8a;
   padding: 0.3rem 0.75rem;
   border-radius: 20px;
   font-size: 0.8rem;
@@ -408,9 +408,10 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  border: 1px solid #BFDBFE;
 
   .device-cost {
-    color: #7C3AED;
+    color: #2563eb;
     font-size: 0.7rem;
   }
 }
@@ -423,7 +424,7 @@
 
 .book-button {
   width: 100%;
-  background-color: #2563eb;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -433,12 +434,12 @@
   cursor: pointer;
   transition: all 0.2s;
   font-family: inherit;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.15);
-    background-color: #1e293b;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
   }
 }
 
@@ -503,7 +504,7 @@
 }
 
 .write-review-btn {
-  background-color: #2563eb;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: white;
   border: none;
   padding: 0.625rem 1.25rem;
@@ -513,12 +514,12 @@
   cursor: pointer;
   transition: all 0.2s;
   font-family: inherit;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.15);
-    background-color: #1e293b;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
   }
 
   &.edit-btn {
@@ -864,5 +865,94 @@
 
   p {
     color: #64748B;
+  }
+}
+
+// ─── RTL Support ──────────────────────────────────────────────────────────────
+:host-context([dir="rtl"]) {
+  .back-button {
+    flex-direction: row-reverse;
+
+    &:hover {
+      transform: translateX(4px);
+    }
+  }
+
+  .header-top {
+    flex-direction: row-reverse;
+  }
+
+  .workspace-city,
+  .workspace-address,
+  .workspace-description {
+    flex-direction: row-reverse;
+    text-align: right;
+  }
+
+  .rating-pill .rating-count {
+    margin-left: 0;
+    margin-right: 4px;
+  }
+
+  .gallery-counter {
+    right: auto;
+    left: 16px;
+  }
+
+  .schedule-table th,
+  .schedule-table td {
+    text-align: right;
+  }
+
+  .room-meta {
+    flex-direction: row-reverse;
+  }
+
+  .room-capacity,
+  .room-price {
+    flex-direction: row-reverse;
+  }
+
+  .availability-stats {
+    flex-direction: row-reverse;
+  }
+
+  .devices-list {
+    direction: rtl;
+  }
+
+  .reviews-header {
+    flex-direction: row-reverse;
+  }
+
+  .review-actions-top {
+    flex-direction: row-reverse;
+  }
+
+  .review-meta {
+    flex-direction: row-reverse;
+
+    .inline-stars {
+      margin-left: 0;
+      margin-right: auto;
+    }
+  }
+
+  .review-form-actions {
+    flex-direction: row-reverse;
+  }
+
+  .rating-picker {
+    flex-direction: row-reverse;
+  }
+
+  .map-link-btn {
+    margin-left: 0;
+    margin-right: 12px;
+  }
+
+  .star-row.inline-stars {
+    margin-left: 0;
+    margin-right: auto;
   }
 }

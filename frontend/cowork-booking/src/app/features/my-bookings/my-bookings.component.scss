@@ -6,7 +6,7 @@
 
 // ─── Page Header ──────────────────────────────────────────────────────────────
 .page-header {
-    background-color: #172554;
+    background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);
     padding: 1.5rem 1rem 2rem;
     color: white;
 
@@ -703,4 +703,76 @@
             box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
         }
     }
+}
+
+// ─── RTL Support ──────────────────────────────────────────────────────────────
+:host-context([dir="rtl"]) {
+  .header-content {
+    flex-direction: row-reverse;
+  }
+
+  .back-link {
+    flex-direction: row-reverse;
+
+    &:hover {
+      transform: translateX(4px);
+    }
+  }
+
+  .stats-grid {
+    direction: rtl;
+  }
+
+  .stat-card {
+    text-align: right;
+  }
+
+  .tabs {
+    flex-direction: row-reverse;
+  }
+
+  .booking-card {
+    text-align: right;
+  }
+
+  .booking-card-header {
+    flex-direction: row-reverse;
+  }
+
+  .upcoming-badge {
+    right: auto;
+    left: 1rem;
+  }
+
+  .booking-workspace {
+    flex-direction: row-reverse;
+    text-align: right;
+  }
+
+  .booking-detail {
+    text-align: right;
+  }
+
+  .detail-label {
+    text-align: right;
+  }
+
+  .card-actions {
+    flex-direction: row-reverse;
+  }
+
+  .cancellation-info {
+    text-align: right;
+    border-left: none;
+    border-right: 4px solid #dc2626;
+  }
+
+  .dialog-actions {
+    flex-direction: row-reverse;
+  }
+
+  .success-banner {
+    flex-direction: row-reverse;
+    text-align: right;
+  }
 }

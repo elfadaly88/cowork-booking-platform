@@ -12,9 +12,9 @@
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(circle at 12% 18%, rgba(230, 57, 70, 0.16), transparent 32%),
-    radial-gradient(circle at 85% 10%, rgba(17, 138, 178, 0.18), transparent 34%),
-    linear-gradient(160deg, #f8f9fb 0%, #eef3f7 45%, #f5efe6 100%);
+    radial-gradient(circle at 12% 18%, rgba(37, 99, 235, 0.12), transparent 32%),
+    radial-gradient(circle at 85% 10%, rgba(59, 130, 246, 0.14), transparent 34%),
+    linear-gradient(160deg, #f8f9fb 0%, #eef3f7 45%, #eff6ff 100%);
   border-radius: 26px;
 }
 
@@ -36,7 +36,7 @@
   font-size: 0.82rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #9d0208;
+  color: #2563eb;
   font-weight: 700;
 }
 
@@ -73,7 +73,7 @@ h1 {
   border: none;
   border-radius: 12px;
   padding: 0.66rem 1rem;
-  background: linear-gradient(120deg, #9d0208, #e85d04);
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: #fff;
   font-weight: 700;
   cursor: pointer;
@@ -82,7 +82,7 @@ h1 {
 
 .refresh-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 18px rgba(157, 2, 8, 0.24);
+  box-shadow: 0 10px 18px rgba(37, 99, 235, 0.3);
 }
 
 .loading-panel,
@@ -104,7 +104,7 @@ h1 {
   width: 24px;
   height: 24px;
   border: 3px solid #e2e8f0;
-  border-top-color: #9d0208;
+  border-top-color: #2563eb;
   border-radius: 999px;
   animation: spin 0.8s linear infinite;
 }
@@ -215,7 +215,7 @@ h1 {
 .bar-fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(120deg, #9d0208, #e85d04);
+  background: linear-gradient(120deg, #2563eb, #3b82f6);
   animation: grow 700ms ease;
 }
 
@@ -250,11 +250,11 @@ h1 {
 
 .city-item strong {
   font-size: 0.78rem;
-  color: #7c2d12;
+  color: #1e3a8a;
 }
 
 .opportunity {
-  border-left: 4px solid #9d0208;
+  border-left: 4px solid #2563eb;
   border-radius: 10px;
   background: #fff;
   padding: 0.7rem;
@@ -275,7 +275,7 @@ h1 {
   display: inline-block;
   font-size: 0.75rem;
   font-weight: 700;
-  color: #9d0208;
+  color: #2563eb;
 }
 
 .empty {
@@ -289,7 +289,7 @@ h1 {
   border-radius: 16px;
   border: 1px solid rgba(15, 23, 42, 0.08);
   padding: 1rem;
-  background: linear-gradient(130deg, #111827, #1f2937);
+  background: linear-gradient(130deg, #172554, #1e3a8a);
   color: #f8fafc;
 }
 
@@ -332,5 +332,58 @@ h1 {
 
   .kpi-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+// ─── RTL Support ──────────────────────────────────────────────────────────────
+:host-context([dir="rtl"]) {
+  .hero {
+    flex-direction: row-reverse;
+    text-align: right;
+  }
+
+  .chips {
+    flex-direction: row-reverse;
+  }
+
+  .kpi-card {
+    text-align: right;
+  }
+
+  .bar-row {
+    direction: rtl;
+    grid-template-columns: 112px 1fr 64px;
+  }
+
+  .bar-value {
+    text-align: left;
+  }
+
+  .bar-label {
+    text-align: right;
+  }
+
+  .city-item {
+    flex-direction: row-reverse;
+  }
+
+  .opportunity {
+    border-left: none;
+    border-right: 4px solid #2563eb;
+    text-align: right;
+  }
+
+  .panel-head {
+    text-align: right;
+  }
+
+  .launch-strip {
+    text-align: right;
+  }
+
+  @media (max-width: 768px) {
+    .hero {
+      flex-direction: column;
+    }
   }
 }

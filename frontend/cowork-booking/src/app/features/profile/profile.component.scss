@@ -330,3 +330,63 @@
         }
     }
 }
+
+// ─── RTL Support ──────────────────────────────────────────────────────────────
+:host-context([dir="rtl"]) {
+  .top-bar {
+    flex-direction: row-reverse;
+  }
+
+  .back-btn {
+    transform: scaleX(-1);
+  }
+
+  .sidebar-btn {
+    flex-direction: row-reverse;
+    text-align: right;
+  }
+
+  .section-header {
+    text-align: right;
+  }
+
+  .form-field {
+    text-align: right;
+
+    label {
+      text-align: right;
+    }
+
+    input {
+      text-align: right;
+    }
+  }
+
+  .form-row {
+    direction: rtl;
+  }
+
+  .pw-wrapper {
+    input {
+      padding-right: 0.875rem;
+      padding-left: 3rem;
+    }
+
+    .pw-toggle {
+      right: auto;
+      left: 0.75rem;
+    }
+  }
+
+  .form-actions {
+    text-align: right;
+  }
+
+  .alert {
+    text-align: right;
+  }
+
+  .user-sidebar {
+    text-align: center;
+  }
+}
