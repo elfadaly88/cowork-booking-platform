@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { forkJoin } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../core/services/auth.service';
 import { BookingService } from '../../core/services/booking.service';
 import { WorkspaceService } from '../../core/services/workspace.service';
@@ -28,7 +29,7 @@ interface SalesOpportunity {
 @Component({
   selector: 'app-business-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, DecimalPipe],
+  imports: [CommonModule, RouterModule, DecimalPipe, TranslateModule],
   templateUrl: './business-dashboard.component.html',
   styleUrls: ['./business-dashboard.component.scss']
 })
@@ -36,6 +37,7 @@ export class BusinessDashboardComponent {
   private readonly auth = inject(AuthService);
   private readonly bookingService = inject(BookingService);
   private readonly workspaceService = inject(WorkspaceService);
+  private readonly translate = inject(TranslateService);
 
   loading = signal(true);
   loadingError = signal('');
@@ -45,7 +47,9 @@ export class BusinessDashboardComponent {
   pendingWorkspaces = signal<Workspace[]>([]);
 
   userName = computed(() => this.auth.currentUser()?.firstName ?? 'Partner');
-  roleLabel = computed(() => this.auth.isAdmin() ? 'Platform View' : 'Owner View');
+  roleLabel = computed(() => this.auth.isAdmin()
+    ? this.translate.instant('BUSINESS.PLATFORM_VIEW')
+    : this.translate.instant('BUSINESS.OWNER_VIEW'));
 
   thisMonthRevenue = computed(() => {
     const now = new Date();
@@ -112,33 +116,33 @@ export class BusinessDashboardComponent {
 
     if (this.pendingWorkspaces().length > 0) {
       list.push({
-        title: 'Pending listings are waiting',
-        detail: `${this.pendingWorkspaces().length} workspace listings are pending approval and can unlock extra supply.`,
-        action: 'Review approvals'
+        title: this.translate.instant('BUSINESS.OPP_PENDING_TITLE'),
+        detail: this.translate.instant('BUSINESS.OPP_PENDING_DETAIL', { count: this.pendingWorkspaces().length }),
+        action: this.translate.instant('BUSINESS.OPP_PENDING_ACTION')
       });
     }
 
     if (this.activeLeads() > 0) {
       list.push({
-        title: 'Leads ready to convert',
-        detail: `${this.activeLeads()} pending bookings can be converted with quick payment follow-up.`,
-        action: 'Follow up now'
+        title: this.translate.instant('BUSINESS.OPP_LEADS_TITLE'),
+        detail: this.translate.instant('BUSINESS.OPP_LEADS_DETAIL', { count: this.activeLeads() }),
+        action: this.translate.instant('BUSINESS.OPP_LEADS_ACTION')
       });
     }
 
     if (this.conversionRate() < 60) {
       list.push({
-        title: 'Payment conversion can improve',
-        detail: `Current paid conversion is ${this.conversionRate()}%. Add stronger checkout messaging and reminders.`,
-        action: 'Improve checkout'
+        title: this.translate.instant('BUSINESS.OPP_CONVERSION_TITLE'),
+        detail: this.translate.instant('BUSINESS.OPP_CONVERSION_DETAIL', { rate: this.conversionRate() }),
+        action: this.translate.instant('BUSINESS.OPP_CONVERSION_ACTION')
       });
     }
 
     if (list.length === 0) {
       list.push({
-        title: 'Growth momentum is healthy',
-        detail: 'No urgent blockers detected this week. Keep scaling acquisition channels and referral offers.',
-        action: 'Scale campaigns'
+        title: this.translate.instant('BUSINESS.OPP_HEALTHY_TITLE'),
+        detail: this.translate.instant('BUSINESS.OPP_HEALTHY_DETAIL'),
+        action: this.translate.instant('BUSINESS.OPP_HEALTHY_ACTION')
       });
     }
 

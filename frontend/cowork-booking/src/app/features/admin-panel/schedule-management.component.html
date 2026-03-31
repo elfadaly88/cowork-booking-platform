@@ -3,10 +3,10 @@
   <div class="schedule-header">
     <button class="back-button" (click)="goBack()">
       <span class="back-icon">←</span>
-      Back to Admin Panel
+      {{ 'ADMIN.BACK_TO_ADMIN' | translate }}
     </button>
-    <h1 class="page-title">Workspace Schedule Management</h1>
-    <p class="page-subtitle">Define working hours for each day of the week</p>
+    <h1 class="page-title">{{ 'ADMIN.SCHEDULE_TITLE' | translate }}</h1>
+    <p class="page-subtitle">{{ 'ADMIN.SCHEDULE_DESC' | translate }}</p>
   </div>
 
   <!-- Alert Messages -->
@@ -32,11 +32,11 @@
 
       <!-- Workspace Selection -->
       <div class="form-section">
-        <h2 class="section-title">Select Workspace</h2>
+        <h2 class="section-title">{{ 'ADMIN.SELECT_WORKSPACE' | translate }}</h2>
         <div class="form-group">
           <label for="workspace" class="form-label">
             <span class="label-icon">🏢</span>
-            Workspace
+            {{ 'ADMIN.WORKSPACE_LABEL' | translate }}
           </label>
           <select
             id="workspace"
@@ -45,25 +45,25 @@
             (change)="onWorkspaceChange($any($event.target).value)"
             required
           >
-            <option [value]="null">-- Select a Workspace --</option>
+            <option [value]="null">-- {{ 'ADMIN.SELECT_WORKSPACE_OPTION' | translate }} --</option>
             @for (workspace of workspaces(); track workspace.id) {
               <option [value]="workspace.id">{{ workspace.name }} - {{ workspace.city }}</option>
             }
           </select>
           @if (scheduleForm.get('workspaceId')?.invalid && scheduleForm.get('workspaceId')?.touched) {
-            <span class="form-error">Please select a workspace</span>
+            <span class="form-error">{{ 'ADMIN.PLEASE_SELECT' | translate }}</span>
           }
         </div>
       </div>
 
       <!-- Date Range -->
       <div class="form-section">
-        <h2 class="section-title">Schedule Period</h2>
+        <h2 class="section-title">{{ 'ADMIN.SCHEDULE_PERIOD' | translate }}</h2>
         <div class="date-range-grid">
           <div class="form-group">
             <label for="startDate" class="form-label">
               <span class="label-icon">📅</span>
-              Start Date
+              {{ 'ADMIN.START_DATE' | translate }}
             </label>
             <input
               id="startDate"
@@ -73,14 +73,14 @@
               required
             />
             @if (scheduleForm.get('startDate')?.invalid && scheduleForm.get('startDate')?.touched) {
-              <span class="form-error">Start date is required</span>
+              <span class="form-error">{{ 'ADMIN.START_REQUIRED' | translate }}</span>
             }
           </div>
 
           <div class="form-group">
             <label for="endDate" class="form-label">
               <span class="label-icon">📅</span>
-              End Date
+              {{ 'ADMIN.END_DATE' | translate }}
             </label>
             <input
               id="endDate"
@@ -90,7 +90,7 @@
               required
             />
             @if (scheduleForm.get('endDate')?.invalid && scheduleForm.get('endDate')?.touched) {
-              <span class="form-error">End date is required</span>
+              <span class="form-error">{{ 'ADMIN.END_REQUIRED' | translate }}</span>
             }
           </div>
         </div>
@@ -99,14 +99,14 @@
       <!-- Weekly Schedule -->
       <div class="form-section">
         <div class="section-header">
-          <h2 class="section-title">Weekly Working Hours</h2>
+          <h2 class="section-title">{{ 'ADMIN.WEEKLY_HOURS' | translate }}</h2>
           <button
             type="button"
             class="btn-secondary-small"
             (click)="applyToAllWeekdays()"
             [disabled]="isLoading()"
           >
-            Apply to All Weekdays
+            {{ 'ADMIN.APPLY_ALL' | translate }}
           </button>
         </div>
 
@@ -121,7 +121,7 @@
                     [checked]="schedules.at(i).get('isWeekend')?.value"
                     (change)="toggleWeekend(i)"
                   />
-                  <span class="toggle-label">Weekend</span>
+                  <span class="toggle-label">{{ 'ADMIN.WEEKEND' | translate }}</span>
                 </label>
               </div>
 
@@ -130,7 +130,7 @@
                   <div class="time-group">
                     <label class="time-label">
                       <span class="time-icon">🕐</span>
-                      Open
+                      {{ 'ADMIN.OPEN_TIME' | translate }}
                     </label>
                     <input
                       type="time"
@@ -144,7 +144,7 @@
                   <div class="time-group">
                     <label class="time-label">
                       <span class="time-icon">🕐</span>
-                      Close
+                      {{ 'ADMIN.CLOSE_TIME' | translate }}
                     </label>
                     <input
                       type="time"
@@ -156,7 +156,7 @@
               } @else {
                 <div class="closed-message">
                   <span class="closed-icon">🔒</span>
-                  Closed
+                  {{ 'ADMIN.CLOSED' | translate }}
                 </div>
               }
             </div>
@@ -172,17 +172,17 @@
           (click)="goBack()"
           [disabled]="isLoading()"
         >
-          Cancel
+          {{ 'COMMON.CANCEL' | translate }}
         </button>
         <button
           type="submit"
           class="btn-primary"
           [disabled]="scheduleForm.invalid || isLoading()"
         >
-          <span *ngIf="!isLoading()">Save Schedule</span>
+          <span *ngIf="!isLoading()">{{ 'ADMIN.SAVE_SCHEDULE' | translate }}</span>
           <span *ngIf="isLoading()">
             <span class="spinner"></span>
-            Saving...
+            {{ 'COMMON.SAVING' | translate }}
           </span>
         </button>
       </div>

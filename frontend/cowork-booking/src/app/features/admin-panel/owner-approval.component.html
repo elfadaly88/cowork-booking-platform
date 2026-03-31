@@ -1,7 +1,7 @@
 <div class="owner-approval-container">
   <div class="header">
-    <h1>👥 Owner Account Approvals</h1>
-    <p>Review and approve workspace owner registrations</p>
+    <h1>👥 {{ 'ADMIN.OWNER_APPROVALS_TITLE' | translate }}</h1>
+    <p>{{ 'ADMIN.OWNER_APPROVALS_DESC' | translate }}</p>
   </div>
 
   @if (successMessage()) {
@@ -21,14 +21,14 @@
   @if (isLoading()) {
     <div class="loading">
       <div class="spinner"></div>
-      <p>Loading pending approvals...</p>
+      <p>{{ 'ADMIN.LOADING_APPROVALS' | translate }}</p>
     </div>
   } @else {
     @if (pendingOwners().length === 0) {
       <div class="empty-state">
         <span class="empty-icon">📭</span>
-        <h3>No Pending Approvals</h3>
-        <p>All owner registration requests have been processed.</p>
+        <h3>{{ 'ADMIN.NO_PENDING' | translate }}</h3>
+        <p>{{ 'ADMIN.ALL_PROCESSED' | translate }}</p>
       </div>
     } @else {
       <div class="owner-list">
@@ -45,7 +45,7 @@
               <div class="owner-details">
                 <h3>{{ owner.fullName }}</h3>
                 <p class="email">{{ owner.email }}</p>
-                <p class="date">Registered: {{ owner.createdAt | date: 'medium' }}</p>
+                <p class="date">{{ 'ADMIN.REGISTERED' | translate }} {{ owner.createdAt | date: 'medium' }}</p>
                 <div class="badges">
                   @for (role of owner.roles; track role) {
                     <span class="badge badge-role">{{ role }}</span>
@@ -56,11 +56,11 @@
             <div class="owner-actions">
               <button class="btn btn-approve" (click)="approveOwner(owner.id)">
                 <span class="icon">✅</span>
-                Approve
+                {{ 'ADMIN.APPROVE_BTN' | translate }}
               </button>
               <button class="btn btn-reject" (click)="rejectOwner(owner.id)">
                 <span class="icon">❌</span>
-                Reject
+                {{ 'ADMIN.REJECT_BTN' | translate }}
               </button>
             </div>
           </div>

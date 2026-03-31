@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { WorkspaceService } from '../../core/services/workspace.service';
 import { Workspace } from '../../core/models/workspace.model';
 import Swal from 'sweetalert2';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-workspace-approval',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './workspace-approval.component.html',
   styleUrls: ['./workspace-approval.component.scss']
 })

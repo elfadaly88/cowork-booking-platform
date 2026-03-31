@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from '../../core/services/auth.service';
 import { WorkspaceService } from '../../core/services/workspace.service';
 import { Workspace } from '../../core/models/workspace.model';
@@ -8,7 +9,7 @@ import { Workspace } from '../../core/models/workspace.model';
 @Component({
     selector: 'app-landing',
     standalone: true,
-    imports: [CommonModule, RouterModule],
+    imports: [CommonModule, RouterModule, TranslateModule],
     templateUrl: './landing.component.html',
     styleUrls: ['./landing.component.scss']
 })

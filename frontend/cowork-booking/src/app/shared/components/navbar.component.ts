@@ -2,33 +2,40 @@
 import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from '../../core/services/auth.service';
+import { LanguageService } from '../../core/services/language.service';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslateModule],
   template: `
     <nav class="navbar">
       <div class="navbar-container">
         <a routerLink="/" class="navbar-brand">
           <span class="brand-icon">🏢</span>
-          <span class="brand-text">Cowork Booking</span>
+          <span class="brand-text">{{ 'COMMON.BRAND' | translate }}</span>
         </a>
 
         <div class="navbar-menu">
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link home-link" *ngIf="!authService.isOwner()">
             <span class="nav-icon">🏠</span>
-            <span class="nav-text">Home</span>
+            <span class="nav-text">{{ 'NAV.HOME' | translate }}</span>
           </a>
           <a routerLink="/owner/dashboard" routerLinkActive="active" class="nav-link" *ngIf="authService.isOwner()">
             <span class="nav-icon">🏢</span>
-            <span class="nav-text">My Workspaces</span>
+            <span class="nav-text">{{ 'NAV.MY_WORKSPACES' | translate }}</span>
           </a>
           <a routerLink="/admin" routerLinkActive="active" class="nav-link" *ngIf="authService.isAdmin()">
             <span class="nav-icon">⚙️</span>
-            <span class="nav-text">Admin Panel</span>
+            <span class="nav-text">{{ 'NAV.ADMIN_PANEL' | translate }}</span>
           </a>
+
+          <!-- Language Toggle -->
+          <button class="lang-btn" (click)="langService.toggleLanguage()" [attr.aria-label]="'Toggle language'">
+            {{ langService.currentLanguage() === 'en' ? 'عربي' : 'EN' }}
+          </button>
 
           <!-- ─── User info chip ──────────────────────────────────────── -->
           <div class="user-chip" *ngIf="authService.isAuthenticated() && authService.currentUser() as user">
@@ -40,7 +47,7 @@ import { AuthService } from '../../core/services/auth.service';
           </div>
 
           <div class="session-chip" *ngIf="authService.isAuthenticated()" title="Session remaining time">
-            <span class="session-label">Session</span>
+            <span class="session-label">{{ 'COMMON.SESSION' | translate }}</span>
             <span class="session-time">{{ authService.sessionCountdown() }}</span>
           </div>
 
@@ -52,7 +59,7 @@ import { AuthService } from '../../core/services/auth.service';
                 <path d="M13 19H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </span>
-            <span class="nav-text">Logout</span>
+            <span class="nav-text">{{ 'COMMON.LOGOUT' | translate }}</span>
           </button>
         </div>
       </div>
@@ -82,7 +89,7 @@ import { AuthService } from '../../core/services/auth.service';
       align-items: center;
       gap: 0.5rem;
       text-decoration: none;
-      color: #0f172a;
+      color: #172554;
       font-size: 1.25rem;
       font-weight: 800;
       transition: opacity 0.2s;
@@ -128,12 +135,12 @@ import { AuthService } from '../../core/services/auth.service';
 
     .nav-link:hover {
       background: #f8fafc;
-      color: #0f172a;
+      color: #172554;
     }
 
     .nav-link.active {
       background: #f1f5f9;
-      color: #0f172a;
+      color: #172554;
       font-weight: 600;
     }
 
@@ -159,11 +166,11 @@ import { AuthService } from '../../core/services/auth.service';
       padding: 0.5rem 0.875rem;
       border-radius: 0.5rem;
       text-decoration: none;
-      color: #e11d48;
+      color: #dc2626;
       font-weight: 500;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       background: transparent;
-      border: 1px solid #ffe4e6;
+      border: 1px solid #fecaca;
       cursor: pointer;
       font-size: 0.875rem;
       margin-left: 0.5rem;
@@ -220,7 +227,7 @@ import { AuthService } from '../../core/services/auth.service';
     .user-name {
       font-size: 0.82rem;
       font-weight: 600;
-      color: #0f172a;
+      color: #172554;
       white-space: nowrap;
     }
 
@@ -238,7 +245,7 @@ import { AuthService } from '../../core/services/auth.service';
       border-radius: 999px;
       border: 1px solid #cbd5e1;
       background: #f8fafc;
-      color: #0f172a;
+      color: #172554;
       font-size: 0.75rem;
       font-weight: 600;
       line-height: 1;
@@ -253,7 +260,7 @@ import { AuthService } from '../../core/services/auth.service';
 
     .session-time {
       font-variant-numeric: tabular-nums;
-      color: #0f172a;
+      color: #172554;
     }
 
     @media (max-width: 640px) {
@@ -263,10 +270,82 @@ import { AuthService } from '../../core/services/auth.service';
       .session-chip { padding: 0.35rem 0.5rem; margin-right: 0; }
       .logout-btn { padding: 0.5rem; margin-left: 0; }
     }
+
+    .lang-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.4rem 0.75rem;
+      border-radius: 0.5rem;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      color: #172554;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-width: 42px;
+      font-family: 'Inter', 'Cairo', sans-serif;
+    }
+
+    .lang-btn:hover {
+      background: #e2e8f0;
+      border-color: #cbd5e1;
+    }
+
+    /* ─── RTL overrides ───────────────────────────────────────────── */
+    :host-context([dir="rtl"]) .navbar-container {
+      flex-direction: row-reverse;
+    }
+
+    :host-context([dir="rtl"]) .navbar-menu {
+      flex-direction: row-reverse;
+    }
+
+    :host-context([dir="rtl"]) .navbar-brand {
+      flex-direction: row-reverse;
+    }
+
+    :host-context([dir="rtl"]) .nav-link {
+      flex-direction: row-reverse;
+    }
+
+    :host-context([dir="rtl"]) .logout-btn {
+      flex-direction: row-reverse;
+      margin-left: 0;
+      margin-right: 0.5rem;
+    }
+
+    :host-context([dir="rtl"]) .user-chip {
+      flex-direction: row-reverse;
+      margin-right: 0;
+      margin-left: 0.25rem;
+      padding: 0.35rem 0.35rem 0.35rem 0.85rem;
+    }
+
+    :host-context([dir="rtl"]) .session-chip {
+      flex-direction: row-reverse;
+      margin-right: 0;
+      margin-left: 0.25rem;
+    }
+
+    :host-context([dir="rtl"]) .logout-btn .svg-icon svg {
+      transform: scaleX(-1);
+    }
+
+    @media (max-width: 640px) {
+      :host-context([dir="rtl"]) .logout-btn {
+        margin-right: 0;
+      }
+      :host-context([dir="rtl"]) .session-chip {
+        margin-left: 0;
+      }
+    }
   `]
 })
 export class NavbarComponent {
   authService = inject(AuthService);
+  langService = inject(LanguageService);
 
   initials = computed(() => {
     const u = this.authService.currentUser();

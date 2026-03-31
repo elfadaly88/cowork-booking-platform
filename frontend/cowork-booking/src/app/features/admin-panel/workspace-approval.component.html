@@ -5,20 +5,20 @@
     <div class="page-header-left">
       <div class="page-icon">🏢</div>
       <div>
-        <h1>Workspace Approvals</h1>
-        <p>Review and approve workspaces submitted by owners</p>
+        <h1>{{ 'ADMIN.WS_APPROVALS_TITLE' | translate }}</h1>
+        <p>{{ 'ADMIN.WS_APPROVALS_DESC' | translate }}</p>
       </div>
     </div>
     <div class="page-header-right">
       @if (!loading() && pendingWorkspaces().length > 0) {
         <div class="queue-badge">
           <span class="queue-count">{{ pendingWorkspaces().length }}</span>
-          <span class="queue-label">pending</span>
+          <span class="queue-label">{{ 'MY_BOOKINGS.PENDING' | translate }}</span>
         </div>
       }
       <button class="refresh-btn" (click)="loadPendingWorkspaces()" [disabled]="loading()">
         <span class="refresh-icon" [class.spinning]="loading()">↻</span>
-        Refresh
+        {{ 'COMMON.REFRESH' | translate }}
       </button>
     </div>
   </div>
@@ -63,9 +63,9 @@
   @if (!loading() && pendingWorkspaces().length === 0 && !errorMessage()) {
     <div class="empty-state">
       <div class="empty-check">✓</div>
-      <h2>All Caught Up!</h2>
-      <p>No workspaces are waiting for approval right now.</p>
-      <button class="refresh-btn outline" (click)="loadPendingWorkspaces()">↻ Check Again</button>
+      <h2>{{ 'ADMIN.ALL_CAUGHT_UP' | translate }}</h2>
+      <p>{{ 'ADMIN.NO_PENDING_WS' | translate }}</p>
+      <button class="refresh-btn outline" (click)="loadPendingWorkspaces()">↻ {{ 'ADMIN.CHECK_AGAIN' | translate }}</button>
     </div>
   }
 
@@ -73,9 +73,9 @@
   @if (!loading() && errorMessage() && pendingWorkspaces().length === 0) {
     <div class="error-state">
       <div class="error-icon">⚠</div>
-      <h3>Failed to Load</h3>
+      <h3>{{ 'ADMIN.FAILED_LOAD' | translate }}</h3>
       <p>{{ errorMessage() }}</p>
-      <button class="refresh-btn outline" (click)="loadPendingWorkspaces()">↻ Retry</button>
+      <button class="refresh-btn outline" (click)="loadPendingWorkspaces()">↻ {{ 'COMMON.RETRY' | translate }}</button>
     </div>
   }
 
@@ -93,7 +93,7 @@
               <div class="banner-placeholder">🏢</div>
             }
             <div class="banner-overlay">
-              <span class="pending-pill">⏳ Pending Review</span>
+              <span class="pending-pill">⏳ {{ 'ADMIN.PENDING_REVIEW' | translate }}</span>
             </div>
           </div>
 
@@ -111,14 +111,14 @@
               <div class="meta-item">
                 <span class="meta-icon">👤</span>
                 <div class="meta-text">
-                  <span class="meta-label">Owner</span>
-                  <span class="meta-value">{{ workspace.ownerName || 'Unknown' }}</span>
+                  <span class="meta-label">{{ 'ADMIN.OWNER_LABEL' | translate }}</span>
+                  <span class="meta-value">{{ workspace.ownerName || ('ADMIN.UNKNOWN' | translate) }}</span>
                 </div>
               </div>
               <div class="meta-item">
                 <span class="meta-icon">🏠</span>
                 <div class="meta-text">
-                  <span class="meta-label">Address</span>
+                  <span class="meta-label">{{ 'ADMIN.ADDRESS' | translate }}</span>
                   <span class="meta-value">{{ workspace.address }}</span>
                 </div>
               </div>
@@ -133,46 +133,46 @@
             <div class="stats-row">
               <div class="stat-pill">
                 <span class="stat-num">{{ getTotalRooms(workspace) }}</span>
-                <span class="stat-lbl">Rooms</span>
+                <span class="stat-lbl">{{ 'COMMON.ROOMS' | translate }}</span>
               </div>
               <div class="stat-pill">
                 <span class="stat-num">{{ getTotalCapacity(workspace) }}</span>
-                <span class="stat-lbl">Total Seats</span>
+                <span class="stat-lbl">{{ 'ADMIN.TOTAL_SEATS' | translate }}</span>
               </div>
               @if (getMinPrice(workspace) !== null) {
                 <div class="stat-pill accent">
-                  <span class="stat-num">EGP {{ getMinPrice(workspace) }}</span>
-                  <span class="stat-lbl">From / hr</span>
+                  <span class="stat-num">{{ 'COMMON.EGP' | translate }} {{ getMinPrice(workspace) }}</span>
+                  <span class="stat-lbl">{{ 'ADMIN.FROM_PER_HR' | translate }}</span>
                 </div>
               }
             </div>
 
             <div class="billing-row">
               <div class="billing-pill accent">
-                <span class="billing-label">Monthly Fee</span>
-                <span class="billing-value">EGP {{ workspace.monthlyFeeAmount || 1000 }}</span>
+                <span class="billing-label">{{ 'ADMIN.MONTHLY_FEE' | translate }}</span>
+                <span class="billing-value">{{ 'COMMON.EGP' | translate }} {{ workspace.monthlyFeeAmount || 1000 }}</span>
               </div>
               <div class="billing-pill">
-                <span class="billing-label">Payment Method</span>
-                <span class="billing-value">{{ workspace.approvalPaymentMethodName || 'Not selected' }}</span>
+                <span class="billing-label">{{ 'ADMIN.PAYMENT_METHOD' | translate }}</span>
+                <span class="billing-value">{{ workspace.approvalPaymentMethodName || ('ADMIN.NOT_SELECTED' | translate) }}</span>
               </div>
               <div class="billing-pill" [class.paid]="workspace.approvalPaymentStatus === 'Paid'" [class.pending]="workspace.approvalPaymentStatus !== 'Paid'">
-                <span class="billing-label">Payment Status</span>
-                <span class="billing-value">{{ workspace.approvalPaymentStatus || 'Pending' }}</span>
+                <span class="billing-label">{{ 'ADMIN.PAYMENT_STATUS' | translate }}</span>
+                <span class="billing-value">{{ workspace.approvalPaymentStatus || ('MY_BOOKINGS.PENDING' | translate) }}</span>
               </div>
             </div>
 
             <!-- Rooms -->
             @if (workspace.rooms && workspace.rooms.length > 0) {
               <div class="rooms-section">
-                <div class="rooms-heading">🚪 Rooms</div>
+                <div class="rooms-heading">🚪 {{ 'COMMON.ROOMS' | translate }}</div>
                 <div class="rooms-list">
                   @for (room of workspace.rooms; track room.id) {
                     <div class="room-chip">
                       <span class="room-chip-name">{{ room.name }}</span>
                       <div class="room-chip-meta">
                         <span>👥 {{ room.capacity }}</span>
-                        <span>EGP {{ room.pricePerHour }}/hr</span>
+                        <span>{{ 'COMMON.EGP' | translate }} {{ room.pricePerHour }}/hr</span>
                         @if (room.hasDevices) {
                           <span class="devices-dot" title="Has devices">📱</span>
                         }
@@ -188,15 +188,15 @@
           <!-- Actions -->
           <div class="card-actions">
             <button class="btn-reject" (click)="rejectWorkspace(workspace.id!)" [disabled]="loading()">
-              <span>✕</span> Reject
+              <span>✕</span> {{ 'ADMIN.REJECT_BTN' | translate }}
             </button>
             @if (workspace.approvalPaymentStatus !== 'Paid') {
               <button class="btn-confirm-payment" (click)="confirmFeePayment(workspace.id!)" [disabled]="loading()">
-                <span>💳</span> Confirm Payment
+                <span>💳</span> {{ 'ADMIN.CONFIRM_PAYMENT' | translate }}
               </button>
             }
             <button class="btn-approve" (click)="approveWorkspace(workspace.id!)" [disabled]="loading() || workspace.approvalPaymentStatus !== 'Paid'">
-              <span>✓</span> Approve
+              <span>✓</span> {{ 'ADMIN.APPROVE_BTN' | translate }}
             </button>
           </div>
 

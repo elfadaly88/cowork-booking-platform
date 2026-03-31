@@ -19,6 +19,7 @@ import { BookingRequest } from '../../core/models/booking.model';
 import { Room, Device, Workspace } from '../../core/models/workspace.model';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 import { ErrorMessageComponent } from '../../shared/components/error-message.component';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-booking-form',
@@ -37,7 +38,8 @@ import { ErrorMessageComponent } from '../../shared/components/error-message.com
     MatSnackBarModule,
     MatIconModule,
     LoadingSpinnerComponent,
-    ErrorMessageComponent
+    ErrorMessageComponent,
+    TranslateModule
   ],
   templateUrl: './booking-form.component.html',
   styleUrls: ['./booking-form.component.scss']

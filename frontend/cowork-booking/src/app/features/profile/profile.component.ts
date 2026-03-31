@@ -5,11 +5,12 @@ import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-profile',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, RouterModule],
+    imports: [CommonModule, ReactiveFormsModule, RouterModule, TranslateModule],
     templateUrl: './profile.component.html',
     styleUrls: ['./profile.component.scss']
 })

@@ -7,11 +7,12 @@ import { CreateWorkspaceDto, CreateRoomDto, CreateDeviceDto, UpdateWorkspaceDto,
 import { PaymentMethod } from '../../core/models/booking.model';
 import { MapLocationPickerComponent } from '../../shared/components/map-location-picker.component';
 import Swal from 'sweetalert2';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-owner-workspace-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MapLocationPickerComponent],
+  imports: [CommonModule, ReactiveFormsModule, MapLocationPickerComponent, TranslateModule],
   templateUrl: './owner-workspace-form.component.html',
   styleUrls: ['./owner-workspace-form.component.scss']
 })

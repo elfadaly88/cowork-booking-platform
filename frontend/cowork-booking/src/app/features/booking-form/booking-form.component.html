@@ -3,7 +3,7 @@
   <div class="booking-header">
     <button class="back-button" (click)="goBack()">
       <span class="back-icon">←</span>
-      Back to {{ workspace?.name || 'Workspaces' }}
+      {{ 'WORKSPACE_DETAILS.BACK' | translate }} {{ workspace?.name }}
     </button>
   </div>
 
@@ -27,9 +27,9 @@
           </p>
         </div>
         <div class="room-price">
-          <span class="price-label">Starting from</span>
-          <span class="price-amount">{{ room.pricePerHour | number:'1.0-0' }} EGP</span>
-          <span class="price-unit">per hour</span>
+          <span class="price-label">{{ 'BOOKING.STARTING_FROM' | translate }}</span>
+          <span class="price-amount">{{ room.pricePerHour | number:'1.0-0' }} {{ 'COMMON.EGP' | translate }}</span>
+          <span class="price-unit">{{ 'BOOKING.PER_HOUR' | translate }}</span>
         </div>
       </div>
 
@@ -37,35 +37,35 @@
         <div class="detail-item">
           <span class="detail-icon">👥</span>
           <div class="detail-content">
-            <span class="detail-label">Capacity</span>
-            <span class="detail-value">{{ room.capacity }} people</span>
+            <span class="detail-label">{{ 'BOOKING.CAPACITY' | translate }}</span>
+            <span class="detail-value">{{ room.capacity }} {{ 'COMMON.PEOPLE' | translate }}</span>
           </div>
         </div>
 
         <div class="detail-item" *ngIf="room.availableSeats !== undefined">
           <span class="detail-icon">✓</span>
           <div class="detail-content">
-            <span class="detail-label">Available Now</span>
-            <span class="detail-value available">{{ room.availableSeats }} seats</span>
+            <span class="detail-label">{{ 'BOOKING.AVAILABLE_NOW' | translate }}</span>
+            <span class="detail-value available">{{ room.availableSeats }} {{ 'COMMON.SEATS' | translate }}</span>
           </div>
         </div>
 
         <div class="detail-item" *ngIf="room.devices && room.devices.length > 0">
           <span class="detail-icon">🔧</span>
           <div class="detail-content">
-            <span class="detail-label">Devices</span>
-            <span class="detail-value">{{ room.devices.length }} available</span>
+            <span class="detail-label">{{ 'COMMON.DEVICES' | translate }}</span>
+            <span class="detail-value">{{ room.devices.length }} {{ 'WORKSPACE_DETAILS.AVAILABLE' | translate }}</span>
           </div>
         </div>
 
         <div class="detail-item" *ngIf="workspace?.currentSchedulePeriod">
           <span class="detail-icon">🕒</span>
           <div class="detail-content">
-            <span class="detail-label">Working Hours</span>
+            <span class="detail-label">{{ 'BOOKING.WORKING_HOURS' | translate }}</span>
             <span class="detail-value" style="font-size: 0.9em;">
               <span *ngFor="let s of workspace?.currentSchedulePeriod?.schedules" style="display: block; margin-top: 2px;">
                 <strong>{{ getDayName(s.dayOfWeek) }}</strong>:
-                {{ s.isWeekend ? 'Closed' : ((s.openTime | slice:0:5) + ' - ' + (s.closeTime | slice:0:5)) }}
+                {{ s.isWeekend ? ('ADMIN.CLOSED' | translate) : ((s.openTime | slice:0:5) + ' - ' + (s.closeTime | slice:0:5)) }}
               </span>
             </span>
           </div>
@@ -75,17 +75,17 @@
 
     <!-- Booking Form Card -->
     <div class="booking-form-card">
-      <h2 class="form-title">Book Your Space</h2>
+      <h2 class="form-title">{{ 'BOOKING.BOOK_YOUR_SPACE' | translate }}</h2>
 
       <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()">
         <!-- Date Selection -->
         <div class="form-section">
-          <h3 class="section-title">When do you need the room?</h3>
+          <h3 class="section-title">{{ 'BOOKING.WHEN_NEED' | translate }}</h3>
 
           <div class="form-group">
             <label class="form-label">
               <span class="label-icon">📅</span>
-              Select Date
+              {{ 'BOOKING.SELECT_DATE' | translate }}
             </label>
             <input
               type="date"
@@ -95,7 +95,7 @@
               required
             />
             <span class="form-error" *ngIf="bookingForm.get('bookingDate')?.hasError('required') && bookingForm.get('bookingDate')?.touched">
-              Please select a date
+              {{ 'BOOKING.PLEASE_SELECT_DATE' | translate }}
             </span>
           </div>
 
@@ -103,60 +103,60 @@
             <div class="form-group">
               <label class="form-label">
                 <span class="label-icon">🕐</span>
-                Start Time
+                {{ 'BOOKING.START_TIME' | translate }}
               </label>
               <select
                 class="form-input"
                 formControlName="startTime"
                 required
               >
-                <option value="" disabled selected>Select start time</option>
+                <option value="" disabled selected>{{ 'BOOKING.SELECT_START_TIME' | translate }}</option>
                 <option *ngFor="let time of timeOptions" [value]="time">{{ time }}</option>
               </select>
               <span class="form-error" *ngIf="bookingForm.get('startTime')?.hasError('required') && bookingForm.get('startTime')?.touched">
-                Start time is required
+                {{ 'BOOKING.START_REQUIRED' | translate }}
               </span>
               <span class="form-error" *ngIf="bookingForm.hasError('startTimeInPast') && (bookingForm.get('startTime')?.touched || bookingForm.get('bookingDate')?.touched)">
-                Start time cannot be in the past
+                {{ 'BOOKING.START_PAST' | translate }}
               </span>
             </div>
 
             <div class="form-group">
               <label class="form-label">
                 <span class="label-icon">🕐</span>
-                End Time
+                {{ 'BOOKING.END_TIME' | translate }}
               </label>
               <select
                 class="form-input"
                 formControlName="endTime"
                 required
               >
-                <option value="" disabled selected>Select end time</option>
+                <option value="" disabled selected>{{ 'BOOKING.SELECT_END_TIME' | translate }}</option>
                 <option *ngFor="let time of timeOptions" [value]="time">{{ time }}</option>
               </select>
               <span class="form-error" *ngIf="bookingForm.get('endTime')?.hasError('required') && bookingForm.get('endTime')?.touched">
-                End time is required
+                {{ 'BOOKING.END_REQUIRED' | translate }}
               </span>
               <span class="form-error" *ngIf="bookingForm.hasError('endTimeBeforeStartTime') && bookingForm.get('endTime')?.touched">
-                End time must be after start time
+                {{ 'BOOKING.END_AFTER_START' | translate }}
               </span>
             </div>
           </div>
 
           <div class="form-error" style="display:block; margin-top:0.75rem;" *ngIf="bookingForm.hasError('notScheduled')">
-            ⚠️ The selected date has no schedule — please choose another day.
+            ⚠️ {{ 'BOOKING.NO_SCHEDULE' | translate }}
           </div>
           <div class="form-error" style="display:block; margin-top:0.75rem;" *ngIf="bookingForm.hasError('isWeekend')">
-            ⚠️ The workspace is closed on the selected day — please choose a working day.
+            ⚠️ {{ 'BOOKING.CLOSED_DAY' | translate }}
           </div>
           <div class="form-error" style="display:block; margin-top:0.75rem;" *ngIf="bookingForm.hasError('outsideWorkingHours') && bookingForm.touched">
-            Selected time falls outside of the workspace's working hours.
+            {{ 'BOOKING.OUTSIDE_HOURS' | translate }}
           </div>
 
           <!-- Availability check feedback -->
           <div class="availability-checking" *ngIf="checkingAvailability" style="display:flex; align-items:center; gap:0.5rem; margin-top:0.75rem; color:#666; font-size:0.875rem;">
             <span class="spinner" style="width:14px; height:14px; border-width:2px;"></span>
-            Checking availability...
+            {{ 'BOOKING.CHECKING_AVAILABILITY' | translate }}
           </div>
           <div class="form-error conflict-error" *ngIf="conflictError && !checkingAvailability"
                style="display:block; margin-top:0.75rem; background:#fff3f3; border:1px solid #e74c3c; border-radius:6px; padding:0.6rem 0.85rem;">
@@ -166,7 +166,7 @@
 
         <!-- Devices Selection -->
         <div class="form-section" *ngIf="availableDevices.length > 0">
-          <h3 class="section-title">Additional Devices (Optional)</h3>
+          <h3 class="section-title">{{ 'BOOKING.ADDITIONAL_DEVICES' | translate }}</h3>
 
           <div class="devices-grid">
             <label
@@ -182,7 +182,7 @@
               />
               <div class="device-option-content">
                 <span class="device-name">{{ device.name }}</span>
-                <span class="device-price">+{{ device.extraCostPerHour | number:'1.0-0' }} EGP/hr</span>
+                <span class="device-price">+{{ device.extraCostPerHour | number:'1.0-0' }} {{ 'COMMON.EGP' | translate }}/{{ 'COMMON.PER_HOUR' | translate }}</span>
               </div>
               <span class="checkmark">✓</span>
             </label>
@@ -192,10 +192,10 @@
         <!-- Price Summary -->
         <div class="price-summary">
           <div class="summary-row">
-            <span class="summary-label">Estimated Total</span>
-            <span class="summary-value total">{{ totalPrice | number:'1.2-2' }} EGP</span>
+            <span class="summary-label">{{ 'BOOKING.ESTIMATED_TOTAL' | translate }}</span>
+            <span class="summary-value total">{{ totalPrice | number:'1.2-2' }} {{ 'COMMON.EGP' | translate }}</span>
           </div>
-          <p class="summary-note">Final price will be calculated based on actual usage</p>
+          <p class="summary-note">{{ 'BOOKING.FINAL_PRICE_NOTE' | translate }}</p>
         </div>
 
         <!-- Action Buttons -->
@@ -206,17 +206,17 @@
             (click)="goBack()"
             [disabled]="submitting"
           >
-            Cancel
+            {{ 'COMMON.CANCEL' | translate }}
           </button>
           <button
             type="submit"
             class="btn-primary"
             [disabled]="bookingForm.invalid || submitting || !!conflictError || checkingAvailability"
           >
-            <span *ngIf="!submitting">Confirm Booking</span>
+            <span *ngIf="!submitting">{{ 'BOOKING.CONFIRM_BOOKING' | translate }}</span>
             <span *ngIf="submitting">
               <span class="spinner"></span>
-              Processing...
+              {{ 'COMMON.PROCESSING' | translate }}
             </span>
           </button>
         </div>

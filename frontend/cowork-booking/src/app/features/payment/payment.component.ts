@@ -10,6 +10,7 @@ import { BookingService } from '../../core/services/booking.service';
 import { PaymentMethod } from '../../core/models/booking.model';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 import { ErrorMessageComponent } from '../../shared/components/error-message.component';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-payment',
@@ -22,7 +23,8 @@ import { ErrorMessageComponent } from '../../shared/components/error-message.com
     MatSnackBarModule,
     FormsModule,
     LoadingSpinnerComponent,
-    ErrorMessageComponent
+    ErrorMessageComponent,
+    TranslateModule
   ],
   templateUrl: './payment.component.html',
   styleUrls: ['./payment.component.scss']

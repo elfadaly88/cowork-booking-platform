@@ -1,6 +1,6 @@
 .schedule-container {
   min-height: 100dvh;
-  background-color: #0f172a;
+  background-color: #172554;
   padding: 2rem 1rem;
 }
 
@@ -171,8 +171,8 @@
 
   &:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
   }
 
   &:disabled {
@@ -213,8 +213,8 @@
   transition: all 0.3s ease;
 
   &:hover {
-    border-color: #667eea;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    border-color: #2563eb;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
   }
 
   &.weekend {
@@ -295,14 +295,14 @@
 
   &:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
   }
 }
 
 .time-separator {
   font-size: 1.25rem;
-  color: #667eea;
+  color: #2563eb;
   font-weight: 600;
   margin-top: 1.5rem;
 }
@@ -371,13 +371,13 @@
 }
 
 .btn-primary {
-  background-color: #0f172a;
+  background-color: #2563eb;
   color: white;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 
   &:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
   }
 }
 

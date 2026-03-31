@@ -3,7 +3,7 @@
   margin: 0 auto;
   padding: 2rem;
   min-height: 100dvh;
-  background-color: #0f172a;
+  background-color: #172554;
 }
 
 .header {
@@ -92,7 +92,7 @@
 
     .btn-add-room {
       padding: 0.5rem 1rem;
-      background-color: #0f172a;
+      background-color: #2563eb;
       color: white;
       border: none;
       border-radius: 8px;
@@ -102,7 +102,7 @@
 
       &:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
       }
     }
   }
@@ -135,8 +135,8 @@
 
     &:focus {
       outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     }
 
     &.invalid {

@@ -5,11 +5,12 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { BookingService } from '../../core/services/booking.service';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-test-payment',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatButtonModule, MatSnackBarModule],
+  imports: [CommonModule, MatCardModule, MatButtonModule, MatSnackBarModule, TranslateModule],
   templateUrl: './test-payment.component.html',
   styleUrls: ['./test-payment.component.scss']
 })

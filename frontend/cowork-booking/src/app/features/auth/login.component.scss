@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #0f172a;
+  background-color: #172554;
   padding: 2rem;
 }
 
@@ -55,8 +55,8 @@
 
       &:focus {
         outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
       }
 
       &.invalid {
@@ -89,11 +89,11 @@
         border-radius: 0.25rem;
 
         &:hover {
-          background: rgba(102, 126, 234, 0.1);
+          background: rgba(37, 99, 235, 0.1);
         }
 
         &:focus {
-          outline: 2px solid #667eea;
+          outline: 2px solid #2563eb;
           outline-offset: 2px;
         }
 
@@ -132,7 +132,7 @@
     color: #718096;
 
     a {
-      color: #667eea;
+      color: #2563eb;
       text-decoration: none;
       font-weight: 600;
 

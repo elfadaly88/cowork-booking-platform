@@ -5,11 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { WorkspaceService } from '../../core/services/workspace.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Workspace } from '../../core/models/workspace.model';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, TranslateModule],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })

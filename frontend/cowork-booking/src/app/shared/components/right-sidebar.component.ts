@@ -119,11 +119,11 @@ import { AuthService } from '../../core/services/auth.service';
 
     .rs-item:hover { background: rgba(37,99,235,0.06); transform: translateY(-1px); }
 
-    .rs-item.active { background-color: #e11d48; color: #fff; }
+    .rs-item.active { background-color: #2563eb; color: #fff; }
 
     .rs-footer { padding: 0.5rem; border-top: 1px solid rgba(30,41,59,0.04); }
 
-    .rs-logout { width: 100%; padding: 0.5rem; border-radius: 8px; border: none; background-color: #e11d48; color: #fff; font-weight: 700; cursor: pointer; }
+    .rs-logout { width: 100%; padding: 0.5rem; border-radius: 8px; border: none; background-color: #2563eb; color: #fff; font-weight: 700; cursor: pointer; }
 
     @media (max-width: 900px) {
       .right-sidebar { transform: translateX(0); position: fixed; }

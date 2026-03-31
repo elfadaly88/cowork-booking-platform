@@ -10,24 +10,27 @@
 @import 'leaflet/dist/leaflet.css';
 
 /* ========================================
-   COLOR PALETTE - Professional Red & Blue Theme
+   COLOR PALETTE - CoworkHub Professional Blue & Amber
    ======================================== */
 :root {
-  /* Primary Base Colors (Premium Slate/Black) */
-  --primary-blue: #0f172a;       /* Slate 900 */
-  --primary-blue-dark: #000000;  /* Pure Black */
-  --primary-blue-light: #334155; /* Slate 700 */
-  --primary-blue-lighter: #f8fafc; /* Slate 50 */
+  /* Primary Brand Colors (Deep Blue Family) */
+  --primary-blue: #2563eb;       /* Blue 600 - main brand, buttons, links */
+  --primary-blue-dark: #1e3a8a;  /* Blue 800 - headings, strong text */
+  --primary-blue-light: #3b82f6; /* Blue 500 - hover states, lighter accents */
+  --primary-blue-lighter: #eff6ff; /* Blue 50 - subtle backgrounds */
 
-  /* Secondary Accent Colors (Crisp White & Gray) */
-  --secondary-red: #ffffff;
-  --secondary-red-dark: #f1f5f9;
-  --secondary-red-light: #ffffff;
-  --secondary-red-lighter: #ffffff;
+  /* Deep Backgrounds (Hero sections, dark panels) */
+  --bg-deep: #172554;            /* Blue 950 - hero backgrounds */
+  --bg-deeper: #0f1d3d;          /* Darker variant for gradients */
 
-  /* Accent Colors */
-  --accent-navy: #020617;
-  --accent-crimson: #4f46e5; /* Electric Indigo for focus/accents */
+  /* Warm Accent Colors (Amber Family) */
+  --accent-warm: #f59e0b;        /* Amber 500 - warm CTAs, highlights */
+  --accent-warm-dark: #d97706;   /* Amber 600 - hover */
+  --accent-warm-light: #fef3c7;  /* Amber 100 - badge backgrounds */
+
+  /* Secondary Accent */
+  --accent-navy: #1e3a8a;
+  --accent-crimson: #2563eb;     /* Blue 600 for focus/accents */
 
   /* Neutral Colors */
   --white: #FFFFFF;
@@ -40,13 +43,13 @@
   --gray-600: #475569;
   --gray-700: #334155;
   --gray-800: #1E293B;
-  --gray-900: #0F172A;
+  --gray-900: #172554;
 
   /* Semantic Colors */
   --success: #10B981;
   --warning: #F59E0B;
-  --error: #E11D48; /* Crimson */
-  --info: #4F46E5; /* Indigo */
+  --error: #dc2626;              /* Red 600 */
+  --info: #2563eb;               /* Blue 600 */
 
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -145,15 +148,15 @@ button, .btn {
 }
 
 .btn-primary {
-  background-color: var(--gray-900);
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   color: var(--white);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
 }
 
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.15);
-  background-color: var(--gray-800);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
 }
 
 .btn-secondary {
@@ -521,7 +524,7 @@ img {
 
 /* Status Indicators */
 .status-available {
-  color: var(--secondary-red);
+  color: var(--success);
   font-weight: 600;
 }
 
@@ -532,7 +535,7 @@ img {
 
 /* Hero Section */
 .hero {
-  background: #0f172a;
+  background: #172554;
   padding: var(--spacing-xl) var(--spacing-md);
   text-align: center;
   color: var(--white);
@@ -577,5 +580,400 @@ img {
 
   .form-actions button {
     width: 100%;
+  }
+}
+
+/* ========================================
+   RTL (Right-to-Left) Support
+   ======================================== */
+
+/* Arabic font family */
+[dir="rtl"],
+[dir="rtl"] * {
+  font-family: 'Cairo', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+[dir="rtl"] {
+  text-align: right;
+
+  /* ── Layout: main content margin flip ──────────────────────────── */
+  .main-content {
+    margin-left: 0;
+    margin-right: var(--sidebar-width);
+    transition: margin-right 0.2s ease, padding 0.2s ease;
+  }
+
+  app-sidebar.collapsed + .main-content,
+  .app-sidebar.collapsed + .main-content,
+  .sidebar.collapsed + .main-content {
+    margin-right: var(--sidebar-collapsed-width);
+  }
+
+  @media (max-width: 900px) {
+    .main-content { margin-right: 0; }
+  }
+
+  /* ── Flex direction reversal for horizontal layouts ────────────── */
+  .navbar-container,
+  .navbar-menu,
+  .nav-inner,
+  .nav-actions,
+  .nav-links,
+  .filter-bar-inner,
+  .filter-actions,
+  .form-row,
+  .form-actions,
+  .room-header,
+  .card-footer,
+  .booking-actions,
+  .dialog-actions,
+  .header-content,
+  .stats-row,
+  .device-row,
+  .devices-header,
+  .top-nav .nav-links,
+  .card-actions,
+  .owner-actions,
+  .review-form-actions,
+  .review-meta,
+  .room-meta,
+  .billing-row,
+  .meta-grid,
+  .hero-nav,
+  .hero-trust,
+  .hero-cta,
+  .final-cta-buttons,
+  .card-title-row,
+  .card-stats,
+  .user-chip,
+  .session-chip,
+  .search-bar,
+  .filter-group,
+  .view-toggle,
+  .steps-container,
+  .owner-benefits li,
+  .sidebar-top,
+  .nav-item,
+  .brand,
+  .navbar-brand,
+  .sidebar-footer,
+  .mockup-stat {
+    flex-direction: row-reverse;
+  }
+
+  /* ── Input and select text alignment ───────────────────────────── */
+  input,
+  textarea,
+  select {
+    text-align: right;
+  }
+
+  /* ── Margin/padding direction swaps ────────────────────────────── */
+  .back-icon,
+  .search-icon,
+  .label-icon,
+  .stat-icon,
+  .notice-icon,
+  .cancel-icon {
+    margin-right: 0;
+    margin-left: 0.5rem;
+  }
+
+  /* Logout button margin */
+  .logout-btn {
+    margin-left: 0;
+    margin-right: 0.5rem;
+  }
+
+  /* User/session chip margins */
+  .user-chip,
+  .session-chip {
+    margin-right: 0;
+    margin-left: 0.25rem;
+  }
+
+  /* Filter actions auto-margin flip */
+  .filter-actions {
+    margin-left: 0;
+    margin-right: auto;
+  }
+
+  /* Float card price */
+  .fc-price {
+    margin-left: 0;
+    margin-right: auto;
+  }
+
+  /* Search bar padding flip */
+  .search-bar {
+    padding: 0.125rem 1.25rem 0.125rem 0.125rem;
+  }
+
+  .search-clear {
+    margin-right: 0;
+    margin-left: 0.5rem;
+  }
+
+  /* Select dropdown arrow position flip */
+  .filter-group select {
+    padding: 0.475rem 0.75rem 0.475rem 2rem;
+    background-position: left 0.6rem center;
+  }
+
+  /* ── Arrow and icon flipping ───────────────────────────────────── */
+  .back-button .back-icon,
+  .back-btn {
+    transform: scaleX(-1);
+  }
+
+  /* Step arrows flip for RTL */
+  .step-arrow {
+    transform: scaleX(-1);
+  }
+
+  /* View details arrow flip */
+  .view-btn-card,
+  .owner-cta {
+    direction: rtl;
+  }
+
+  /* ── Table alignment ───────────────────────────────────────────── */
+  table {
+    text-align: right;
+
+    th, td {
+      text-align: right;
+    }
+  }
+
+  /* ── Grid items alignment ──────────────────────────────────────── */
+  .stat-card,
+  .card-body,
+  .room-card,
+  .workspace-card {
+    text-align: right;
+  }
+
+  /* ── Sidebar positioning ───────────────────────────────────────── */
+  .sidebar {
+    right: 0;
+    left: auto;
+    border-right: none;
+    border-left: 1px solid rgba(30, 41, 59, 0.06);
+  }
+
+  @media (max-width: 768px) {
+    .sidebar.collapsed {
+      transform: translateX(100%);
+    }
+  }
+
+  /* Brand padding flip */
+  .brand {
+    padding-left: 0;
+    padding-right: 0.5rem;
+  }
+
+  /* ── Dialog and dropdown alignment ─────────────────────────────── */
+  .dialog-box {
+    text-align: right;
+  }
+
+  /* ── Badge positioning ─────────────────────────────────────────── */
+  .upcoming-badge,
+  .rating-badge,
+  .pending-pill {
+    right: auto;
+    left: 0.625rem;
+  }
+
+  /* ── Form label alignment ──────────────────────────────────────── */
+  label {
+    text-align: right;
+  }
+
+  /* ── Landing page specifics ────────────────────────────────────── */
+  .hero-section::before {
+    right: auto;
+    left: -20%;
+  }
+
+  .hero-section::after {
+    left: auto;
+    right: -10%;
+  }
+
+  .owner-content {
+    direction: rtl;
+  }
+
+  .owner-benefits {
+    padding: 0;
+  }
+
+  /* Dashboard mockup labels */
+  .mockup-stat .m-label {
+    text-align: right;
+  }
+
+  /* ── Home page list mode card hover ────────────────────────────── */
+  .workspaces-container.list-mode {
+    .workspace-card:hover {
+      transform: translateX(-4px) translateY(0);
+    }
+
+    .card-footer {
+      border-left: none;
+      border-right: 1px solid #F1F5F9;
+      align-items: flex-start;
+    }
+  }
+
+  /* ── Centered text sections stay centered ──────────────────────── */
+  .hero-content,
+  .section-header,
+  .features-section .section-header,
+  .how-it-works .section-header,
+  .final-cta,
+  .stats-section,
+  .search-hero,
+  .landing-footer,
+  .state-center,
+  .no-results {
+    text-align: center;
+  }
+
+  /* ── Step content stays centered ───────────────────────────────── */
+  .step {
+    text-align: center;
+  }
+
+  /* Stats container */
+  .stats-container {
+    text-align: center;
+  }
+
+  /* ── Workspace Details page ────────────────────────────────────── */
+  .back-button {
+    flex-direction: row-reverse;
+  }
+
+  .workspace-header,
+  .info-chips,
+  .amenity-tag,
+  .room-card-header,
+  .room-details,
+  .room-pricing,
+  .review-header,
+  .review-author,
+  .detail-row,
+  .price-row,
+  .booking-summary-row {
+    flex-direction: row-reverse;
+  }
+
+  .room-image-section {
+    border-right: none;
+    border-left: 1px solid #e2e8f0;
+  }
+
+  /* ── My Bookings page ──────────────────────────────────────────── */
+  .booking-card,
+  .booking-header,
+  .booking-meta,
+  .booking-actions,
+  .tab-nav,
+  .status-badge {
+    text-align: right;
+  }
+
+  .booking-header,
+  .booking-meta,
+  .booking-actions {
+    flex-direction: row-reverse;
+  }
+
+  /* ── Booking Form page ─────────────────────────────────────────── */
+  .booking-form-container,
+  .form-section,
+  .date-time-row,
+  .summary-row,
+  .price-breakdown {
+    text-align: right;
+  }
+
+  .date-time-row,
+  .summary-row {
+    flex-direction: row-reverse;
+  }
+
+  /* ── Owner Dashboard ───────────────────────────────────────────── */
+  .dashboard-header,
+  .workspace-actions,
+  .workspace-list-item,
+  .stat-cards,
+  .action-bar {
+    flex-direction: row-reverse;
+  }
+
+  .workspace-list-item,
+  .dashboard-stat {
+    text-align: right;
+  }
+
+  /* ── Profile page ──────────────────────────────────────────────── */
+  .profile-header,
+  .profile-form label,
+  .profile-stats {
+    text-align: right;
+  }
+
+  .profile-header {
+    flex-direction: row-reverse;
+  }
+
+  /* ── Auth pages (Login/Register) ───────────────────────────────── */
+  .auth-container,
+  .auth-form,
+  .auth-header {
+    text-align: right;
+  }
+
+  /* ── Admin panel ───────────────────────────────────────────────── */
+  .admin-header,
+  .admin-nav,
+  .admin-actions,
+  .approval-card,
+  .approval-actions,
+  .workspace-info {
+    flex-direction: row-reverse;
+  }
+
+  .admin-header,
+  .approval-card,
+  .workspace-info {
+    text-align: right;
+  }
+
+  /* ── Business Dashboard ────────────────────────────────────────── */
+  .dashboard-grid,
+  .chart-header,
+  .metric-card {
+    text-align: right;
+  }
+
+  .chart-header {
+    flex-direction: row-reverse;
+  }
+
+  /* ── Payment page ──────────────────────────────────────────────── */
+  .payment-container,
+  .payment-summary,
+  .payment-methods {
+    text-align: right;
+  }
+
+  .payment-summary {
+    flex-direction: row-reverse;
   }
 }

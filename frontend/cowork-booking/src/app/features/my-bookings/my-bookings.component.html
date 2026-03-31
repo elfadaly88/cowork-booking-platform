@@ -4,11 +4,11 @@
     <div class="page-header">
         <div class="header-content">
             <button class="back-btn" routerLink="/workspaces">
-                ← Back to Workspaces
+                ← {{ 'MY_BOOKINGS.BACK' | translate }}
             </button>
             <div class="header-title">
-                <h1>My Bookings</h1>
-                <p class="header-subtitle">Manage your workspace reservations</p>
+                <h1>{{ 'MY_BOOKINGS.TITLE' | translate }}</h1>
+                <p class="header-subtitle">{{ 'MY_BOOKINGS.SUBTITLE' | translate }}</p>
             </div>
         </div>
     </div>
@@ -25,28 +25,28 @@
             <div class="stat-icon">📅</div>
             <div class="stat-info">
                 <div class="stat-value">{{ totalBookings() }}</div>
-                <div class="stat-label">Total Bookings</div>
+                <div class="stat-label">{{ 'MY_BOOKINGS.TOTAL_BOOKINGS' | translate }}</div>
             </div>
         </div>
         <div class="stat-card stat-confirmed">
             <div class="stat-icon">✅</div>
             <div class="stat-info">
                 <div class="stat-value">{{ confirmedCount() }}</div>
-                <div class="stat-label">Confirmed</div>
+                <div class="stat-label">{{ 'MY_BOOKINGS.CONFIRMED' | translate }}</div>
             </div>
         </div>
         <div class="stat-card stat-completed">
             <div class="stat-icon">🏁</div>
             <div class="stat-info">
                 <div class="stat-value">{{ completedCount() }}</div>
-                <div class="stat-label">Completed</div>
+                <div class="stat-label">{{ 'MY_BOOKINGS.COMPLETED' | translate }}</div>
             </div>
         </div>
         <div class="stat-card stat-spent">
             <div class="stat-icon">💳</div>
             <div class="stat-info">
                 <div class="stat-value">{{ totalSpent() | currency:'EGP':'symbol':'1.0-0' }}</div>
-                <div class="stat-label">Total Spent</div>
+                <div class="stat-label">{{ 'MY_BOOKINGS.TOTAL_SPENT' | translate }}</div>
             </div>
         </div>
     </div>
@@ -54,29 +54,29 @@
     <!-- ─── Loading ──────────────────────────────────────────────────── -->
     <div class="loading-state" *ngIf="loading()">
         <div class="loading-spinner"></div>
-        <p>Loading your bookings...</p>
+        <p>{{ 'MY_BOOKINGS.LOADING' | translate }}</p>
     </div>
 
     <!-- ─── Error ────────────────────────────────────────────────────── -->
     <div class="error-state" *ngIf="error() && !loading()">
         <div class="error-icon">⚠️</div>
         <p>{{ error() }}</p>
-        <button class="retry-btn" (click)="loadBookings()">Try Again</button>
+        <button class="retry-btn" (click)="loadBookings()">{{ 'COMMON.RETRY' | translate }}</button>
     </div>
 
     <!-- ─── Filter Tabs ───────────────────────────────────────────────── -->
     <div class="filter-tabs" *ngIf="!loading() && !error()">
         <button class="tab-btn" [class.active]="filterStatus() === 'all'" (click)="filterStatus.set('all')">
-            All <span class="tab-count">{{ totalBookings() }}</span>
+            {{ 'MY_BOOKINGS.ALL' | translate }} <span class="tab-count">{{ totalBookings() }}</span>
         </button>
         <button class="tab-btn" [class.active]="filterStatus() === 'confirmed'" (click)="filterStatus.set('confirmed')">
-            Confirmed <span class="tab-count tab-confirmed">{{ confirmedCount() }}</span>
+            {{ 'MY_BOOKINGS.CONFIRMED' | translate }} <span class="tab-count tab-confirmed">{{ confirmedCount() }}</span>
         </button>
         <button class="tab-btn" [class.active]="filterStatus() === 'completed'" (click)="filterStatus.set('completed')">
-            Completed <span class="tab-count tab-completed">{{ completedCount() }}</span>
+            {{ 'MY_BOOKINGS.COMPLETED' | translate }} <span class="tab-count tab-completed">{{ completedCount() }}</span>
         </button>
         <button class="tab-btn" [class.active]="filterStatus() === 'cancelled'" (click)="filterStatus.set('cancelled')">
-            Cancelled <span class="tab-count tab-cancelled">{{ cancelledCount() }}</span>
+            {{ 'MY_BOOKINGS.CANCELLED' | translate }} <span class="tab-count tab-cancelled">{{ cancelledCount() }}</span>
         </button>
     </div>
 
@@ -86,10 +86,10 @@
         <!-- Empty state -->
         <div class="empty-state" *ngIf="filteredBookings().length === 0">
             <div class="empty-illustration">📭</div>
-            <h3>No bookings found</h3>
-            <p *ngIf="filterStatus() === 'all'">You haven't made any bookings yet.</p>
-            <p *ngIf="filterStatus() !== 'all'">No {{ filterStatus() }} bookings to show.</p>
-            <button class="find-space-btn" routerLink="/">Find a Workspace →</button>
+            <h3>{{ 'MY_BOOKINGS.NO_BOOKINGS' | translate }}</h3>
+            <p *ngIf="filterStatus() === 'all'">{{ 'MY_BOOKINGS.NO_BOOKINGS_YET' | translate }}</p>
+            <p *ngIf="filterStatus() !== 'all'">{{ 'MY_BOOKINGS.NO_STATUS_BOOKINGS' | translate }}</p>
+            <button class="find-space-btn" routerLink="/">{{ 'MY_BOOKINGS.FIND_WORKSPACE' | translate }} →</button>
         </div>
 
         <!-- Booking cards -->
@@ -97,12 +97,12 @@
             [class.past]="isPast(booking)" [class.cancelled]="booking.status === 'Cancelled'">
 
             <!-- Upcoming badge -->
-            <div class="upcoming-badge" *ngIf="isUpcoming(booking)">🔔 Upcoming</div>
+            <div class="upcoming-badge" *ngIf="isUpcoming(booking)">🔔 {{ 'MY_BOOKINGS.UPCOMING' | translate }}</div>
 
             <!-- Card Header -->
             <div class="booking-card-header">
                 <div class="workspace-info">
-                    <h3 class="workspace-name">{{ booking.workspaceName || 'Workspace' }}</h3>
+                    <h3 class="workspace-name">{{ booking.workspaceName || ('NAV.WORKSPACES' | translate) }}</h3>
                     <span class="workspace-city" *ngIf="booking.workspaceCity">
                         📍 {{ booking.workspaceCity }}
                     </span>
@@ -135,7 +135,7 @@
 
             <!-- Price -->
             <div class="booking-price">
-                <span class="price-label">Total Paid</span>
+                <span class="price-label">{{ 'MY_BOOKINGS.TOTAL_PAID' | translate }}</span>
                 <span class="price-value">{{ booking.totalPrice | currency:'EGP':'symbol' }}</span>
             </div>
 
@@ -143,33 +143,33 @@
             <div class="cancellation-info" *ngIf="booking.status === 'Cancelled'">
                 <span class="cancel-icon">ℹ️</span>
                 <div>
-                    <span class="cancel-label">Cancelled on {{ booking.cancelledAt | date:'MMM d, y' }}</span>
+                    <span class="cancel-label">{{ 'MY_BOOKINGS.CANCELLED_ON' | translate }} {{ booking.cancelledAt | date:'MMM d, y' }}</span>
                     <span class="cancel-reason" *ngIf="booking.cancellationReason">
-                        Reason: "{{ booking.cancellationReason }}"
+                        {{ 'MY_BOOKINGS.REASON' | translate }} "{{ booking.cancellationReason }}"
                     </span>
                 </div>
             </div>
 
             <!-- Booking reference -->
             <div class="booking-ref">
-                Booking #{{ booking.id }} · Booked {{ booking.createdAt | date:'MMM d' }}
+                {{ 'MY_BOOKINGS.BOOKING_REF' | translate }} #{{ booking.id }} · {{ 'MY_BOOKINGS.BOOKED' | translate }} {{ booking.createdAt | date:'MMM d' }}
             </div>
 
             <!-- Actions -->
             <div class="booking-actions">
                 <button class="action-btn view-btn" *ngIf="booking.workspaceId"
                     (click)="viewWorkspace(booking.workspaceId!)">
-                    View Workspace
+                    {{ 'MY_BOOKINGS.VIEW_WORKSPACE' | translate }}
                 </button>
                 <button class="action-btn rebook-btn"
                     *ngIf="booking.status === 'Completed' || booking.status === 'Cancelled'"
                     (click)="rebookRoom(booking)">
-                    Book Again
+                    {{ 'MY_BOOKINGS.BOOK_AGAIN' | translate }}
                 </button>
                 <button class="action-btn cancel-btn" *ngIf="canCancel(booking)"
                     [disabled]="cancellingId() === booking.id" (click)="openCancelDialog(booking.id)">
-                    <span *ngIf="cancellingId() !== booking.id">Cancel Booking</span>
-                    <span *ngIf="cancellingId() === booking.id">Cancelling...</span>
+                    <span *ngIf="cancellingId() !== booking.id">{{ 'MY_BOOKINGS.CANCEL_BOOKING' | translate }}</span>
+                    <span *ngIf="cancellingId() === booking.id">{{ 'MY_BOOKINGS.CANCELLING' | translate }}</span>
                 </button>
             </div>
 
@@ -181,20 +181,20 @@
         <div class="dialog-box" (click)="$event.stopPropagation()">
             <div class="dialog-header">
                 <span class="dialog-icon">⚠️</span>
-                <h3>Cancel Booking?</h3>
+                <h3>{{ 'MY_BOOKINGS.CANCEL_CONFIRM_TITLE' | translate }}</h3>
             </div>
-            <p class="dialog-text">Are you sure you want to cancel this booking? This action cannot be undone.</p>
+            <p class="dialog-text">{{ 'MY_BOOKINGS.CANCEL_CONFIRM_DESC' | translate }}</p>
 
             <div class="dialog-field">
-                <label for="cancel-reason">Reason (optional)</label>
-                <textarea id="cancel-reason" [(ngModel)]="cancelReason" placeholder="Tell us why you're cancelling..."
+                <label for="cancel-reason">{{ 'MY_BOOKINGS.CANCEL_REASON' | translate }}</label>
+                <textarea id="cancel-reason" [(ngModel)]="cancelReason" [placeholder]="'MY_BOOKINGS.CANCEL_REASON_PLACEHOLDER' | translate"
                     rows="3">
         </textarea>
             </div>
 
             <div class="dialog-actions">
-                <button class="dialog-btn dialog-keep" (click)="closeCancelDialog()">Keep Booking</button>
-                <button class="dialog-btn dialog-cancel" (click)="confirmCancel()">Yes, Cancel</button>
+                <button class="dialog-btn dialog-keep" (click)="closeCancelDialog()">{{ 'MY_BOOKINGS.KEEP_BOOKING' | translate }}</button>
+                <button class="dialog-btn dialog-cancel" (click)="confirmCancel()">{{ 'MY_BOOKINGS.YES_CANCEL' | translate }}</button>
             </div>
         </div>
     </div>

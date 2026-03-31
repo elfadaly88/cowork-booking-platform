@@ -5,27 +5,27 @@
     <div class="nav-inner">
       <div class="nav-brand" routerLink="/">
         <span class="brand-icon">🏢</span>
-        <span class="brand-name">CoworkHub</span>
+        <span class="brand-name">{{ 'COMMON.BRAND' | translate }}</span>
       </div>
       <nav class="nav-links">
-        <button class="nav-link-btn active">Browse</button>
-        <button class="nav-link-btn" (click)="goToMyBookings()">My Bookings</button>
+        <button class="nav-link-btn active">{{ 'NAV.BROWSE' | translate }}</button>
+        <button class="nav-link-btn" (click)="goToMyBookings()">{{ 'NAV.MY_BOOKINGS' | translate }}</button>
         <button class="nav-link-btn" (click)="goToProfile()">
-          {{ currentUser()?.firstName || 'Profile' }}
+          {{ currentUser()?.firstName || ('NAV.PROFILE' | translate) }}
         </button>
-        <button class="nav-link-btn logout-btn" (click)="logout()">Sign Out</button>
+        <button class="nav-link-btn logout-btn" (click)="logout()">{{ 'NAV.SIGN_OUT' | translate }}</button>
       </nav>
     </div>
   </header>
 
   <!-- ─── Search Hero ──────────────────────────────────────────────────── -->
   <div class="search-hero">
-    <h1 class="search-title">Find Your Perfect Workspace</h1>
-    <p class="search-subtitle">{{ filteredWorkspaces().length }} spaces available across {{ cities().length }} cities
+    <h1 class="search-title">{{ 'HOME.TITLE' | translate }}</h1>
+    <p class="search-subtitle">{{ 'HOME.SPACES_AVAILABLE' | translate:{ count: filteredWorkspaces().length, cities: cities().length } }}
     </p>
     <div class="search-bar">
       <span class="search-icon">🔍</span>
-      <input type="text" class="search-input" placeholder="Search by name, city, or description..."
+      <input type="text" class="search-input" [placeholder]="'HOME.SEARCH_PLACEHOLDER' | translate"
         [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)" id="workspace-search" />
       <button class="search-clear" *ngIf="searchQuery()" (click)="searchQuery.set('')">✕</button>
     </div>
@@ -37,55 +37,55 @@
 
       <!-- City Filter -->
       <div class="filter-group">
-        <label>📍 City</label>
+        <label>📍 {{ 'HOME.CITY_FILTER' | translate }}</label>
         <select [value]="selectedCity()" (change)="selectedCity.set($any($event.target).value)" id="city-filter">
-          <option value="">All Cities</option>
+          <option value="">{{ 'HOME.ALL_CITIES' | translate }}</option>
           <option *ngFor="let city of cities()" [value]="city">{{ city }}</option>
         </select>
       </div>
 
       <!-- Max Price Filter -->
       <div class="filter-group">
-        <label>EGP Max Price/hr</label>
+        <label>{{ 'COMMON.EGP' | translate }} {{ 'HOME.MAX_PRICE' | translate }}</label>
         <select id="price-filter" [value]="selectedMaxPrice() ?? ''"
           (change)="selectedMaxPrice.set($any($event.target).value ? +$any($event.target).value : null)">
-          <option value="">Any Price</option>
-          <option value="25">Up to EGP 25</option>
-          <option value="50">Up to EGP 50</option>
-          <option value="100">Up to EGP 100</option>
-          <option value="200">Up to EGP 200</option>
+          <option value="">{{ 'HOME.ANY_PRICE' | translate }}</option>
+          <option value="25">{{ 'HOME.UP_TO_25' | translate }}</option>
+          <option value="50">{{ 'HOME.UP_TO_50' | translate }}</option>
+          <option value="100">{{ 'HOME.UP_TO_100' | translate }}</option>
+          <option value="200">{{ 'HOME.UP_TO_200' | translate }}</option>
         </select>
       </div>
 
       <!-- Min Capacity Filter -->
       <div class="filter-group">
-        <label>👥 Min Seats</label>
+        <label>👥 {{ 'HOME.MIN_SEATS' | translate }}</label>
         <select id="capacity-filter" [value]="selectedMinCapacity() ?? ''"
           (change)="selectedMinCapacity.set($any($event.target).value ? +$any($event.target).value : null)">
-          <option value="">Any Size</option>
-          <option value="1">1+ person</option>
-          <option value="4">4+ people</option>
-          <option value="8">8+ people</option>
-          <option value="20">20+ people</option>
+          <option value="">{{ 'HOME.ANY_SIZE' | translate }}</option>
+          <option value="1">{{ 'HOME.1_PLUS' | translate }}</option>
+          <option value="4">{{ 'HOME.4_PLUS' | translate }}</option>
+          <option value="8">{{ 'HOME.8_PLUS' | translate }}</option>
+          <option value="20">{{ 'HOME.20_PLUS' | translate }}</option>
         </select>
       </div>
 
       <!-- Sort -->
       <div class="filter-group">
-        <label>↕ Sort By</label>
+        <label>↕ {{ 'HOME.SORT_BY' | translate }}</label>
         <select id="sort-filter" [value]="sortBy()" (change)="sortBy.set($any($event.target).value)">
-          <option value="name">Name A–Z</option>
-          <option value="distance">Nearest</option>
-          <option value="price">Lowest Price</option>
-          <option value="rating">Top Rated</option>
-          <option value="rooms">Most Rooms</option>
+          <option value="name">{{ 'HOME.SORT_NAME' | translate }}</option>
+          <option value="distance">{{ 'HOME.SORT_NEAREST' | translate }}</option>
+          <option value="price">{{ 'HOME.SORT_LOWEST_PRICE' | translate }}</option>
+          <option value="rating">{{ 'HOME.SORT_TOP_RATED' | translate }}</option>
+          <option value="rooms">{{ 'HOME.SORT_MOST_ROOMS' | translate }}</option>
         </select>
       </div>
 
       <!-- Clear + View Mode -->
       <div class="filter-actions">
         <button class="clear-btn" *ngIf="hasActiveFilters()" (click)="clearFilters()">
-          ✕ Clear Filters
+          ✕ {{ 'HOME.CLEAR_FILTERS' | translate }}
         </button>
         <div class="view-toggle">
           <button class="view-btn" [class.active]="viewMode() === 'grid'" (click)="viewMode.set('grid')"
@@ -103,23 +103,23 @@
     <!-- Loading -->
     <div class="state-center" *ngIf="loading()">
       <div class="spinner-ring"></div>
-      <p>Finding workspaces for you...</p>
+      <p>{{ 'HOME.FINDING_WORKSPACES' | translate }}</p>
     </div>
 
     <!-- Error -->
     <div class="state-center error-state" *ngIf="error() && !loading()">
       <span class="state-icon">⚠️</span>
-      <h3>Connection Error</h3>
+      <h3>{{ 'HOME.CONNECTION_ERROR' | translate }}</h3>
       <p>{{ error() }}</p>
-      <button class="retry-btn" (click)="loadWorkspaces()">🔄 Retry</button>
+      <button class="retry-btn" (click)="loadWorkspaces()">🔄 {{ 'COMMON.RETRY' | translate }}</button>
     </div>
 
     <!-- Results info -->
     <div class="results-bar" *ngIf="!loading() && !error()">
       <span class="results-count">
         <strong>{{ filteredWorkspaces().length }}</strong> workspace{{ filteredWorkspaces().length !== 1 ? 's' : '' }}
-        found
-        <span *ngIf="hasActiveFilters()" class="filtered-label"> (filtered)</span>
+        {{ 'HOME.FILTERED' | translate }}
+        <span *ngIf="hasActiveFilters()" class="filtered-label"> ({{ 'HOME.FILTERED' | translate }})</span>
       </span>
     </div>
 
@@ -129,8 +129,8 @@
       <!-- Empty State -->
       <div class="no-results" *ngIf="filteredWorkspaces().length === 0">
         <div class="no-results-icon">🔍</div>
-        <h3>No workspaces match your filters</h3>
-        <p>Try adjusting your search or <button class="link-btn" (click)="clearFilters()">clear all filters</button></p>
+        <h3>{{ 'HOME.NO_MATCH' | translate }}</h3>
+        <p>{{ 'HOME.NO_MATCH_DESC' | translate }} <button class="link-btn" (click)="clearFilters()">{{ 'HOME.CLEAR_ALL_FILTERS' | translate }}</button></p>
       </div>
 
       <!-- Workspace Card -->
@@ -162,16 +162,16 @@
           <!-- Stats chips -->
           <div class="card-stats">
             <span class="stat-chip">
-              🚪 {{ ws.rooms?.length || 0 }} rooms
+              🚪 {{ ws.rooms?.length || 0 }} {{ 'COMMON.ROOMS' | translate }}
             </span>
             <span class="stat-chip" *ngIf="getTotalSeats(ws)">
-              👥 {{ getTotalSeats(ws) }} seats
+              👥 {{ getTotalSeats(ws) }} {{ 'COMMON.SEATS' | translate }}
             </span>
             <span class="stat-chip price-chip" *ngIf="getMinPrice(ws) !== null">
-              EGP {{ getMinPrice(ws) }}/hr (from)
+              {{ 'COMMON.EGP' | translate }} {{ getMinPrice(ws) }}{{ 'COMMON.PER_HOUR' | translate }} ({{ 'HOME.FROM' | translate }})
             </span>
             <span class="stat-chip review-chip" *ngIf="ws.totalReviews">
-              {{ ws.totalReviews }} reviews
+              {{ ws.totalReviews }} {{ 'COMMON.REVIEWS' | translate }}
             </span>
             <span class="stat-chip distance-chip" *ngIf="ws.distance !== undefined">
               🚗 {{ ws.distance | number:'1.0-1' }} km
@@ -185,7 +185,7 @@
             🏢 {{ ws.address }}
           </span>
           <button class="view-btn-card" (click)="viewWorkspace(ws.id!); $event.stopPropagation()">
-            View Details →
+            {{ 'HOME.VIEW_DETAILS' | translate }} →
           </button>
         </div>
 

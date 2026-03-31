@@ -4,11 +4,12 @@ import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } fr
 import { Router } from '@angular/router';
 import { WorkspaceService } from '../../core/services/workspace.service';
 import { Workspace, WorkspaceSchedulePeriod, WorkspaceSchedule } from '../../core/models/workspace.model';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-schedule-management',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslateModule],
   templateUrl: './schedule-management.component.html',
   styleUrls: ['./schedule-management.component.scss']
 })

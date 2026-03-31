@@ -6,17 +6,17 @@
   <!-- List View -->
   <div *ngIf="viewMode() === 'list'" class="workspace-list-view">
     <div class="header">
-      <h2>Workspace Management</h2>
-      <button class="btn btn-primary" (click)="addNewWorkspace()">Add New Workspace</button>
+      <h2>{{ 'ADMIN.WORKSPACE_MANAGEMENT' | translate }}</h2>
+      <button class="btn btn-primary" (click)="addNewWorkspace()">{{ 'ADMIN.ADD_WORKSPACE' | translate }}</button>
     </div>
 
     <div *ngIf="loading()" class="loading-container">
       <div class="spinner"></div>
-      <p>Loading workspaces...</p>
+      <p>{{ 'ADMIN.LOADING_WORKSPACES' | translate }}</p>
     </div>
 
     <div *ngIf="!loading() && workspaces().length === 0" class="empty-state">
-      <p>No workspaces found. Click "Add New Workspace" to create one.</p>
+      <p>{{ 'ADMIN.NO_WORKSPACES_FOUND_DESC' | translate }}</p>
     </div>
 
     <div *ngIf="!loading() && workspaces().length > 0" class="workspace-grid">
@@ -25,7 +25,7 @@
         <p class="location">{{ workspace.city }}, {{ workspace.address }}</p>
         <p class="description">{{ workspace.description }}</p>
         <div class="rooms-info">
-          <span class="room-count">{{ workspace.rooms?.length || 0 }} Rooms</span>
+          <span class="room-count">{{ workspace.rooms?.length || 0 }} {{ 'COMMON.ROOMS' | translate }}</span>
         </div>
       </div>
     </div>

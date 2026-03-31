@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { User } from '../../core/models/auth.model';
 import Swal from 'sweetalert2';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-owner-approval',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './owner-approval.component.html',
   styleUrls: ['./owner-approval.component.scss']
 })

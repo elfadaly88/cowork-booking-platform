@@ -1,7 +1,7 @@
 <div class="workspace-form-container">
   <div class="header">
-    <h2>{{ isEditMode() ? '✏️ Edit Workspace' : '➕ Create New Workspace' }}</h2>
-    <p class="subtitle">{{ isEditMode() ? 'Update your workspace details' : 'Add a new coworking space with rooms and equipment' }}</p>
+    <h2>{{ isEditMode() ? ('OWNER.EDIT_WORKSPACE' | translate) : ('OWNER.CREATE_WORKSPACE' | translate) }}</h2>
+    <p class="subtitle">{{ isEditMode() ? ('OWNER.EDIT_DESC' | translate) : ('OWNER.CREATE_DESC' | translate) }}</p>
   </div>
 
   @if (successMessage()) {
@@ -21,116 +21,116 @@
   <form [formGroup]="workspaceForm" (ngSubmit)="onSubmit()" class="form">
     <!-- Basic Information -->
     <div class="form-section">
-      <h3 class="section-title">📍 Basic Information</h3>
+      <h3 class="section-title">📍 {{ 'OWNER.BASIC_INFO' | translate }}</h3>
 
       <div class="form-row">
         <div class="form-group">
-          <label for="name">Workspace Name *</label>
+          <label for="name">{{ 'OWNER.WORKSPACE_NAME' | translate }} *</label>
           <input
             id="name"
             type="text"
             formControlName="name"
-            placeholder="e.g., Downtown Coworking Hub"
+            [placeholder]="'OWNER.WORKSPACE_NAME_PLACEHOLDER' | translate"
             [class.invalid]="isFieldInvalid('name')"
           />
           @if (isFieldInvalid('name')) {
-            <span class="error-text">Workspace name is required</span>
+            <span class="error-text">{{ 'OWNER.WORKSPACE_NAME_REQUIRED' | translate }}</span>
           }
         </div>
 
         <div class="form-group">
-          <label for="city">City *</label>
+          <label for="city">{{ 'OWNER.CITY' | translate }} *</label>
           <input
             id="city"
             type="text"
             formControlName="city"
-            placeholder="e.g., Cairo"
+            [placeholder]="'OWNER.CITY_PLACEHOLDER' | translate"
             [class.invalid]="isFieldInvalid('city')"
           />
           @if (isFieldInvalid('city')) {
-            <span class="error-text">City is required</span>
+            <span class="error-text">{{ 'OWNER.CITY_REQUIRED' | translate }}</span>
           }
         </div>
       </div>
 
       <div class="form-group">
-        <label for="description">Description *</label>
+        <label for="description">{{ 'OWNER.DESCRIPTION_LABEL' | translate }} *</label>
         <textarea
           id="description"
           formControlName="description"
           rows="3"
-          placeholder="Describe your workspace..."
+          [placeholder]="'OWNER.DESCRIPTION_PLACEHOLDER' | translate"
           [class.invalid]="isFieldInvalid('description')"
         ></textarea>
         @if (isFieldInvalid('description')) {
-          <span class="error-text">Description is required</span>
+          <span class="error-text">{{ 'OWNER.DESCRIPTION_REQUIRED' | translate }}</span>
         }
       </div>
 
       <div class="form-group">
-        <label for="address">Address *</label>
+        <label for="address">{{ 'OWNER.ADDRESS' | translate }} *</label>
         <input
           id="address"
           type="text"
           formControlName="address"
-          placeholder="e.g., 123 Main Street"
+          [placeholder]="'OWNER.ADDRESS_PLACEHOLDER' | translate"
           [class.invalid]="isFieldInvalid('address')"
         />
         @if (isFieldInvalid('address')) {
-          <span class="error-text">Address is required</span>
+          <span class="error-text">{{ 'OWNER.ADDRESS_REQUIRED' | translate }}</span>
         }
       </div>
 
       <div class="form-group map-group">
-        <label>Location on Map *</label>
+        <label>{{ 'OWNER.LOCATION_ON_MAP' | translate }} *</label>
         <app-map-location-picker
           [initialLatitude]="workspaceForm.get('latitude')?.value"
           [initialLongitude]="workspaceForm.get('longitude')?.value"
           (locationSelected)="onLocationSelected($event)">
         </app-map-location-picker>
         @if (isFieldInvalid('latitude') || isFieldInvalid('longitude')) {
-          <span class="error-text" style="display: block; margin-top: 5px;">Please pick the location on the map.</span>
+          <span class="error-text" style="display: block; margin-top: 5px;">{{ 'OWNER.PICK_LOCATION' | translate }}</span>
         }
       </div>
     </div>
 
     <div class="form-section">
-      <h3 class="section-title">💳 Workspace Subscription</h3>
+      <h3 class="section-title">💳 {{ 'OWNER.SUBSCRIPTION' | translate }}</h3>
 
       <div class="subscription-card">
         <div>
-          <div class="subscription-label">Monthly listing fee</div>
-          <div class="subscription-price">EGP 1000 / month</div>
-          <p class="subscription-note">Owner workspaces cannot be approved until this subscription fee is paid.</p>
+          <div class="subscription-label">{{ 'OWNER.MONTHLY_FEE' | translate }}</div>
+          <div class="subscription-price">{{ 'OWNER.FEE_AMOUNT' | translate }}</div>
+          <p class="subscription-note">{{ 'OWNER.FEE_NOTE' | translate }}</p>
         </div>
 
         @if (!isEditMode()) {
           <div class="form-group payment-method-group">
-            <label for="approvalPaymentMethodId">Payment Method *</label>
+            <label for="approvalPaymentMethodId">{{ 'OWNER.PAYMENT_METHOD' | translate }} *</label>
             <select
               id="approvalPaymentMethodId"
               formControlName="approvalPaymentMethodId"
               [class.invalid]="isFieldInvalid('approvalPaymentMethodId')">
-              <option [ngValue]="null">Select a payment method</option>
+              <option [ngValue]="null">{{ 'OWNER.SELECT_PAYMENT' | translate }}</option>
               @for (method of paymentMethods(); track method.id) {
                 <option [ngValue]="method.id">{{ method.name }}</option>
               }
             </select>
             @if (isFieldInvalid('approvalPaymentMethodId')) {
-              <span class="error-text">Payment method is required</span>
+              <span class="error-text">{{ 'OWNER.PAYMENT_METHOD_REQUIRED' | translate }}</span>
             }
           </div>
         } @else {
           <div class="subscription-status-box">
-            <span class="subscription-status-label">Selected method</span>
-            <strong>{{ selectedPaymentMethodName || 'Not selected yet' }}</strong>
+            <span class="subscription-status-label">{{ 'OWNER.SELECTED_METHOD' | translate }}</span>
+            <strong>{{ selectedPaymentMethodName || ('OWNER.NOT_SELECTED_YET' | translate) }}</strong>
           </div>
         }
       </div>
 
       @if (!isEditMode() && selectedPaymentMethodName === 'Cash') {
         <div class="payment-warning">
-          Cash payment will stay pending until an admin confirms receiving the monthly workspace fee.
+          {{ 'OWNER.CASH_NOTE' | translate }}
         </div>
       }
     </div>
@@ -138,9 +138,9 @@
     <!-- Rooms Section -->
     <div class="form-section">
       <div class="section-header">
-        <h3 class="section-title">🚪 Rooms</h3>
+        <h3 class="section-title">🚪 {{ 'OWNER.ROOMS_SECTION' | translate }}</h3>
         <button type="button" class="btn-add-room" (click)="addRoom()">
-          ➕ Add Room
+          ➕ {{ 'OWNER.ADD_ROOM' | translate }}
         </button>
       </div>
 
@@ -148,7 +148,7 @@
         @for (room of rooms.controls; track room; let roomIndex = $index) {
           <div [formGroupName]="roomIndex" class="room-card">
             <div class="room-header">
-              <h4>Room {{ roomIndex + 1 }}</h4>
+              <h4>{{ 'COMMON.ROOMS' | translate }} {{ roomIndex + 1 }}</h4>
               <button type="button" class="btn-remove" (click)="removeRoom(roomIndex)" title="Remove Room">
                 🗑️
               </button>
@@ -156,17 +156,17 @@
 
             <div class="form-row">
               <div class="form-group">
-                <label>Room Name *</label>
+                <label>{{ 'OWNER.ROOM_NAME' | translate }} *</label>
                 <input
                   type="text"
                   formControlName="name"
-                  placeholder="e.g., Meeting Room A"
+                  [placeholder]="'OWNER.ROOM_NAME_PLACEHOLDER' | translate"
                   [class.invalid]="isRoomFieldInvalid(roomIndex, 'name')"
                 />
               </div>
 
               <div class="form-group">
-                <label>Capacity *</label>
+                <label>{{ 'OWNER.CAPACITY' | translate }} *</label>
                 <input
                   type="number"
                   formControlName="capacity"
@@ -177,7 +177,7 @@
               </div>
 
               <div class="form-group">
-                <label>Price/Hour (EGP) *</label>
+                <label>{{ 'OWNER.PRICE_PER_HOUR' | translate }} *</label>
                 <input
                   type="number"
                   formControlName="pricePerHour"
@@ -192,9 +192,9 @@
             <!-- Devices for this room -->
             <div class="devices-section">
               <div class="devices-header">
-                <h5>📱 Devices (Optional)</h5>
+                <h5>📱 {{ 'OWNER.DEVICES_SECTION' | translate }}</h5>
                 <button type="button" class="btn-add-device" (click)="addDevice(roomIndex)">
-                  ➕ Add Device
+                  ➕ {{ 'OWNER.ADD_DEVICE' | translate }}
                 </button>
               </div>
 
@@ -205,7 +205,7 @@
                       <input
                         type="text"
                         formControlName="name"
-                        placeholder="Device name (e.g., Projector)"
+                        [placeholder]="'OWNER.DEVICE_NAME_PLACEHOLDER' | translate"
                         [class.invalid]="isDeviceFieldInvalid(roomIndex, deviceIdx, 'name')"
                       />
                     </div>
@@ -216,7 +216,7 @@
                         formControlName="extraCostPerHour"
                         min="0"
                         step="0.01"
-                        placeholder="Extra cost/hr"
+                        [placeholder]="'OWNER.EXTRA_COST' | translate"
                         [class.invalid]="isDeviceFieldInvalid(roomIndex, deviceIdx, 'extraCostPerHour')"
                       />
                     </div>
@@ -228,7 +228,7 @@
                 }
 
                 @if (getDevices(roomIndex).length === 0) {
-                  <p class="no-devices">No devices added yet</p>
+                  <p class="no-devices">{{ 'OWNER.NO_DEVICES' | translate }}</p>
                 }
               </div>
             </div>
@@ -240,14 +240,14 @@
     <!-- Form Actions -->
     <div class="form-actions">
       <button type="button" class="btn btn-cancel" (click)="cancel()" [disabled]="loading()">
-        Cancel
+        {{ 'COMMON.CANCEL' | translate }}
       </button>
       <button type="submit" class="btn btn-submit" [disabled]="loading() || workspaceForm.invalid">
         @if (loading()) {
           <span class="spinner-small"></span>
-          <span>Saving...</span>
+          <span>{{ 'COMMON.SAVING' | translate }}</span>
         } @else {
-          <span>{{ isEditMode() ? 'Update Workspace' : 'Create Workspace' }}</span>
+          <span>{{ isEditMode() ? ('OWNER.UPDATE_WORKSPACE' | translate) : ('OWNER.CREATE_WORKSPACE_BTN' | translate) }}</span>
         }
       </button>
     </div>

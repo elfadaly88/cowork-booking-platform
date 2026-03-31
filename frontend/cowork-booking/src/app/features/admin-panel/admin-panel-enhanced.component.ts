@@ -8,11 +8,12 @@ import { Workspace, CreateWorkspaceDto, UpdateWorkspaceDto } from '../../core/mo
 import { catchError, throwError } from 'rxjs';
 import { MapPickerComponent } from '../../shared/components/map-picker.component';
 import Swal from 'sweetalert2';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-admin-panel-enhanced',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, MapPickerComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, MapPickerComponent, TranslateModule],
   templateUrl: './admin-panel-enhanced.component.html',
   styleUrls: ['./admin-panel-enhanced.component.scss']
 })

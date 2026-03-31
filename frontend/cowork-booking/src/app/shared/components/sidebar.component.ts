@@ -1,66 +1,71 @@
 import { Component, inject, HostBinding, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from '../../core/services/auth.service';
+import { LanguageService } from '../../core/services/language.service';
 import { Subscription, filter } from 'rxjs';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslateModule],
   template: `
     <aside class="sidebar" [class.collapsed]="isCollapsed">
       <div class="sidebar-top">
         <button class="collapse-btn" (click)="toggleCollapse()" aria-label="Toggle sidebar">
-          <span *ngIf="!isCollapsed">⬅️</span>
-          <span *ngIf="isCollapsed">➡️</span>
+          <span *ngIf="!isCollapsed" class="collapse-icon">◀</span>
+          <span *ngIf="isCollapsed" class="collapse-icon">▶</span>
         </button>
         <a routerLink="/" class="brand" *ngIf="!isCollapsed">
           <span class="brand-icon">🏢</span>
-          <span class="brand-text">Cowork Booking</span>
+          <span class="brand-text">{{ 'COMMON.BRAND' | translate }}</span>
         </a>
       </div>
 
       <nav class="sidebar-nav">
         <a routerLink="/" routerLinkActive="active" class="nav-item">
           <span class="icon">🏠</span>
-          <span class="label" *ngIf="!isCollapsed">Home</span>
+          <span class="label" *ngIf="!isCollapsed">{{ 'NAV.HOME' | translate }}</span>
         </a>
 
         <a routerLink="/workspaces" routerLinkActive="active" class="nav-item" *ngIf="auth.isAuthenticated()">
           <span class="icon">📋</span>
-          <span class="label" *ngIf="!isCollapsed">Workspaces</span>
+          <span class="label" *ngIf="!isCollapsed">{{ 'NAV.WORKSPACES' | translate }}</span>
         </a>
 
         <a routerLink="/owner/dashboard" routerLinkActive="active" class="nav-item" *ngIf="auth.isOwner()">
           <span class="icon">🏢</span>
-          <span class="label" *ngIf="!isCollapsed">My Workspaces</span>
+          <span class="label" *ngIf="!isCollapsed">{{ 'NAV.MY_WORKSPACES' | translate }}</span>
         </a>
 
         <a routerLink="/business-dashboard" routerLinkActive="active" class="nav-item" *ngIf="auth.hasAnyRole(['Owner', 'Admin'])">
           <span class="icon">📈</span>
-          <span class="label" *ngIf="!isCollapsed">Business Dashboard</span>
+          <span class="label" *ngIf="!isCollapsed">{{ 'NAV.BUSINESS_DASHBOARD' | translate }}</span>
         </a>
 
         <a routerLink="/admin" routerLinkActive="active" class="nav-item" *ngIf="auth.isAdmin()">
           <span class="icon">⚙️</span>
-          <span class="label" *ngIf="!isCollapsed">Admin Panel</span>
+          <span class="label" *ngIf="!isCollapsed">{{ 'NAV.ADMIN_PANEL' | translate }}</span>
         </a>
 
         <a routerLink="/profile" routerLinkActive="active" class="nav-item" *ngIf="auth.isAuthenticated()">
           <span class="icon">👤</span>
-          <span class="label" *ngIf="!isCollapsed">Profile</span>
+          <span class="label" *ngIf="!isCollapsed">{{ 'NAV.PROFILE' | translate }}</span>
         </a>
 
         <a routerLink="/login" class="nav-item" *ngIf="!auth.isAuthenticated()">
           <span class="icon">🔐</span>
-          <span class="label" *ngIf="!isCollapsed">Login</span>
+          <span class="label" *ngIf="!isCollapsed">{{ 'NAV.LOGIN' | translate }}</span>
         </a>
 
       </nav>
 
       <div class="sidebar-footer" *ngIf="!isCollapsed">
-        <button class="logout-small" (click)="logout()" *ngIf="auth.isAuthenticated()">🚪 Logout</button>
+        <button class="lang-toggle" (click)="langService.toggleLanguage()">
+          🌐 {{ langService.currentLanguage() === 'en' ? 'عربي' : 'English' }}
+        </button>
+        <button class="logout-small" (click)="logout()" *ngIf="auth.isAuthenticated()">🚪 {{ 'COMMON.LOGOUT' | translate }}</button>
       </div>
     </aside>
   `,
@@ -150,9 +155,9 @@ import { Subscription, filter } from 'rxjs';
     }
 
     .nav-item.active {
-      background-color: #e11d48;
+      background-color: #2563eb;
       color: #fff;
-      box-shadow: 0 4px 12px rgba(37,99,235,0.12);
+      box-shadow: 0 4px 12px rgba(37,99,235,0.25);
     }
 
     .label { font-size: 0.9rem; }
@@ -167,10 +172,44 @@ import { Subscription, filter } from 'rxjs';
       padding: 0.5rem;
       border-radius: 8px;
       border: none;
-      background-color: #e11d48;
+      background-color: #dc2626;
       color: #fff;
       font-weight: 700;
       cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .logout-small:hover {
+      background-color: #b91c1c;
+    }
+
+    .lang-toggle {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      background: #f1f5f9;
+      color: #172554;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+      transition: background 0.2s;
+      font-family: 'Inter', 'Cairo', sans-serif;
+    }
+
+    .lang-toggle:hover {
+      background: #e2e8f0;
+    }
+
+    .collapse-icon {
+      display: inline-block;
+      font-size: 0.75rem;
+      line-height: 1;
+    }
+
+    :host-context([dir="rtl"]) .collapse-icon {
+      transform: scaleX(-1);
     }
 
     @media (max-width: 768px) {
@@ -178,11 +217,37 @@ import { Subscription, filter } from 'rxjs';
       .sidebar.collapsed { transform: translateX(-100%); }
       :host(.collapsed) .sidebar { transform: translateX(-100%); }
     }
+
+    :host-context([dir="rtl"]) .sidebar {
+      left: auto;
+      right: 0;
+      border-right: none;
+      border-left: 1px solid rgba(30,41,59,0.06);
+    }
+
+    :host-context([dir="rtl"]) .brand {
+      padding-left: 0;
+      padding-right: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+      :host-context([dir="rtl"]) .sidebar {
+        right: 0;
+        left: auto;
+      }
+      :host-context([dir="rtl"]) .sidebar.collapsed {
+        transform: translateX(100%);
+      }
+      :host-context([dir="rtl"]):host(.collapsed) .sidebar {
+        transform: translateX(100%);
+      }
+    }
     `
   ]
 })
 export class SidebarComponent implements OnInit, OnDestroy {
   auth = inject(AuthService);
+  langService = inject(LanguageService);
   private router = inject(Router);
   isCollapsed = false;
   private routerSub?: Subscription;

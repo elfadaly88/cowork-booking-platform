@@ -84,7 +84,7 @@ interface SearchResult {
     }
 
     .map-header {
-      background-color: #0f172a;
+      background-color: #172554;
       color: white;
       padding: 1rem 1.5rem;
     }
@@ -123,14 +123,14 @@ interface SearchResult {
 
       &:focus {
         outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
       }
     }
 
     .search-button {
       padding: 0.75rem 1.5rem;
-      background-color: #0f172a;
+      background-color: #2563eb;
       color: white;
       border: none;
       border-radius: 8px;
@@ -141,7 +141,7 @@ interface SearchResult {
 
       &:hover:not(:disabled) {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
       }
 
       &:disabled {
@@ -293,7 +293,7 @@ export class MapPickerComponent implements OnInit, AfterViewInit, OnDestroy, OnC
       html: `
         <svg width="32" height="48" viewBox="0 0 32 48" xmlns="http://www.w3.org/2000/svg">
           <path d="M16 0C7.163 0 0 7.163 0 16c0 13 16 32 16 32s16-19 16-32c0-8.837-7.163-16-16-16z"
-                fill="#667eea" stroke="#fff" stroke-width="2"/>
+                fill="#2563eb" stroke="#fff" stroke-width="2"/>
           <circle cx="16" cy="16" r="6" fill="#fff"/>
         </svg>
       `,

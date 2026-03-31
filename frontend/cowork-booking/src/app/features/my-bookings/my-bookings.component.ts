@@ -5,11 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { BookingService } from '../../core/services/booking.service';
 import { AuthService } from '../../core/services/auth.service';
 import { BookingResponse, BookingStatus } from '../../core/models/booking.model';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-my-bookings',
     standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule],
+    imports: [CommonModule, RouterModule, FormsModule, TranslateModule],
     templateUrl: './my-bookings.component.html',
     styleUrls: ['./my-bookings.component.scss']
 })

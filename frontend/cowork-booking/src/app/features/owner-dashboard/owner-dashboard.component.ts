@@ -8,11 +8,12 @@ import { Workspace } from '../../core/models/workspace.model';
 import { BookingResponse } from '../../core/models/booking.model';
 import { Subscription, interval } from 'rxjs';
 import Swal from 'sweetalert2';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-owner-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslateModule],
   templateUrl: './owner-dashboard.component.html',
   styleUrls: ['./owner-dashboard.component.scss']
 })

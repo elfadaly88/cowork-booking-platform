@@ -3,31 +3,31 @@
 
   <header class="hero">
     <div>
-      <p class="eyebrow">Growth command center</p>
-      <h1>Business Dashboard</h1>
+      <p class="eyebrow">{{ 'BUSINESS.EYEBROW' | translate }}</p>
+      <h1>{{ 'BUSINESS.TITLE' | translate }}</h1>
       <p class="intro">
-        Welcome, {{ userName() }}. This view translates your real booking data into campaign-ready insights for acquiring more partners and customers.
+        {{ 'BUSINESS.WELCOME' | translate:{ name: userName() } }}
       </p>
       <div class="chips">
         <span class="chip">{{ roleLabel() }}</span>
-        <span class="chip">Live Data</span>
-        <span class="chip">EGP Market</span>
+        <span class="chip">{{ 'BUSINESS.LIVE_DATA' | translate }}</span>
+        <span class="chip">{{ 'BUSINESS.EGP_MARKET' | translate }}</span>
       </div>
     </div>
 
-    <button class="refresh-btn" (click)="refresh()">Refresh Insights</button>
+    <button class="refresh-btn" (click)="refresh()">{{ 'BUSINESS.REFRESH' | translate }}</button>
   </header>
 
   @if (loading()) {
     <div class="loading-panel">
       <div class="loader"></div>
-      <p>Building your business snapshot...</p>
+      <p>{{ 'BUSINESS.LOADING' | translate }}</p>
     </div>
   }
 
   @if (loadingError()) {
     <div class="error-panel">
-      <h3>Dashboard data is unavailable</h3>
+      <h3>{{ 'BUSINESS.ERROR_TITLE' | translate }}</h3>
       <p>{{ loadingError() }}</p>
     </div>
   }
@@ -35,35 +35,35 @@
   @if (!loading() && !loadingError()) {
     <section class="kpi-grid">
       <article class="kpi-card revenue">
-        <h3>Monthly Revenue</h3>
-        <p class="kpi-value">EGP {{ thisMonthRevenue() | number:'1.0-0' }}</p>
-        <p class="kpi-note">From confirmed and paid bookings in current month.</p>
+        <h3>{{ 'BUSINESS.KPI_REVENUE' | translate }}</h3>
+        <p class="kpi-value">{{ 'COMMON.EGP' | translate }} {{ thisMonthRevenue() | number:'1.0-0' }}</p>
+        <p class="kpi-note">{{ 'BUSINESS.KPI_REVENUE_NOTE' | translate }}</p>
       </article>
 
       <article class="kpi-card occupancy">
-        <h3>Occupancy Signal</h3>
+        <h3>{{ 'BUSINESS.KPI_OCCUPANCY' | translate }}</h3>
         <p class="kpi-value">{{ occupancyRate() }}%</p>
-        <p class="kpi-note">Estimated utilization across available rooms.</p>
+        <p class="kpi-note">{{ 'BUSINESS.KPI_OCCUPANCY_NOTE' | translate }}</p>
       </article>
 
       <article class="kpi-card conversion">
-        <h3>Payment Conversion</h3>
+        <h3>{{ 'BUSINESS.KPI_CONVERSION' | translate }}</h3>
         <p class="kpi-value">{{ conversionRate() }}%</p>
-        <p class="kpi-note">Share of bookings that reached paid status.</p>
+        <p class="kpi-note">{{ 'BUSINESS.KPI_CONVERSION_NOTE' | translate }}</p>
       </article>
 
       <article class="kpi-card leads">
-        <h3>Active Leads</h3>
+        <h3>{{ 'BUSINESS.KPI_LEADS' | translate }}</h3>
         <p class="kpi-value">{{ activeLeads() }}</p>
-        <p class="kpi-note">Pending bookings that need follow-up.</p>
+        <p class="kpi-note">{{ 'BUSINESS.KPI_LEADS_NOTE' | translate }}</p>
       </article>
     </section>
 
     <section class="insight-grid">
       <article class="panel trend-panel">
         <div class="panel-head">
-          <h3>Revenue Trend This Month</h3>
-          <p>Weekly pace for your pitch deck and investor updates.</p>
+          <h3>{{ 'BUSINESS.TREND_TITLE' | translate }}</h3>
+          <p>{{ 'BUSINESS.TREND_DESC' | translate }}</p>
         </div>
 
         <div class="bars">
@@ -73,7 +73,7 @@
               <div class="bar-track">
                 <div class="bar-fill" [style.width.%]="point.pct"></div>
               </div>
-              <span class="bar-value">EGP {{ point.value | number:'1.0-0' }}</span>
+              <span class="bar-value">{{ 'COMMON.EGP' | translate }} {{ point.value | number:'1.0-0' }}</span>
             </div>
           }
         </div>
@@ -81,28 +81,28 @@
 
       <article class="panel market-panel">
         <div class="panel-head">
-          <h3>Top Cities by Inventory</h3>
-          <p>Where you can amplify ad spend or recruit more workspace owners.</p>
+          <h3>{{ 'BUSINESS.CITIES_TITLE' | translate }}</h3>
+          <p>{{ 'BUSINESS.CITIES_DESC' | translate }}</p>
         </div>
 
         <div class="city-list" *ngIf="cityPoints().length > 0; else emptyCities">
           @for (city of cityPoints(); track city.city) {
             <div class="city-item">
               <span>{{ city.city }}</span>
-              <strong>{{ city.count }} spaces</strong>
+              <strong>{{ city.count }} {{ 'BUSINESS.SPACES' | translate }}</strong>
             </div>
           }
         </div>
 
         <ng-template #emptyCities>
-          <p class="empty">No city distribution data available yet.</p>
+          <p class="empty">{{ 'BUSINESS.CITIES_EMPTY' | translate }}</p>
         </ng-template>
       </article>
 
       <article class="panel action-panel">
         <div class="panel-head">
-          <h3>Sales Opportunities</h3>
-          <p>Immediate actions to increase bookings and partner growth.</p>
+          <h3>{{ 'BUSINESS.OPPS_TITLE' | translate }}</h3>
+          <p>{{ 'BUSINESS.OPPS_DESC' | translate }}</p>
         </div>
 
         <div class="opportunity-list">
@@ -118,10 +118,9 @@
     </section>
 
     <section class="launch-strip">
-      <h3>Business launch message</h3>
+      <h3>{{ 'BUSINESS.LAUNCH_TITLE' | translate }}</h3>
       <p>
-        CoworkBooking is now positioned as a growth platform, not only a booking tool. Use this dashboard in demos to show revenue visibility,
-        conversion control, and expansion strategy in one place.
+        {{ 'BUSINESS.LAUNCH_DESC' | translate }}
       </p>
     </section>
   }

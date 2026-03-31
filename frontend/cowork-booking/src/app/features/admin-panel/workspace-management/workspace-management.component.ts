@@ -4,13 +4,14 @@ import { Router, RouterModule } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { WorkspaceService } from '../../../core/services/workspace.service';
 import { Workspace, Room, CreateWorkspaceDto, UpdateWorkspaceDto } from '../../../core/models/workspace.model';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-workspace-management',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslateModule],
   // Router used for navigating to the separate form page
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, TranslateModule],
   templateUrl: './workspace-management.component.html',
   styleUrls: ['./workspace-management.component.scss']
 })

@@ -5,16 +5,17 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { WorkspaceService } from '../../core/services/workspace.service';
 import { Workspace, CreateWorkspaceDto, UpdateWorkspaceDto } from '../../core/models/workspace.model';
 import { MapLocationPickerComponent } from '../../shared/components/map-location-picker.component';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-admin-workspace-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, MapLocationPickerComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, MapLocationPickerComponent, TranslateModule],
   template: `
     <div class="admin-workspace-form">
       <div class="panel-header">
-        <h1>{{ isEditMode ? 'Edit Workspace' : 'Add New Workspace' }}</h1>
-        <button class="btn btn-secondary" (click)="cancel()">← Back to List</button>
+        <h1>{{ isEditMode ? ('ADMIN.WORKSPACE_FORM_EDIT' | translate) : ('ADMIN.WORKSPACE_FORM_CREATE' | translate) }}</h1>
+        <button class="btn btn-secondary" (click)="cancel()">← {{ 'ADMIN.BACK_TO_LIST' | translate }}</button>
       </div>
 
       <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
@@ -22,66 +23,66 @@ import { MapLocationPickerComponent } from '../../shared/components/map-location
 
       <form [formGroup]="workspaceForm" (ngSubmit)="submitForm()">
         <div class="form-section">
-          <h2>Basic Information</h2>
+          <h2>{{ 'ADMIN.BASIC_INFO' | translate }}</h2>
           <div class="form-group">
-            <label for="name">Workspace Name <span class="required">*</span></label>
-            <input id="name" type="text" formControlName="name" placeholder="Enter workspace name" />
+            <label for="name">{{ 'ADMIN.WORKSPACE_NAME' | translate }} <span class="required">*</span></label>
+            <input id="name" type="text" formControlName="name" [placeholder]="'ADMIN.WORKSPACE_NAME_PLACEHOLDER' | translate" />
           </div>
 
           <div class="form-group">
-            <label for="description">Description <span class="required">*</span></label>
+            <label for="description">{{ 'ADMIN.DESCRIPTION' | translate }} <span class="required">*</span></label>
             <textarea id="description" formControlName="description" rows="3"></textarea>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label for="address">Address <span class="required">*</span></label>
+              <label for="address">{{ 'ADMIN.ADDRESS' | translate }} <span class="required">*</span></label>
               <input id="address" type="text" formControlName="address" />
             </div>
 
             <div class="form-group">
-              <label for="city">City <span class="required">*</span></label>
+              <label for="city">{{ 'ADMIN.CITY' | translate }} <span class="required">*</span></label>
               <input id="city" type="text" formControlName="city" />
             </div>
           </div>
 
           <div class="form-group map-group">
-            <label>Location on Map <span class="required">*</span></label>
+            <label>{{ 'ADMIN.MAP_LOCATION' | translate }} <span class="required">*</span></label>
             <app-map-location-picker
               [initialLatitude]="workspaceForm.get('latitude')?.value"
               [initialLongitude]="workspaceForm.get('longitude')?.value"
               (locationSelected)="onLocationSelected($event)">
             </app-map-location-picker>
             <span *ngIf="workspaceForm.get('latitude')?.invalid && workspaceForm.get('latitude')?.touched" class="error-text text-danger" style="display: block; margin-top: 5px;">
-              Please pick the location on the map.
+              {{ 'ADMIN.LOCATION_REQUIRED' | translate }}
             </span>
           </div>
         </div>
 
         <div class="form-section">
           <div class="section-header">
-            <h2>Rooms</h2>
-            <button type="button" class="btn btn-sm btn-primary" (click)="addRoom()">➕ Add Room</button>
+            <h2>{{ 'ADMIN.ROOMS_TITLE' | translate }}</h2>
+            <button type="button" class="btn btn-sm btn-primary" (click)="addRoom()">➕ {{ 'ADMIN.ADD_ROOM' | translate }}</button>
           </div>
 
           <div formArrayName="rooms">
             <div *ngFor="let room of rooms.controls; let i = index" [formGroupName]="i" class="room-card">
               <div class="room-header">
-                <h3>Room #{{ i + 1 }}</h3>
-                <button type="button" class="btn btn-sm btn-danger" (click)="removeRoom(i)">🗑️ Remove</button>
+                <h3>{{ 'ADMIN.ROOM_HASH' | translate: {num: i + 1} }}</h3>
+                <button type="button" class="btn btn-sm btn-danger" (click)="removeRoom(i)">🗑️ {{ 'COMMON.REMOVE' | translate }}</button>
               </div>
 
               <div class="form-row">
                 <div class="form-group">
-                  <label>Room Name *</label>
+                  <label>{{ 'ADMIN.ROOM_NAME' | translate }} *</label>
                   <input type="text" formControlName="name" />
                 </div>
                 <div class="form-group">
-                  <label>Capacity *</label>
+                  <label>{{ 'ADMIN.CAPACITY' | translate }} *</label>
                   <input type="number" formControlName="capacity" min="1" />
                 </div>
                 <div class="form-group">
-                  <label>Price Per Hour *</label>
+                  <label>{{ 'ADMIN.PRICE_LABEL' | translate }} *</label>
                   <input type="number" formControlName="pricePerHour" min="0" step="0.01" />
                 </div>
               </div>
@@ -90,8 +91,8 @@ import { MapLocationPickerComponent } from '../../shared/components/map-location
         </div>
 
         <div class="form-actions">
-          <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
-          <button type="submit" class="btn btn-primary">{{ isEditMode ? 'Update Workspace' : 'Create Workspace' }}</button>
+          <button type="button" class="btn btn-secondary" (click)="cancel()">{{ 'COMMON.CANCEL' | translate }}</button>
+          <button type="submit" class="btn btn-primary">{{ isEditMode ? ('ADMIN.SAVE_UPDATE' | translate) : ('ADMIN.SAVE_CREATE' | translate) }}</button>
         </div>
       </form>
     </div>

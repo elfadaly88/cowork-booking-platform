@@ -1,8 +1,9 @@
 
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './shared/components/navbar.component';
 import { SidebarComponent } from './shared/components/sidebar.component';
+import { LanguageService } from './core/services/language.service';
 
 @Component({
   selector: 'app-root',
@@ -13,4 +14,5 @@ import { SidebarComponent } from './shared/components/sidebar.component';
 })
 export class AppComponent {
   title = 'cowork-booking';
+  private langService = inject(LanguageService);
 }

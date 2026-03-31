@@ -1,8 +1,8 @@
 <div class="auth-container">
   <div class="auth-card">
     <div class="auth-header">
-      <h1>🔐 Welcome Back</h1>
-      <p>Sign in to your Cowork Booking account</p>
+      <h1>🔐 {{ 'AUTH.WELCOME_BACK' | translate }}</h1>
+      <p>{{ 'AUTH.SIGN_IN_DESC' | translate }}</p>
     </div>
 
     @if (errorMessage()) {
@@ -14,12 +14,12 @@
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
       <div class="form-group">
-        <label for="email">Email Address</label>
+        <label for="email">{{ 'AUTH.EMAIL' | translate }}</label>
         <input
           id="email"
           type="email"
           formControlName="email"
-          placeholder="Enter your email"
+          [placeholder]="'AUTH.EMAIL_PLACEHOLDER' | translate"
           [class.invalid]="isFieldInvalid('email')"
         />
         @if (isFieldInvalid('email')) {
@@ -28,20 +28,20 @@
       </div>
 
       <div class="form-group">
-        <label for="password">Password</label>
+        <label for="password">{{ 'AUTH.PASSWORD' | translate }}</label>
         <div class="password-input-wrapper">
           <input
             id="password"
             [type]="showPassword() ? 'text' : 'password'"
             formControlName="password"
-            placeholder="Enter your password"
+            [placeholder]="'AUTH.PASSWORD_PLACEHOLDER' | translate"
             [class.invalid]="isFieldInvalid('password')"
           />
           <button
             type="button"
             class="toggle-password-btn"
             (click)="togglePasswordVisibility()"
-            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+            [attr.aria-label]="showPassword() ? ('AUTH.HIDE_PASSWORD' | translate) : ('AUTH.SHOW_PASSWORD' | translate)"
           >
             <span class="eye-icon">{{ showPassword() ? '🙈' : '👁️' }}</span>
           </button>
@@ -57,14 +57,14 @@
         [disabled]="isLoading() || loginForm.invalid"
       >
         @if (isLoading()) {
-          <span class="spinner"></span> Signing in...
+          <span class="spinner"></span> {{ 'AUTH.SIGNING_IN' | translate }}
         } @else {
-          🔓 Sign In
+          🔓 {{ 'AUTH.SIGN_IN_BTN' | translate }}
         }
       </button>
 
       <div class="auth-footer">
-        <p>Don't have an account? <a routerLink="/register">Sign up here</a></p>
+        <p>{{ 'AUTH.NO_ACCOUNT' | translate }} <a routerLink="/register">{{ 'AUTH.SIGN_UP_HERE' | translate }}</a></p>
       </div>
     </form>
   </div>

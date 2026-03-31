@@ -26,7 +26,7 @@
 
   &:hover {
     background: #f1f5f9;
-    color: #0f172a;
+    color: #172554;
     border-color: #cbd5e1;
     transform: translateY(-1px);
     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
@@ -224,7 +224,7 @@
   &:focus {
     outline: none;
     border-color: #6366f1;
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
   }
 
   &:disabled {
@@ -265,13 +265,13 @@
   transition: all 0.3s ease;
 
   &:hover {
-    border-color: #0f172a;
+    border-color: #172554;
     background: #f0f3ff;
   }
 
   &.selected {
-    background-color: #0f172a;
-    border-color: #0f172a;
+    background-color: #2563eb;
+    border-color: #172554;
     color: white;
 
     .device-name,
@@ -318,7 +318,7 @@
 
 /* Price Summary */
 .price-summary {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  background: linear-gradient(135deg, #172554 0%, #1e293b 100%);
   padding: 1.5rem;
   border-radius: 12px;
   margin-bottom: 2rem;
@@ -387,7 +387,7 @@
 
   &:hover:not(:disabled) {
     background: #f8fafc;
-    color: #0f172a;
+    color: #172554;
     border-color: #94a3b8;
   }
 }

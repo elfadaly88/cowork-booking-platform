@@ -7,6 +7,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { Workspace, Room, WorkspaceImage, WorkspaceSchedulePeriod } from '../../core/models/workspace.model';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 import { ErrorMessageComponent } from '../../shared/components/error-message.component';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-workspace-details',
@@ -15,7 +16,8 @@ import { ErrorMessageComponent } from '../../shared/components/error-message.com
     CommonModule,
     FormsModule,
     LoadingSpinnerComponent,
-    ErrorMessageComponent
+    ErrorMessageComponent,
+    TranslateModule
   ],
   templateUrl: './workspace-details.component.html',
   styleUrls: ['./workspace-details.component.scss']

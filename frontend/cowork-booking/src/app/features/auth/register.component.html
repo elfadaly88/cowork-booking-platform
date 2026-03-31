@@ -1,8 +1,8 @@
 <div class="auth-container">
   <div class="auth-card">
     <div class="auth-header">
-      <h1>✨ Create Account</h1>
-      <p>Join Cowork Booking and start reserving workspaces</p>
+      <h1>✨ {{ 'AUTH.CREATE_ACCOUNT' | translate }}</h1>
+      <p>{{ 'AUTH.CREATE_ACCOUNT_DESC' | translate }}</p>
     </div>
 
     @if (errorMessage()) {
@@ -14,13 +14,13 @@
 
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form" autocomplete="off">
       <div class="form-group">
-        <label for="fullName">Full Name</label>
+        <label for="fullName">{{ 'AUTH.FULL_NAME' | translate }}</label>
         <input
           id="fullName"
           type="text"
           formControlName="fullName"
           autocomplete="name"
-          placeholder="Enter your full name"
+          [placeholder]="'AUTH.FULL_NAME_PLACEHOLDER' | translate"
           [class.invalid]="isFieldInvalid('fullName')"
         />
         @if (isFieldInvalid('fullName')) {
@@ -29,13 +29,13 @@
       </div>
 
       <div class="form-group">
-        <label for="email">Email Address</label>
+        <label for="email">{{ 'AUTH.EMAIL' | translate }}</label>
         <input
           id="email"
           type="email"
           formControlName="email"
           autocomplete="email"
-          placeholder="Enter your email"
+          [placeholder]="'AUTH.EMAIL_PLACEHOLDER' | translate"
           [class.invalid]="isFieldInvalid('email')"
         />
         @if (isFieldInvalid('email')) {
@@ -44,7 +44,7 @@
       </div>
 
       <div class="form-group">
-        <label for="userType">I am a...</label>
+        <label for="userType">{{ 'AUTH.IAM' | translate }}</label>
         <div class="user-type-selector">
           <label class="radio-card" [class.selected]="registerForm.get('userType')?.value === 'User'">
             <input
@@ -56,8 +56,8 @@
             <div class="radio-content">
               <span class="radio-icon">👤</span>
               <div class="radio-text">
-                <strong>Regular User</strong>
-                <small>I want to book workspaces</small>
+                <strong>{{ 'AUTH.REGULAR_USER' | translate }}</strong>
+                <small>{{ 'AUTH.REGULAR_USER_DESC' | translate }}</small>
               </div>
             </div>
           </label>
@@ -72,8 +72,8 @@
             <div class="radio-content">
               <span class="radio-icon">🏢</span>
               <div class="radio-text">
-                <strong>Workspace Owner</strong>
-                <small>I want to list my workspaces</small>
+                <strong>{{ 'AUTH.WORKSPACE_OWNER' | translate }}</strong>
+                <small>{{ 'AUTH.WORKSPACE_OWNER_DESC' | translate }}</small>
               </div>
             </div>
           </label>
@@ -81,21 +81,21 @@
       </div>
 
       <div class="form-group">
-        <label for="password">Password</label>
+        <label for="password">{{ 'AUTH.PASSWORD' | translate }}</label>
         <div class="password-input-wrapper">
           <input
             id="password"
             [type]="showPassword() ? 'text' : 'password'"
             formControlName="password"
             autocomplete="new-password"
-            placeholder="Create a password (min 6 characters)"
+            [placeholder]="'AUTH.CREATE_PASSWORD' | translate"
             [class.invalid]="isFieldInvalid('password')"
           />
           <button
             type="button"
             class="toggle-password-btn"
             (click)="togglePasswordVisibility()"
-            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+            [attr.aria-label]="showPassword() ? ('AUTH.HIDE_PASSWORD' | translate) : ('AUTH.SHOW_PASSWORD' | translate)"
           >
             <span class="eye-icon">{{ showPassword() ? '🙈' : '👁️' }}</span>
           </button>
@@ -111,26 +111,26 @@
               ></div>
             </div>
             <span class="strength-label" [style.color]="getPasswordStrengthColor()">
-              {{ passwordStrength() === 'weak' ? '🔴 Weak' : passwordStrength() === 'medium' ? '🟡 Medium' : '🟢 Strong' }}
+              {{ passwordStrength() === 'weak' ? ('AUTH.PASSWORD_STRENGTH_WEAK' | translate) : passwordStrength() === 'medium' ? ('AUTH.PASSWORD_STRENGTH_MEDIUM' | translate) : ('AUTH.PASSWORD_STRENGTH_STRONG' | translate) }}
             </span>
           </div>
 
           <div class="password-requirements">
             <div class="requirement" [class.met]="passwordRequirements().minLength">
               <span class="check-icon">{{ passwordRequirements().minLength ? '✅' : '⭕' }}</span>
-              <span>At least 6 characters</span>
+              <span>{{ 'AUTH.MIN_6_CHARS' | translate }}</span>
             </div>
             <div class="requirement" [class.met]="passwordRequirements().hasLetter">
               <span class="check-icon">{{ passwordRequirements().hasLetter ? '✅' : '⭕' }}</span>
-              <span>Contains letters</span>
+              <span>{{ 'AUTH.CONTAINS_LETTERS' | translate }}</span>
             </div>
             <div class="requirement" [class.met]="passwordRequirements().hasNumber">
               <span class="check-icon">{{ passwordRequirements().hasNumber ? '✅' : '⭕' }}</span>
-              <span>Contains numbers</span>
+              <span>{{ 'AUTH.CONTAINS_NUMBERS' | translate }}</span>
             </div>
             <div class="requirement" [class.met]="passwordRequirements().hasSpecialChar">
               <span class="check-icon">{{ passwordRequirements().hasSpecialChar ? '✅' : '⭕' }}</span>
-              <span>Contains special characters (!&#64;#$%^&*)</span>
+              <span>{{ 'AUTH.CONTAINS_SPECIAL' | translate }}</span>
             </div>
           </div>
         }
@@ -141,21 +141,21 @@
       </div>
 
       <div class="form-group">
-        <label for="confirmPassword">Confirm Password</label>
+        <label for="confirmPassword">{{ 'AUTH.CONFIRM_PASSWORD' | translate }}</label>
         <div class="password-input-wrapper">
           <input
             id="confirmPassword"
             [type]="showConfirmPassword() ? 'text' : 'password'"
             formControlName="confirmPassword"
             autocomplete="new-password"
-            placeholder="Re-enter your password"
+            [placeholder]="'AUTH.CONFIRM_PASSWORD_PLACEHOLDER' | translate"
             [class.invalid]="isFieldInvalid('confirmPassword') || registerForm.hasError('mismatch')"
           />
           <button
             type="button"
             class="toggle-password-btn"
             (click)="toggleConfirmPasswordVisibility()"
-            [attr.aria-label]="showConfirmPassword() ? 'Hide password' : 'Show password'"
+            [attr.aria-label]="showConfirmPassword() ? ('AUTH.HIDE_PASSWORD' | translate) : ('AUTH.SHOW_PASSWORD' | translate)"
           >
             <span class="eye-icon">{{ showConfirmPassword() ? '🙈' : '👁️' }}</span>
           </button>
@@ -171,14 +171,14 @@
         [disabled]="isLoading() || registerForm.invalid"
       >
         @if (isLoading()) {
-          <span class="spinner"></span> Creating account...
+          <span class="spinner"></span> {{ 'AUTH.CREATING_ACCOUNT' | translate }}
         } @else {
-          🚀 Sign Up
+          🚀 {{ 'AUTH.SIGN_UP_BTN' | translate }}
         }
       </button>
 
       <div class="auth-footer">
-        <p>Already have an account? <a routerLink="/login">Sign in here</a></p>
+        <p>{{ 'AUTH.HAVE_ACCOUNT' | translate }} <a routerLink="/login">{{ 'AUTH.SIGN_IN_HERE' | translate }}</a></p>
       </div>
     </form>
   </div>

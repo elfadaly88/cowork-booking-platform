@@ -2,30 +2,30 @@
   <div class="header" [class.edit-mode]="isEditMode()">
     <div class="header-content">
       <div>
-  <p class="header-title">🏢 {{ isEditMode() ? '✏️ Edit' : 'Create' }} Workspace</p>
-        <p class="subtitle">{{ isEditMode() ? 'Update workspace details, add or remove rooms and devices' : 'Add a new coworking space with rooms and optional equipment' }}</p>
+  <p class="header-title">🏢 {{ isEditMode() ? ('ADMIN.WORKSPACE_FORM_EDIT' | translate) : ('ADMIN.WORKSPACE_FORM_CREATE' | translate) }}</p>
+        <p class="subtitle">{{ isEditMode() ? ('ADMIN.FORM_EDIT_DESC' | translate) : ('ADMIN.FORM_CREATE_DESC' | translate) }}</p>
         @if (isEditMode()) {
           <div class="edit-indicator">
-            <span>📝 Editing Workspace ID: {{ selectedWorkspaceId() }}</span>
+            <span>📝 {{ 'ADMIN.EDITING_ID' | translate }} {{ selectedWorkspaceId() }}</span>
           </div>
         }
       </div>
       <div class="admin-nav">
         <a routerLink="/admin/workspaces" class="btn-nav">
           <span class="icon">🏢</span>
-          Manage Workspaces
+          {{ 'ADMIN.MANAGE_WORKSPACES' | translate }}
         </a>
         <a routerLink="/admin/schedule" class="btn-schedule">
           <span class="icon">🕐</span>
-          Manage Schedules
+          {{ 'ADMIN.MANAGE_SCHEDULES' | translate }}
         </a>
         <a routerLink="/admin/owner-approvals" class="btn-approval">
           <span class="icon">👥</span>
-          Owner Approvals
+          {{ 'ADMIN.OWNER_APPROVALS' | translate }}
         </a>
         <a routerLink="/admin/workspace-approvals" class="btn-approval">
           <span class="icon">🏢</span>
-          Workspace Approvals
+          {{ 'ADMIN.WORKSPACE_APPROVALS' | translate }}
         </a>
       </div>
     </div>
@@ -50,16 +50,16 @@
   <form [formGroup]="workspaceForm" (ngSubmit)="onSubmit()" class="workspace-form">
     <!-- Workspace Basic Info -->
     <div class="form-section">
-      <h2 class="section-title">📍 Basic Information</h2>
+      <h2 class="section-title">📍 {{ 'ADMIN.BASIC_INFO' | translate }}</h2>
 
       <div class="form-row">
         <div class="form-group">
-          <label for="name">Workspace Name *</label>
+          <label for="name">{{ 'ADMIN.WORKSPACE_NAME' | translate }} *</label>
           <input
             id="name"
             type="text"
             formControlName="name"
-            placeholder="e.g., Cairo Innovation Hub, Downtown Coworking"
+            [placeholder]="'ADMIN.WORKSPACE_NAME_PLACEHOLDER' | translate"
             [class.invalid]="isFieldInvalid('name')"
           />
           @if (isFieldInvalid('name')) {
@@ -68,12 +68,12 @@
         </div>
 
         <div class="form-group">
-          <label for="city">City *</label>
+          <label for="city">{{ 'ADMIN.CITY' | translate }} *</label>
           <input
             id="city"
             type="text"
             formControlName="city"
-            placeholder="e.g., Cairo, Giza"
+            [placeholder]="'ADMIN.CITY_PLACEHOLDER' | translate"
             [class.invalid]="isFieldInvalid('city')"
           />
           @if (isFieldInvalid('city')) {
@@ -83,12 +83,12 @@
       </div>
 
       <div class="form-group">
-        <label for="description">Description *</label>
+        <label for="description">{{ 'ADMIN.DESCRIPTION' | translate }} *</label>
         <textarea
           id="description"
           formControlName="description"
           rows="4"
-          placeholder="Describe your workspace... Include amenities, atmosphere, and what makes it special"
+          [placeholder]="'ADMIN.DESCRIPTION_PLACEHOLDER' | translate"
           [class.invalid]="isFieldInvalid('description')"
         ></textarea>
         @if (isFieldInvalid('description')) {
@@ -97,12 +97,12 @@
       </div>
 
       <div class="form-group">
-        <label for="address">Full Address *</label>
+        <label for="address">{{ 'ADMIN.ADDRESS' | translate }} *</label>
         <input
           id="address"
           type="text"
           formControlName="address"
-          placeholder="e.g., 123 Main Street, Zamalek, Cairo"
+          [placeholder]="'ADMIN.ADDRESS_PLACEHOLDER' | translate"
           [class.invalid]="isFieldInvalid('address')"
         />
         @if (isFieldInvalid('address')) {
@@ -112,9 +112,9 @@
 
       <!-- Map Picker -->
       <div class="form-group">
-        <label>📍 Location on Map (Cairo/Giza) *</label>
+        <label>📍 {{ 'ADMIN.MAP_LOCATION' | translate }} *</label>
         <p style="margin: 0.5rem 0; color: #718096; font-size: 0.9rem;">
-          Click on the map to pin your workspace location, or search for a nearby landmark
+          {{ 'ADMIN.MAP_HINT' | translate }}
         </p>
         <app-map-picker
           [initialLat]="workspaceForm.get('latitude')?.value"
@@ -123,28 +123,28 @@
         ></app-map-picker>
         @if (workspaceForm.get('latitude')?.value && workspaceForm.get('longitude')?.value) {
           <p class="coordinates-info">
-            ✅ Location Set: {{ workspaceForm.get('latitude')?.value | number:'1.6-6' }}°N,
+            ✅ {{ 'ADMIN.LOCATION_SET' | translate }} {{ workspaceForm.get('latitude')?.value | number:'1.6-6' }}°N,
             {{ workspaceForm.get('longitude')?.value | number:'1.6-6' }}°E
           </p>
         } @else {
           <p class="coordinates-info" style="background: #fff5f5; color: #c53030;">
-            ⚠️ Please select a location on the map
+            ⚠️ {{ 'ADMIN.LOCATION_REQUIRED' | translate }}
           </p>
         }
       </div>
     </div>    <!-- Rooms Section -->
     <div class="form-section">
       <div class="section-header">
-        <h2 class="section-title">🏢 Rooms & Spaces</h2>
+        <h2 class="section-title">🏢 {{ 'ADMIN.ROOMS_SECTION' | translate }}</h2>
         <button type="button" class="btn btn-secondary" (click)="addRoom()">
-          ➕ Add New Room
+          ➕ {{ 'ADMIN.ADD_NEW_ROOM' | translate }}
         </button>
       </div>
 
       @if (rooms.length === 0) {
         <div class="empty-message">
-          <p style="margin: 0; font-size: 1.1rem;">📋 No rooms added yet</p>
-          <p style="margin: 0.5rem 0 0 0; color: #718096;">Click "Add New Room" to create your first meeting room, private office, or workspace</p>
+          <p style="margin: 0; font-size: 1.1rem;">📋 {{ 'ADMIN.NO_ROOMS' | translate }}</p>
+          <p style="margin: 0.5rem 0 0 0; color: #718096;">{{ 'ADMIN.NO_ROOMS_HINT' | translate }}</p>
         </div>
       }
 
@@ -152,53 +152,53 @@
       @for (room of rooms.controls; track $index) {
         <div class="room-card" [formGroupName]="$index">
           <div class="card-header">
-            <h3>🚪 Room {{ $index + 1 }}</h3>
+            <h3>🚪 {{ 'ADMIN.ROOM_NUM' | translate: {num: $index + 1} }}</h3>
             <button type="button" class="btn btn-danger-small" (click)="removeRoom($index)">
-              🗑️ Remove Room
+              🗑️ {{ 'ADMIN.REMOVE_ROOM' | translate }}
             </button>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label>Room Name *</label>
+              <label>{{ 'ADMIN.ROOM_NAME' | translate }} *</label>
               <input
                 type="text"
                 formControlName="name"
-                placeholder="e.g., Meeting Room A, Executive Suite, Hot Desk Area"
+                [placeholder]="'ADMIN.ROOM_NAME_PLACEHOLDER' | translate"
                 [class.invalid]="isRoomFieldInvalid($index, 'name')"
               />
               @if (isRoomFieldInvalid($index, 'name')) {
-                <span class="error-text">⚠️ Room name is required (minimum 2 characters)</span>
+                <span class="error-text">⚠️ {{ 'ADMIN.ROOM_NAME_REQUIRED' | translate }}</span>
               }
             </div>
 
             <div class="form-group">
-              <label>Capacity (People) *</label>
+              <label>{{ 'ADMIN.CAPACITY' | translate }} *</label>
               <input
                 type="number"
                 formControlName="capacity"
-                placeholder="e.g., 10"
+                [placeholder]="'ADMIN.CAPACITY_PLACEHOLDER' | translate"
                 min="1"
                 max="1000"
                 [class.invalid]="isRoomFieldInvalid($index, 'capacity')"
               />
               @if (isRoomFieldInvalid($index, 'capacity')) {
-                <span class="error-text">⚠️ Capacity must be between 1 and 1000</span>
+                <span class="error-text">⚠️ {{ 'ADMIN.CAPACITY_RANGE' | translate }}</span>
               }
             </div>
 
             <div class="form-group">
-              <label>Price per Hour (EGP) *</label>
+              <label>{{ 'ADMIN.PRICE_LABEL' | translate }} *</label>
               <input
                 type="number"
                 formControlName="pricePerHour"
-                placeholder="e.g., 100.00"
+                [placeholder]="'ADMIN.PRICE_PLACEHOLDER' | translate"
                 min="0"
                 step="0.01"
                 [class.invalid]="isRoomFieldInvalid($index, 'pricePerHour')"
               />
               @if (isRoomFieldInvalid($index, 'pricePerHour')) {
-                <span class="error-text">⚠️ Price is required and must be positive</span>
+                <span class="error-text">⚠️ {{ 'ADMIN.PRICE_REQUIRED' | translate }}</span>
               }
             </div>
           </div>
@@ -206,31 +206,31 @@
           <!-- Devices Section -->
           <div class="devices-section" formArrayName="devices">
             <div class="devices-header">
-              <h4>🖥️ Equipment & Devices <span style="color: #a0aec0; font-weight: normal; font-size: 0.9rem;">(Optional)</span></h4>
+              <h4>🖥️ {{ 'ADMIN.EQUIPMENT_SECTION' | translate }} <span style="color: #a0aec0; font-weight: normal; font-size: 0.9rem;">({{ 'COMMON.OPTIONAL' | translate }})</span></h4>
               <button type="button" class="btn btn-secondary-small" (click)="addDevice($index)">
-                ➕ Add Device
+                ➕ {{ 'ADMIN.ADD_DEVICE' | translate }}
               </button>
             </div>
 
             @if (getDevices($index).length === 0) {
               <p class="empty-message-small">
-                💡 No devices added. Add equipment like projectors, whiteboards, or monitors (optional)
+                💡 {{ 'ADMIN.NO_DEVICES' | translate }}
               </p>
             }
 
             @for (device of getDevices($index).controls; track device; let di = $index) {
               <div class="device-row" [formGroupName]="di">
                 <div class="form-group-inline">
-                  <label style="font-size: 0.85rem; color: #718096; margin-bottom: 0.35rem;">Device Name</label>
+                  <label style="font-size: 0.85rem; color: #718096; margin-bottom: 0.35rem;">{{ 'ADMIN.DEVICE_NAME_PLACEHOLDER' | translate }}</label>
                   <input
                     type="text"
                     formControlName="name"
-                    placeholder="e.g., Projector, 4K Display, Whiteboard"
+                    [placeholder]="'ADMIN.DEVICE_NAME_PLACEHOLDER' | translate"
                     [class.invalid]="isDeviceFieldInvalid($index, di, 'name')"
                   />
                 </div>
                 <div class="form-group-inline">
-                  <label style="font-size: 0.85rem; color: #718096; margin-bottom: 0.35rem;">Extra Cost (EGP/hr)</label>
+                  <label style="font-size: 0.85rem; color: #718096; margin-bottom: 0.35rem;">{{ 'ADMIN.EXTRA_COST' | translate }}</label>
                   <input
                     type="number"
                     formControlName="extraCostPerHour"
@@ -260,13 +260,13 @@
     <!-- Form Actions -->
     <div class="form-actions">
       <button type="button" class="btn btn-secondary" (click)="resetForm()" [disabled]="isLoading()">
-        ↩️ Cancel & Reset
+        ↩️ {{ 'ADMIN.CANCEL_RESET' | translate }}
       </button>
       <button type="submit" class="btn btn-primary" [disabled]="isLoading() || workspaceForm.invalid">
         @if (isLoading()) {
-          <span class="spinner"></span> Saving...
+          <span class="spinner"></span> {{ 'COMMON.SAVING' | translate }}
         } @else {
-          {{ isEditMode() ? '💾 Update Workspace' : '✨ Create Workspace' }}
+          {{ isEditMode() ? ('ADMIN.SAVE_UPDATE' | translate) : ('ADMIN.SAVE_CREATE' | translate) }}
         }
       </button>
     </div>
@@ -274,17 +274,17 @@
 
   <!-- Workspaces List -->
   <div class="workspaces-list">
-    <h2>📊 Existing Workspaces</h2>
+    <h2>📊 {{ 'ADMIN.EXISTING_WORKSPACES' | translate }}</h2>
 
     @if (isLoading()) {
       <div class="loading-container">
         <div class="spinner"></div>
-        <p>Loading workspaces...</p>
+        <p>{{ 'ADMIN.LOADING_WORKSPACES' | translate }}</p>
       </div>
     } @else if (workspaces().length === 0) {
       <div class="empty-message">
-        <p style="margin: 0; font-size: 1.2rem;">🏗️ No workspaces yet</p>
-        <p style="margin: 0.5rem 0 0 0; color: #718096;">Create your first workspace using the form above!</p>
+        <p style="margin: 0; font-size: 1.2rem;">🏗️ {{ 'ADMIN.NO_WORKSPACES' | translate }}</p>
+        <p style="margin: 0.5rem 0 0 0; color: #718096;">{{ 'ADMIN.NO_WORKSPACES_DESC' | translate }}</p>
       </div>
     } @else {
       <div class="workspace-cards">
@@ -303,16 +303,16 @@
 
               @if (workspace.rooms && workspace.rooms.length > 0) {
                 <div class="rooms-summary">
-                  <strong>🚪 {{ workspace.rooms.length }} Room{{ workspace.rooms.length > 1 ? 's' : '' }} Available</strong>
+                  <strong>🚪 {{ 'ADMIN.ROOMS_AVAILABLE' | translate: {count: workspace.rooms.length} }}</strong>
                   <ul>
                     @for (room of workspace.rooms; track room.id) {
                       <li>
                         <span>
                           <strong>{{ room.name }}</strong>
-                          <span style="color: #718096;"> • {{ room.capacity }} people • {{ room.pricePerHour | number:'1.2-2' }} EGP/hr</span>
+                          <span style="color: #718096;"> • {{ room.capacity }} {{ 'COMMON.PEOPLE' | translate }} • {{ room.pricePerHour | number:'1.2-2' }} {{ 'COMMON.EGP' | translate }}{{ 'COMMON.PER_HOUR' | translate }}</span>
                         </span>
                         @if (room.devices && room.devices.length > 0) {
-                          <span class="devices-badge">🖥️ {{ room.devices.length }} device{{ room.devices.length > 1 ? 's' : '' }}</span>
+                          <span class="devices-badge">🖥️ {{ 'ADMIN.DEVICE_COUNT' | translate: {count: room.devices.length} }}</span>
                         }
                       </li>
                     }
@@ -320,17 +320,17 @@
                 </div>
               } @else {
                 <div class="rooms-summary" style="border-left-color: #fc8181;">
-                  <p style="color: #718096; margin: 0; font-style: italic;">⚠️ No rooms added yet</p>
+                  <p style="color: #718096; margin: 0; font-style: italic;">⚠️ {{ 'ADMIN.NO_ROOMS_ADDED' | translate }}</p>
                 </div>
               }
             </div>
 
             <div class="card-actions">
               <button class="btn btn-edit" (click)="editWorkspace(workspace)">
-                ✏️ Edit
+                ✏️ {{ 'COMMON.EDIT' | translate }}
               </button>
               <button class="btn btn-danger" (click)="deleteWorkspace(workspace.id!)">
-                🗑️ Delete
+                🗑️ {{ 'COMMON.DELETE' | translate }}
               </button>
             </div>
           </div>
