@@ -43,7 +43,13 @@
             (click)="togglePasswordVisibility()"
             [attr.aria-label]="showPassword() ? ('AUTH.HIDE_PASSWORD' | translate) : ('AUTH.SHOW_PASSWORD' | translate)"
           >
-            <span class="eye-icon">{{ showPassword() ? '🙈' : '👁️' }}</span>
+            <svg class="eye-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              <circle cx="12" cy="12" r="2.5" fill="currentColor"></circle>
+              @if (showPassword()) {
+                <path d="M4 4l16 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+              }
+            </svg>
           </button>
         </div>
         @if (isFieldInvalid('password')) {
