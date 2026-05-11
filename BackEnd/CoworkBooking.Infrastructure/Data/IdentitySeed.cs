@@ -1,4 +1,4 @@
-﻿using CoworkBooking.Domain.Entities.Auth;
+using CoworkBooking.Domain.Entities.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using System.Text.Json;
@@ -99,6 +99,36 @@ namespace CoworkBooking.Infrastructure.Data
                     Console.WriteLine($"\u274c  Failed to seed admin: {errs}");
                     Console.ResetColor();
                 }
+            }
+
+            if (await userManager.FindByEmailAsync("owner@cowork.com") == null)
+            {
+                var ownerUser = new ApplicationUser
+                {
+                    UserName = "owner@cowork.com",
+                    Email = "owner@cowork.com",
+                    EmailConfirmed = true,
+                    FullName = "Workspace Owner",
+                    IsActive = true,
+                    IsApproved = true
+                };
+                var result = await userManager.CreateAsync(ownerUser, "Owner@2025!");
+                if (result.Succeeded) await userManager.AddToRoleAsync(ownerUser, "Owner");
+            }
+
+            if (await userManager.FindByEmailAsync("user@cowork.com") == null)
+            {
+                var regularUser = new ApplicationUser
+                {
+                    UserName = "user@cowork.com",
+                    Email = "user@cowork.com",
+                    EmailConfirmed = true,
+                    FullName = "Regular User",
+                    IsActive = true,
+                    IsApproved = true
+                };
+                var result = await userManager.CreateAsync(regularUser, "User@2025!");
+                if (result.Succeeded) await userManager.AddToRoleAsync(regularUser, "User");
             }
         }
     }

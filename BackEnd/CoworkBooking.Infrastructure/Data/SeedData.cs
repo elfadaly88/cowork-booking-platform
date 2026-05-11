@@ -1,4 +1,4 @@
-﻿using CoworkBooking.Domain.Entities;
+using CoworkBooking.Domain.Entities;
 
 namespace CoworkBooking.Infrastructure.Data
 {
@@ -12,10 +12,10 @@ namespace CoworkBooking.Infrastructure.Data
 
             // 🏢 Workspace
 
-            var owner = context.Users.FirstOrDefault();
+            var owner = context.Users.FirstOrDefault(u => u.Email == "owner@cowork.com");
             if (owner == null)
             {
-                throw new Exception("❌ No users found in AspNetUsers table. Please seed Identity first.");
+                throw new Exception("❌ No owner user found in AspNetUsers table. Please seed Identity first.");
             }
 
             var workspace = new WorkSpace
@@ -58,8 +58,8 @@ namespace CoworkBooking.Infrastructure.Data
             var schedulePeriod = new WorkspaceSchedulePeriod
             {
                 Workspace = workspace,
-                StartDate = new DateTime(currentYear, 1, 1),
-                EndDate = new DateTime(currentYear, 12, 31)
+                StartDate = new DateTime(currentYear, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                EndDate = new DateTime(currentYear, 12, 31, 23, 59, 59, DateTimeKind.Utc)
             };
 
             // 🕒 Weekly Schedule (Sun–Thu: 9–18)
@@ -81,8 +81,8 @@ namespace CoworkBooking.Infrastructure.Data
                 {
                     UserId = owner.Id, // actual Guid from Identity
                     Room = room1,
-                    StartTime = DateTime.Now.AddHours(1),
-                    EndTime = DateTime.Now.AddHours(3),
+                    StartTime = DateTime.UtcNow.AddHours(1),
+                    EndTime = DateTime.UtcNow.AddHours(3),
                     TotalPrice = 150m,
                     Status = BookingStatus.Confirmed
                 }

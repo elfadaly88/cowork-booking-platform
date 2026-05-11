@@ -8,10 +8,10 @@ namespace CoworkBooking.Infrastructure.Data
         public AppDbContext CreateDbContext(string[] args)
         {
             var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
-                                   ?? "Server=localhost;Database=CoworkBookingDB;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True;MultipleActiveResultSets=true";
+                                   ?? "Host=localhost;Port=5444;Database=rentalBook;Username=rentals_user;Password=rentals_password;";
 
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-            optionsBuilder.UseSqlServer(connectionString);
+            optionsBuilder.UseNpgsql(connectionString);
 
             return new AppDbContext(optionsBuilder.Options);
         }

@@ -1,4 +1,4 @@
-﻿using CoworkBooking.Application.Interfaces;
+using CoworkBooking.Application.Interfaces;
 using CoworkBooking.Application.Services;
 using CoworkBooking.Domain.Entities.Auth;
 using CoworkBooking.Domain.Interfaces;
@@ -31,9 +31,9 @@ try
     if (!useInMemory && !string.IsNullOrEmpty(connectionString))
     {
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("🗄️ Using SQL Server Database");
+        Console.WriteLine("🗄️ Using PostgreSQL Database");
         builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(connectionString));
+            options.UseNpgsql(connectionString));
     }
     else
     {
@@ -43,7 +43,7 @@ try
 catch (Exception)
 {
     Console.ForegroundColor = ConsoleColor.Yellow;
-    Console.WriteLine("⚠️ SQL Server unavailable — switching to InMemory DB");
+    Console.WriteLine("⚠️ PostgreSQL unavailable — switching to InMemory DB");
     Console.ResetColor();
 
     builder.Services.AddDbContext<AppDbContext>(options =>
